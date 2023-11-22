@@ -21,6 +21,9 @@ class StationView extends React.Component<Props> {
 	render() {
 		return (
 			<div>
+				<div className="text-7xl font-bold text-center p-10">
+					<h1>STATION VIEW</h1>
+				</div>
 				<p>{this.state.station.code}</p>
 				<p>{this.state.station.description}</p>
 			</div>

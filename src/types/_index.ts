@@ -1,0 +1,1 @@
+export type { CoordinateType } from './CoordinateType';

@@ -1,10 +1,16 @@
 import React from "react";
-import StationView from "@/views/StationView";
-import StationController from "@/controllers/StationController";
+import MainView from "@/views/MainView";
+import MainController from "@/controllers/MainController";
+import Head from "next/head";
 
-export default class Home extends React.Component {
+export default class Main extends React.Component {
 	render() {
-		const controller = new StationController();
-		return <StationView controller={controller} />;
+		const controller = new MainController();
+		return <>
+			<Head>
+				<title>InaEEWS</title>
+			</Head>
+			<MainView controller={controller}/>
+		</>
 	}
 }
