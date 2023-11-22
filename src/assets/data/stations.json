@@ -1,0 +1,200 @@
+[
+  {
+    "network": "GE",
+    "code": "BBJI",
+    "description": "Station BBJI (GEOFON Station GEOFON Station Bungbulang, Garut, Java)",
+    "creation_date": "2016-09-05T00:00:00.000000Z",
+    "elevation": 615,
+    "latitude": -7.462603,
+    "longitude": 107.65
+  },
+  {
+    "network": "GE",
+    "code": "SMRI",
+    "description": "Station SMRI (GEOFON Station GEOFON Station Semarang, Java)",
+    "creation_date": "2006-11-01T00:00:00.000000Z",
+    "elevation": 203,
+    "latitude": -7.04915,
+    "longitude": 110.44067
+  },
+  {
+    "network": "GE",
+    "code": "JAGI",
+    "description": "Station JAGI (GEOFON Station GEOFON Station Jajag, Java)",
+    "creation_date": "2008-07-21T00:00:00.000000Z",
+    "elevation": 171,
+    "latitude": -8.4702,
+    "longitude": 114.1521
+  },
+  {
+    "network": "GE",
+    "code": "UGM",
+    "description": "Station UGM (GEOFON Station Wanagama, Indonesia)",
+    "creation_date": "1995-08-23T00:00:00.000000Z",
+    "elevation": 350,
+    "latitude": -7.9125,
+    "longitude": 110.5231
+  },
+  {
+    "network": "GE",
+    "code": "BKB",
+    "description": "Station BKB (GEOFON Station GEOFON Station Balikpapan, Kalimantan)",
+    "creation_date": "2009-06-09T00:00:00.000000Z",
+    "elevation": 110,
+    "latitude": -1.1073,
+    "longitude": 116.9048
+  },
+  {
+    "network": "GE",
+    "code": "CISI",
+    "description": "Station CISI (GEOFON Station GEOFON Station Cisomped, Java)",
+    "creation_date": "2008-07-21T00:00:00.000000Z",
+    "elevation": 544,
+    "latitude": -7.5557,
+    "longitude": 107.8153
+  },
+  {
+    "network": "GE",
+    "code": "GSI",
+    "description": "Station GSI (GEOFON Station Gunungsitoli, Nias)",
+    "creation_date": "2005-10-02T00:00:00.000000Z",
+    "elevation": 107,
+    "latitude": 1.3039,
+    "longitude": 97.5755
+  },
+  {
+    "network": "GE",
+    "code": "BKNI",
+    "description": "Station BKNI (GEOFON Station GEOFON Station Bangkinang, Sumatra)",
+    "creation_date": "2008-04-29T00:00:00.000000Z",
+    "elevation": 65,
+    "latitude": 0.3262,
+    "longitude": 101.0396
+  },
+  {
+    "network": "GE",
+    "code": "PMBI",
+    "description": "Station PMBI (GEOFON Station Palembang, Sumatra)",
+    "creation_date": "2009-05-30T00:00:00.000000Z",
+    "elevation": 25,
+    "latitude": -2.9024,
+    "longitude": 104.6993
+  },
+  {
+    "network": "GE",
+    "code": "LHMI",
+    "description": "Station LHMI (GEOFON Station GEOFON Station Lhokseumave, Sumatra)",
+    "creation_date": "2008-02-29T00:00:00.000000Z",
+    "elevation": 3,
+    "latitude": 5.2288,
+    "longitude": 96.9472
+  },
+  {
+    "network": "GE",
+    "code": "MNAI",
+    "description": "Station MNAI (GEOFON Station GEOFON Station Manna, Sumatra)",
+    "creation_date": "2006-07-27T00:00:00.000000Z",
+    "elevation": 154,
+    "latitude": -4.3605,
+    "longitude": 102.9557
+  },
+  {
+    "network": "GE",
+    "code": "PLAI",
+    "description": "Station PLAI (GEOFON Station Plampang, Sumbawa, Indonesia)",
+    "creation_date": "2011-03-04T00:00:00.000000Z",
+    "elevation": 125,
+    "latitude": -8.8275,
+    "longitude": 117.7765
+  },
+  {
+    "network": "GE",
+    "code": "MMRI",
+    "description": "Station MMRI (GEOFON Station GEOFON Station Maumere, Flores)",
+    "creation_date": "2006-11-09T00:00:00.000000Z",
+    "elevation": 137,
+    "latitude": -8.6357,
+    "longitude": 122.2376
+  },
+  {
+    "network": "GE",
+    "code": "SOEI",
+    "description": "Station SOEI (GEOFON Station GEOFON Station Soe, Timor)",
+    "creation_date": "2006-12-13T00:00:00.000000Z",
+    "elevation": 1047,
+    "latitude": -9.7553,
+    "longitude": 124.2672
+  },
+  {
+    "network": "GE",
+    "code": "LUWI",
+    "description": "Station LUWI (GEOFON Station GEOFON Station Lhokseumave, Sulawesi)",
+    "creation_date": "2008-03-10T00:00:00.000000Z",
+    "elevation": 6,
+    "latitude": -1.0418,
+    "longitude": 122.7717
+  },
+  {
+    "network": "GE",
+    "code": "SAUI",
+    "description": "Station SAUI (GEOFON Station Saumlaki, Tanimbar, Indonesia)",
+    "creation_date": "2009-08-25T00:00:00.000000Z",
+    "elevation": 110,
+    "latitude": -7.9826,
+    "longitude": 131.2988
+  },
+  {
+    "network": "GE",
+    "code": "TOLI",
+    "description": "Station TOLI (GEOFON Station GEOFON Station Tolitoli, Sulawesi)",
+    "creation_date": "2008-06-30T00:00:00.000000Z",
+    "elevation": 86,
+    "latitude": 1.1214,
+    "longitude": 120.7944
+  },
+  {
+    "network": "GE",
+    "code": "SANI",
+    "description": "Station SANI (GEOFON Station Sanana, Moluccas, Indonesia)",
+    "creation_date": "2009-12-03T00:00:00.000000Z",
+    "elevation": 30,
+    "latitude": -2.0496,
+    "longitude": 125.9881
+  },
+  {
+    "network": "GE",
+    "code": "BNDI",
+    "description": "Station BNDI (GEOFON Station Bandaneira, Indonesia)",
+    "creation_date": "2008-07-04T00:00:00.000000Z",
+    "elevation": 16,
+    "latitude": -4.5224,
+    "longitude": 129.9045
+  },
+  {
+    "network": "GE",
+    "code": "FAKI",
+    "description": "Station FAKI (GEOFON Station GEOFON Station Fak Fak, Irian Jaya)",
+    "creation_date": "2008-12-01T00:00:00.000000Z",
+    "elevation": 136,
+    "latitude": -2.91925,
+    "longitude": 132.24889
+  },
+  {
+    "network": "GE",
+    "code": "GENI",
+    "description": "Station GENI (GEOFON Station Genyem, Irian Jaya Indonesia)",
+    "creation_date": "2009-11-26T00:00:00.000000Z",
+    "elevation": 47,
+    "latitude": -2.5927,
+    "longitude": 140.1678
+  },
+  {
+    "network": "GE",
+    "code": "TNTI",
+    "description": "Station TNTI (GEOFON Station GEOFON Station Ternate, Indonesia)",
+    "creation_date": "2007-01-05T00:00:00.000000Z",
+    "elevation": 43,
+    "latitude": 0.7718,
+    "longitude": 127.3667
+  }
+]
