@@ -14,7 +14,7 @@ class MainView extends React.Component<Props> {
         earthquakePrediction: {} as IEarthquakePrediction,
         map: {} as IMap,
         notification: {} as INotification,
-        seismogram: {} as ISeismogram,
+        seismogram: [] as ISeismogram[],
         last5MEartquake: {} as IExternalSource,
         lastFeltEarthquake: {} as IExternalSource,
         weeklyEartquake: [] as IExternalSource[],
