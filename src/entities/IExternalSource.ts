@@ -1,4 +1,5 @@
 export interface IExternalSource {
+	id: string | number;
 	title: string;
 	location: string;
 	date: string;

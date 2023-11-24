@@ -6,6 +6,7 @@ import {
 } from "@/models/response/_index";
 
 export default class ExternalSource implements IExternalSource {
+	id: string;
 	title: string;
 	location: string;
 	date: string;
@@ -25,22 +26,9 @@ export default class ExternalSource implements IExternalSource {
 
 		const earthquakes = data.features.map((earthquake) => {
 			const [long, lat, elevation] = earthquake.geometry.coordinates;
-			const time = new Date(earthquake.properties.time);
-			const zoneOffset = time.getTimezoneOffset() / 60;
-			time.setHours(time.getHours() - zoneOffset);
 			return {
 				location: earthquake.properties.place,
-				date: time.toLocaleDateString("id-ID", {
-					weekday: "long",
-					year: "numeric",
-					month: "long",
-					day: "numeric",
-				}),
-				time: time.toLocaleTimeString("id-ID", {
-					hour: "2-digit",
-					minute: "2-digit",
-					second: "2-digit",
-				}),
+				time: earthquake.properties.time,
 				magnitude: parseFloat(earthquake.properties.mag).toFixed(2),
 				depth: parseFloat(earthquake.properties.depth).toFixed(2),
 				latitude: parseFloat(lat).toFixed(2),

@@ -10,7 +10,7 @@ import {
 	INotification,
 	ISeismogram,
 } from "@/entities/_index";
-import { Navbar, Sidebar } from "@/components/_index";
+import { EarthquakeHistorySidebar, Navbar, Sidebar } from "@/components/_index";
 
 interface Props {
 	controller: MainController;
@@ -27,7 +27,7 @@ class MainView extends React.Component<Props> {
 		seismogram: [] as ISeismogram[],
 		last5MEartquake: {} as IExternalSource,
 		lastFeltEarthquake: {} as IExternalSource,
-		weeklyEartquake: [] as IExternalSource[],
+		weeklyEarthquake: [] as IExternalSource[],
 		navbar: {
 			isLoggedIn: false,
 			navLinks: [],
@@ -69,11 +69,14 @@ class MainView extends React.Component<Props> {
 				(await this.state.controller.getLatestEarthquake()) as IExternalSource;
 			const latestFeltEarthquake =
 				(await this.state.controller.getLatestFeltEarthquake()) as IExternalSource;
+			const weeklyEarthquake =
+				(await this.state.controller.getEarthquakeWeekly()) as IExternalSource[];
 			this.setState({
 				sidebarProps: {
 					latestFeltEarthquake,
 					latestEarthquake,
 				},
+				weeklyEarthquake,
 			});
 		}
 
@@ -87,6 +90,8 @@ class MainView extends React.Component<Props> {
 
 				{/* CONTENT */}
 				<section className="flex h-full relative overflow-hidden">
+					<EarthquakeHistorySidebar weeklyEarthquake={this.state.weeklyEarthquake} />
+					
 					<Sidebar {...this.state.sidebarProps} />
 					<div className="w-full h-full" id="eews-map"></div>
 				</section>
