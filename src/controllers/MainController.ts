@@ -1,3 +1,5 @@
+import { IMap } from "@/entities/IMap";
+import { IStation } from "@/entities/_index";
 import {
 	EarthquakePrediction,
 	ExternalSource,
@@ -5,6 +7,7 @@ import {
 	Notification,
 	Seismogram,
 } from "@/models/_index";
+import { CoordinateType } from "@/types/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 
 /**
@@ -26,7 +29,7 @@ export default class MainController {
 			map: observable,
             getEarthquakeWeekly: action,
             showEarthquakeWeekly: action,
-            getLatestM5Earthquake: action,
+            getLatestEarthquake: action,
             getLatestFeltEarthquake: action,
             getLatestEarthquakePrediction: action,
             connectEarthquakePrediction: action,
@@ -42,7 +45,9 @@ export default class MainController {
     /**
      * Retrieves earthquake data for the past week.
      */
-    getEarthquakeWeekly() {}
+    async getEarthquakeWeekly() {
+       return await this.externalSource.fetchEarthquakeWeekly();
+    }
 
     /**
      * Displays the earthquake data for the past week.
@@ -52,12 +57,16 @@ export default class MainController {
     /**
      * Retrieves the latest earthquake with magnitude 5 or higher.
      */
-    getLatestM5Earthquake() {}
+    async getLatestEarthquake() {
+        return await this.externalSource.fetchLatestEarthquake();
+    }
 
     /**
      * Retrieves the latest felt earthquake.
      */
-    getLatestFeltEarthquake() {}
+    async getLatestFeltEarthquake() {
+        return await this.externalSource.fetchLatestFeltEarthquake();
+    }
 
     // EARTHQUAKE PREDICTION
 
@@ -83,12 +92,20 @@ export default class MainController {
     /**
      * Displays the stations on the map.
      */
-    showStations() {}
+    showStations(stations: IStation[]) {
+        this.map.addStations(stations);
+    }
 
     /**
      * Displays the map.
      */
-    showMap() {}
+    showMap(map: IMap) {
+        this.map.initMap(map);
+    }
+
+    setOnViewCenter(coordinate: CoordinateType, zoom?: number) {
+        this.map.setOnViewCenter(coordinate, zoom);
+    }
 
     /**
      * Stops the simulation.
