@@ -1,14 +1,17 @@
 import { IMap } from "@/entities/IMap";
-import { IStation } from "@/entities/_index";
+import { IEarthquakePrediction, IStation } from "@/entities/_index";
 import {
 	EarthquakePrediction,
 	ExternalSource,
-	Map,
+	Map as EEWSMap,
 	Notification,
 	Seismogram,
 } from "@/models/_index";
-import { CoordinateType } from "@/types/_index";
+import { CoordinateType, GeoJsonCollection, RegionType } from "@/types/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
+import STATIONS_DATA from "@/assets/data/stations.json";
+import REGENCIES_DATA from "@/assets/data/regencies.json";
+import * as turf from "@turf/turf";
 
 /**
  * MainController class responsible for managing the main functionalities of the application.
@@ -16,99 +19,304 @@ import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 export default class MainController {
 	private seismogram = new Seismogram();
 	private externalSource = new ExternalSource();
-	private notification = new Notification();
-	private earthquakePrediction = new EarthquakePrediction();
-	private map = new Map();
+	private notificationEarthquakePrediction = new Notification();
+	private notificationEarthquake = new Notification();
+	private notificationSWaveAffected = new Notification();
+	private map = new EEWSMap();
+	private earthquakePredictionInterval: NodeJS.Timeout;
+	private earthquakePredictionWorker: Worker;
+	private countdown: number = 0;
+	earthquakePrediction = new EarthquakePrediction();
+
+	private pWavesWorker: Worker;
+	private affectedPWavesWorker: Worker;
+	private affectedPWaves: GeoJsonCollection;
+
+	private sWavesWorker: Worker;
+	private affectedSWavesWorker: Worker;
+	private affectedSWaves: RegionType[];
+
+	private nearestRegencies = REGENCIES_DATA as RegionType[];
 
 	constructor() {
 		makeObservable(this, {
-			seismogram: observable,
-			externalSource: observable,
-			notification: observable,
 			earthquakePrediction: observable,
-			map: observable,
-            getEarthquakeWeekly: action,
-            showEarthquakeWeekly: action,
-            getLatestEarthquake: action,
-            getLatestFeltEarthquake: action,
-            getLatestEarthquakePrediction: action,
-            connectEarthquakePrediction: action,
-            connectSeismogram: action,
-            showStations: action,
-            showMap: action,
-            stopSimulation: action,
+			getEarthquakeWeekly: action,
+			getLatestEarthquake: action,
+			getLatestFeltEarthquake: action,
+			getLatestEarthquakePrediction: action,
+			connectEarthquakePrediction: action,
+			connectSeismogram: action,
+			showStations: action,
+			showMap: action,
+			stopSimulation: action,
 		} as AnnotationsMap<this, any>);
+
+		this.notificationEarthquakePrediction.setNotification(
+			"Peringatan Gempa",
+			"/audio/tingtong.mp3",
+			"",
+			2000
+		);
+
+		this.notificationEarthquake.setNotification(
+			"Terjadi Gempa",
+			"/audio/earthquake_alarm.mp3",
+			"",
+			25000
+		);
+
+		this.notificationSWaveAffected.setNotification(
+			"Area Terdampak Gempa",
+			"/audio/bell.mp3",
+			"",
+			1000
+		);
+
+		this.affectedPWaves = {
+			type: "FeatureCollection",
+			features: [],
+		};
+
+		this.affectedSWaves = [];
 	}
 
-    // EXTERNAL SOURCE
+	// EXTERNAL SOURCE
 
-    /**
-     * Retrieves earthquake data for the past week.
-     */
-    async getEarthquakeWeekly() {
-       return await this.externalSource.fetchEarthquakeWeekly();
-    }
+	/**
+	 * Retrieves earthquake data for the past week.
+	 */
+	async getEarthquakeWeekly() {
+		return await this.externalSource.fetchEarthquakeWeekly();
+	}
 
-    /**
-     * Displays the earthquake data for the past week.
-     */
-    showEarthquakeWeekly() {}
+	/**
+	 * Retrieves the latest earthquake with magnitude 5 or higher.
+	 */
+	async getLatestEarthquake() {
+		return await this.externalSource.fetchLatestEarthquake();
+	}
 
-    /**
-     * Retrieves the latest earthquake with magnitude 5 or higher.
-     */
-    async getLatestEarthquake() {
-        return await this.externalSource.fetchLatestEarthquake();
-    }
+	/**
+	 * Retrieves the latest felt earthquake.
+	 */
+	async getLatestFeltEarthquake() {
+		return await this.externalSource.fetchLatestFeltEarthquake();
+	}
 
-    /**
-     * Retrieves the latest felt earthquake.
-     */
-    async getLatestFeltEarthquake() {
-        return await this.externalSource.fetchLatestFeltEarthquake();
-    }
+	// EARTHQUAKE PREDICTION
 
-    // EARTHQUAKE PREDICTION
+	/**
+	 * Retrieves the latest earthquake prediction.
+	 */
+	getLatestEarthquakePrediction() {}
 
-    /**
-     * Retrieves the latest earthquake prediction.
-     */
-    getLatestEarthquakePrediction() {}
+	/**
+	 * Connects to the earthquake prediction service.
+	 */
+	connectEarthquakePrediction() {
+		this.earthquakePredictionWorker = new Worker(
+			new URL("../workers/earthquakePrediction.ts", import.meta.url)
+		);
+		setTimeout(() => {
+			this.earthquakePredictionWorker.postMessage("tick");
+		}, 3000);
 
-    /**
-     * Connects to the earthquake prediction service.
-     */
-    connectEarthquakePrediction() {}
+		this.earthquakePredictionWorker.onmessage = async (event: MessageEvent) => {
+			const earthquakePrediction: IEarthquakePrediction = event.data;
+			if (earthquakePrediction.prediction === "warning") {
+				const stasiun = STATIONS_DATA[Math.floor(Math.random() * 10)];
 
-    // SEISMOGRAM
+				// EARTHQUAKE PREDICTION LOCATION
+				this.map.addEarthquakePredictionLocations({
+					longitude: earthquakePrediction.long,
+					latitude: earthquakePrediction.lat,
+				}, stasiun);
 
-    /**
-     * Connects to the seismogram service.
-     */
-    connectSeismogram() {}
+				// EARTHQUAKE PREDICTION DATA
+				this.countdown = 10;
+				this.earthquakePrediction = new EarthquakePrediction(
+					earthquakePrediction
+				);
+				let address = await this.map.getAreaName({
+					longitude: earthquakePrediction.long,
+					latitude: earthquakePrediction.lat,
+				});	
 
-    // MAP
+				if (address) {
+					this.notificationEarthquakePrediction.setMessage(`
+                        Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`);
+				} else {
+					this.notificationEarthquakePrediction.setMessage(`
+                        Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`);
+				}
+				this.notificationEarthquakePrediction.playNotification();
 
-    /**
-     * Displays the stations on the map.
-     */
-    showStations(stations: IStation[]) {
-        this.map.addStations(stations);
-    }
+				// SORTING NEAREST REGENCIES
+				//calculate distance between wave center and province center
+				this.nearestRegencies.forEach((regency: RegionType) => {
+					const distance = turf.distance(
+						turf.point([earthquakePrediction.long, earthquakePrediction.lat]),
+						turf.point([regency.longitude, regency.latitude])
+					);
+					regency.distance = distance;
+				});
+				//sort by distance
+				this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
+				this.affectedPWavesWorker = new Worker(
+					new URL("../workers/affectedPWaves.ts", import.meta.url)
+				);
+				this.affectedSWavesWorker = new Worker(
+					new URL("../workers/affectedSWaves.ts", import.meta.url)
+				);
 
-    /**
-     * Displays the map.
-     */
-    showMap(map: IMap) {
-        this.map.initMap(map);
-    }
+				// EARTHQUAKE PREDICTION COUNTDOWN
+				this.earthquakePredictionInterval = setInterval(() => {
+					this.countdown--;
+					if (this.countdown === 0) {
+						this.notificationEarthquake.setMessage(`
+						Harap perhatian, telah terjadi gempa bumi di wilayah ${address}. Gelombang ini dideteksi oleh stasiun ${stasiun.code}. Harap segera lakukan tindakan mitigasi, terima kasih`);
+						this.notificationEarthquake.playNotification();
+						const earthquake = {
+							title: "Terjadi Gempa Bumi",
+							prediction: "earthquake",
+							description: `Perhatian! telah terjadi gempa bumi di wilayah ${address}, segera lakukan tindakan mitigasi!`,
+							creation_date: Date.now(),
+							depth: this.earthquakePrediction.depth,
+							lat: this.earthquakePrediction.lat,
+							long: this.earthquakePrediction.long,
+							mag: this.earthquakePrediction.mag,
+							countdown: -1,
+						};
 
-    setOnViewCenter(coordinate: CoordinateType, zoom?: number) {
-        this.map.setOnViewCenter(coordinate, zoom);
-    }
+						this.earthquakePrediction = new EarthquakePrediction(
+							earthquake as IEarthquakePrediction
+						);
 
-    /**
-     * Stops the simulation.
-     */
-    stopSimulation() {}
+						clearInterval(this.earthquakePredictionInterval);
+					}
+				}, 1000);
+
+				// EARTHQUAKE PREDICTION PWAVE
+				this.pWavesWorker = new Worker(
+					new URL("../workers/pWaves.ts", import.meta.url)
+				);
+
+				this.pWavesWorker.postMessage({
+					command: "start",
+					earthquakeEpicenter: {
+						longitude: earthquakePrediction.long,
+						latitude: earthquakePrediction.lat,
+					},
+				});
+
+				this.pWavesWorker.onmessage = (event: MessageEvent) => {
+					const data = event.data;
+					const pWave = data.pWave;
+					this.map.simulatePWaves(pWave);
+
+					// EARTHQUAKE PREDICTION AFFECTED AREA PWAVE
+					this.affectedPWavesWorker.postMessage({
+						nearestRegencies: this.nearestRegencies,
+						pWave: pWave,
+						pWaveImpacted: this.affectedPWaves,
+					});
+				};
+
+				// EARTHQUAKE PREDICTION SWAVE
+				this.sWavesWorker = new Worker(
+					new URL("../workers/sWaves.ts", import.meta.url)
+				);
+				
+				this.sWavesWorker.postMessage({
+					command: "start",
+					earthquakeEpicenter: {
+						longitude: earthquakePrediction.long,
+						latitude: earthquakePrediction.lat,
+					},
+				});
+
+				this.sWavesWorker.onmessage = (event: MessageEvent) => {
+					const data = event.data;
+					const sWave = data.sWave;
+					this.map.simulateSWaves(sWave);
+
+					// EARTHQUAKE PREDICTION AFFECTED AREA SWAVE
+					this.affectedSWavesWorker.postMessage({
+						nearestRegencies: this.nearestRegencies,
+						sWave: sWave,
+						sWaveImpacted: this.affectedSWaves,
+						earthquakePrediction: this.earthquakePrediction,
+					});
+				};				
+
+				// GET AFFECTED AREA P-WAVES
+				this.affectedPWavesWorker.onmessage = (event: MessageEvent) => {
+					const geoJson = event.data;
+					this.affectedPWaves = geoJson;
+					this.map.addAreaAffectedPWave(geoJson);
+				};
+
+				// GET AFFECTED AREA S-WAVES
+				this.affectedSWavesWorker.onmessage = (event: MessageEvent) => {
+					const data = event.data;
+
+					if(data.message == "stop"){
+						this.stopSimulation();
+					}else{
+						const regenciesData = data.sWaveImpacted;
+						this.affectedSWaves = regenciesData;
+						this.map.addAreaAffectedSWave(regenciesData);
+						this.notificationSWaveAffected.playNotification();
+					}
+				};
+			}
+		};
+	}
+
+	disconnectEarthquakePrediction() {
+		this.earthquakePredictionWorker.terminate();
+		this.earthquakePredictionWorker = null;
+		clearInterval(this.earthquakePredictionInterval);
+	}
+
+	// SEISMOGRAM
+
+	/**
+	 * Connects to the seismogram service.
+	 */
+	connectSeismogram() {}
+
+	// MAP
+
+	/**
+	 * Displays the stations on the map.
+	 */
+	showStations(stations: IStation[]) {
+		this.map.addStations(stations);
+	}
+
+	/**
+	 * Displays the map.
+	 */
+	showMap(map: IMap) {
+		this.map.initMap(map);
+	}
+
+	setOnViewCenter(coordinate: CoordinateType, zoom?: number) {
+		this.map.setOnViewCenter(coordinate, zoom);
+	}
+
+	/**
+	 * Stops the simulation.
+	 */
+	stopSimulation() {
+		this.pWavesWorker.postMessage({
+			command: "stop",
+		});
+		this.sWavesWorker.postMessage({
+			command: "stop",
+		});
+		this.map.stopSimulation();
+	}
 }

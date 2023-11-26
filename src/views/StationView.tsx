@@ -30,6 +30,10 @@ class StationView extends React.Component<Props> {
 		};
 	}
 
+	componentWillUnmount(): void {
+		this.state.controller.stopSeismogram();
+	}
+
 	render() {
 		return (
 			<div>

@@ -11,17 +11,27 @@ import {
 	ISeismogram,
 } from "@/entities/_index";
 import { EarthquakeHistorySidebar, Navbar, Sidebar } from "@/components/_index";
+import { NavbarProps } from "@/components/Navbar";
+import { observe } from "mobx";
+import { EarthquakeRealtimeProps } from "@/components/Sidebar";
 
 interface Props {
 	controller: MainController;
 	stationController: StationController;
+	weeklyEarthquake: IExternalSource[];
+	navbar: NavbarProps;
+	sidebarProps: {
+		latestFeltEarthquake: IExternalSource;
+		latestEarthquake: IExternalSource;
+		earthquakePrediction: EarthquakeRealtimeProps;
+	};
 }
 
 class MainView extends React.Component<Props> {
 	state = {
 		controller: {} as MainController,
 		stationController: {} as StationController,
-		earthquakePrediction: {} as IEarthquakePrediction,
+		earthquakePrediction: {} as EarthquakeRealtimeProps,
 		map: {} as IMap,
 		notification: {} as INotification,
 		seismogram: [] as ISeismogram[],
@@ -40,13 +50,25 @@ class MainView extends React.Component<Props> {
 		sidebarProps: {
 			latestFeltEarthquake: {} as IExternalSource,
 			latestEarthquake: {} as IExternalSource,
+			earthquakePrediction: {} as EarthquakeRealtimeProps,
 		},
+		countdown: 0,
 	};
 	constructor(props: Props) {
 		super(props);
 		this.state.controller = props.controller;
 		this.state.stationController = props.stationController;
+		this.state.weeklyEarthquake = props.weeklyEarthquake;
+		this.state.navbar = props.navbar;
+		this.state.sidebarProps = props.sidebarProps;
 	}
+
+	componentDidUpdate(prevProps: Readonly<Props>): void {
+		if (prevProps.weeklyEarthquake !== this.props.weeklyEarthquake) {
+			this.setState({ weeklyEarthquake: this.props.weeklyEarthquake });
+		}
+	}
+
 	componentDidMount(): void {
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
@@ -62,26 +84,29 @@ class MainView extends React.Component<Props> {
 		// Get saved stations
 		const stations = this.state.stationController.getStations();
 		this.state.controller.showStations(stations);
+		setTimeout(() => {
+			this.state.controller.connectEarthquakePrediction();
+		}, 2000);
 
-		// Get latest felt earthquake
-		async function getSidebarInfo() {
-			const latestEarthquake =
-				(await this.state.controller.getLatestEarthquake()) as IExternalSource;
-			const latestFeltEarthquake =
-				(await this.state.controller.getLatestFeltEarthquake()) as IExternalSource;
-			const weeklyEarthquake =
-				(await this.state.controller.getEarthquakeWeekly()) as IExternalSource[];
-			this.setState({
-				sidebarProps: {
-					latestFeltEarthquake,
-					latestEarthquake,
-				},
-				weeklyEarthquake,
-			});
-		}
-
-		getSidebarInfo.bind(this)();
+		observe(this.state.controller, "earthquakePrediction", (change) => {
+			console.log(change.newValue, "observer")
+			if (change.newValue) {
+				this.setState({
+					sidebarProps: {
+						...this.state.sidebarProps,
+						earthquakePrediction: {
+							earthquake: change.newValue,
+						},
+					},
+				});
+			}
+		});
 	}
+
+	componentWillUnmount(): void {
+		this.state.controller.disconnectEarthquakePrediction();
+	}
+
 	render() {
 		return (
 			<main className="h-screen flex flex-col overflow-hidden">
@@ -90,9 +115,12 @@ class MainView extends React.Component<Props> {
 
 				{/* CONTENT */}
 				<section className="flex h-full relative overflow-hidden">
-					<EarthquakeHistorySidebar weeklyEarthquake={this.state.weeklyEarthquake} />
-					
-					<Sidebar {...this.state.sidebarProps} />
+					<EarthquakeHistorySidebar
+						weeklyEarthquake={this.state.weeklyEarthquake}
+					/>
+
+					<Sidebar {...this.state.sidebarProps}/>
+
 					<div className="w-full h-full" id="eews-map"></div>
 				</section>
 			</main>

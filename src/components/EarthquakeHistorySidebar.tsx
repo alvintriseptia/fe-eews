@@ -68,7 +68,7 @@ class EarthquakeHistorySidebar extends React.Component<EarthquakeHistorySidebarP
 	state = { open: false, weeklyEarthquake: [] as IExternalSource[] };
 	constructor(props: EarthquakeHistorySidebarProps) {
 		super(props);
-
+		this.state = { ...props, open: false };
 		this.setOpen = this.setOpen.bind(this);
 	}
 

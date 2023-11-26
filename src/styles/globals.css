@@ -40,32 +40,9 @@
 @layer base {
 	html {
 		font-family: "Work Sans", sans-serif;
-		font-size: 16px;
-		line-height: 1.5;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
-		text-rendering: optimizeLegibility;
-		-webkit-text-size-adjust: 100%;
-		-webkit-tap-highlight-color: transparent;
 	}
 
 	body {
-		margin: 0;
-		font-family: inherit;
-		font-size: inherit;
-		line-height: inherit;
-		font-weight: inherit;
-		text-align: inherit;
-		color: inherit;
 		background: #0d121c;
-	}
-
-	*,
-	*::before,
-	*::after {
-		box-sizing: border-box;
-		border-width: 0;
-		border-style: solid;
-		border-color: currentColor;
 	}
 }
