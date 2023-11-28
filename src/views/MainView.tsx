@@ -4,7 +4,6 @@ import { StyleSpecification } from "maplibre-gl";
 import mapStyle from "@/assets/data/dataviz_dark.json";
 import { MainController, StationController } from "@/controllers/_index";
 import {
-	IEarthquakePrediction,
 	IExternalSource,
 	IMap,
 	INotification,
@@ -21,6 +20,7 @@ import { NavbarProps } from "@/components/Navbar";
 import { observe } from "mobx";
 import { EarthquakeRealtimeProps } from "@/components/Sidebar";
 import STATIONS_DATA from "@/assets/data/stations.json";
+import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
 
 interface Props {
 	controller: MainController;
@@ -129,9 +129,13 @@ class MainView extends React.Component<Props> {
 						weeklyEarthquake={this.state.weeklyEarthquake}
 					/>
 
-					<Seismogram
-						seismogramStations={this.state.stations.map((s) => s.code)}
-					/>
+					<EarthquakePredictionContext.Provider
+						value={this.state.sidebarProps.earthquakePrediction?.earthquake}
+					>
+						<Seismogram
+							seismogramStations={this.state.stations.map((s) => s.code)}
+						/>
+					</EarthquakePredictionContext.Provider>
 
 					<Sidebar {...this.state.sidebarProps} />
 

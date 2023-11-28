@@ -1,8 +1,8 @@
 import React from "react";
-import { ISeismogram } from "@/entities/_index";
-import SeismogramContext from "@/stores/SeismogramContext";
+import { IEarthquakePrediction, ISeismogram } from "@/entities/_index";
 import dynamic from "next/dynamic";
 import { Layout, PlotRelayoutEvent } from "plotly.js";
+import MainContext from "@/stores/MainContext";
 
 const Plot = dynamic(
 	() => import("react-plotly.js").then((mod) => mod.default),
@@ -11,20 +11,16 @@ const Plot = dynamic(
 	}
 );
 
-type pWaveProps = {
-	time_stamp: string;
-};
-
 interface Props {
 	station?: string;
-	pWave?: pWaveProps;
 }
 
 export default class DynamicLineChart extends React.Component<Props> {
-	static contextType = SeismogramContext;
+	static contextType = MainContext;
 
 	state = {
 		station: "",
+		prevContextValue: null,
 		waveData: [] as ISeismogram[],
 		samplingRate: 80,
 		channelZ: {
@@ -54,13 +50,13 @@ export default class DynamicLineChart extends React.Component<Props> {
 			y: [],
 			name: "Channel E",
 			line: {
-				color:"#FFFF00",
+				color: "#FFFF00",
 				width: 2,
 			},
 			xaxis: "x",
 			yaxis: "y3",
 		} as any,
-		pWaves: [],
+		pWaves: [] as any[],
 		layout: {
 			datarevision: 0,
 			xaxis: {
@@ -86,6 +82,27 @@ export default class DynamicLineChart extends React.Component<Props> {
 				range: [-1000, 7000],
 				fixedrange: true,
 			},
+			yaxis4: {
+				type: "linear",
+				color: "#fff",
+				range: [-1000, 7000],
+				fixedrange: true,
+				overlaying: "y",
+			},
+			yaxis5: {
+				type: "linear",
+				color: "#fff",
+				range: [-1000, 7000],
+				fixedrange: true,
+				overlaying: "y2",
+			},
+			yaxis6: {
+				type: "linear",
+				color: "#fff",
+				range: [-1000, 7000],
+				fixedrange: true,
+				overlaying: "y3",
+			},
 			height: 400,
 			width: 480,
 			paper_bgcolor: "#0D121C",
@@ -101,6 +118,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 				yside: "left plot",
 			},
 		} as Partial<Layout>,
+		earthquakePredictions: [] as IEarthquakePrediction[],
 		revision: 0,
 		userDefinedRange: null,
 	};
@@ -112,14 +130,15 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 	componentDidMount() {
 		setInterval(this.simulateSeismogram, 1000);
-		const seismogramWorker = this.context as Worker | null;
+		const seismogramWorker = (this.context as any)
+			?.seismogramWorker as Worker | null;
 
 		const handleSeismogramWorker = (event: MessageEvent) => {
 			const { station, seismogram } = event.data;
 			if (station !== this.state.station) {
 				return; // Ignore messages not meant for this station
 			}
-			this.setState((prevState) => ({
+			this.setState((prevState: any) => ({
 				waveData: [...prevState.waveData, ...seismogram],
 			}));
 		};
@@ -132,38 +151,85 @@ export default class DynamicLineChart extends React.Component<Props> {
 	}
 	componentDidUpdate(prevProps: Props) {
 		//context is updated
-		if (prevProps.pWave !== this.props.pWave) {
-			const pWaveTemp = {
-				x: [] as Array<number>,
-				y: [] as Array<number>,
-				line: {
-					color: "#FF0000",
-					width: 2,
-				},
-				showlegend: false,
-			};
-			const { pWave: pWaveProps } = this.props;
+		const earthquakePrediction = (this.context as any)
+			?.earthquakePrediction as IEarthquakePrediction | null;
+		if (
+			earthquakePrediction &&
+			earthquakePrediction.station === this.state.station &&
+			earthquakePrediction.creation_date !==
+				this.state.prevContextValue?.creation_date
+		) {
+			console.log(
+				earthquakePrediction,
+				"earthquakePrediction",
+				this.state.station
+			);
 
-			if (pWaveProps) {
-				const date = new Date(pWaveProps.time_stamp);
+			//if the creation date is less than the last data, then directly add it to the pWaves
+			if (
+				this.state.channelZ.x[this.state.channelZ.x.length - 1] >
+				earthquakePrediction.creation_date
+			) {
+				const pWaveTemp = {
+					x: [] as Array<number>,
+					y: [] as Array<number>,
+					line: {
+						color: "#FF0000",
+						width: 2,
+					},
+					showlegend: false,
+					xaxis: "x",
+				};
+
+				const date = new Date(earthquakePrediction.creation_date);
 				pWaveTemp.x.push(date.getTime());
 				pWaveTemp.y.push(0);
 				pWaveTemp.x.push(date.getTime());
 				pWaveTemp.y.push(6000);
 
-				this.setState({
-					pWaves: [...this.state.pWaves, pWaveTemp],
-				});
+				this.setState((prevState: any) => ({
+					pWaves: [
+						...prevState.pWaves,
+						{
+							...pWaveTemp,
+							yaxis: "y4",
+						},
+						{
+							...pWaveTemp,
+							yaxis: "y5",
+						},
+						{
+							...pWaveTemp,
+							yaxis: "y6",
+						},
+					],
+					prevContextValue: earthquakePrediction,
+				}));
+			} else {
+				this.setState((prevState: any) => ({
+					earthquakePredictions: [
+						...prevState.earthquakePredictions,
+						earthquakePrediction,
+					],
+					prevContextValue: earthquakePrediction,
+				}));
 			}
 		}
 	}
 	simulateSeismogram = () => {
-		const { channelZ,channelN, channelE, waveData, samplingRate, layout, userDefinedRange } =
-			this.state;
+		const {
+			channelZ,
+			channelN,
+			channelE,
+			waveData,
+			samplingRate,
+			layout,
+			userDefinedRange,
+			pWaves,
+			earthquakePredictions,
+		} = this.state;
 		if (!waveData || waveData.length === 0) {
 			return;
-		} else {
-			console.log(waveData, this.state.station);
 		}
 
 		const length =
@@ -174,6 +240,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 		const tempN: number[] = [];
 		const tempE: number[] = [];
 		const tempX: number[] = [];
+		const removedEarthquakePredictions: number[] = [];
 		for (let i = 0; i < length; i++) {
 			const data = newData[i];
 			//if data.creation_date < last channelZ.x or data.creation_date
@@ -188,6 +255,48 @@ export default class DynamicLineChart extends React.Component<Props> {
 			tempZ.push(data.z_channel);
 			tempN.push(data.n_channel);
 			tempE.push(data.e_channel);
+
+			// Check if earthquake prediction is available, and the time is same as the current data
+			const earthquakePredictionIndex = earthquakePredictions.findIndex(
+				(prediction) => prediction.creation_date <= data.creation_date
+			);
+
+			if (earthquakePredictionIndex !== -1) {
+				const earthquakePrediction =
+					earthquakePredictions[earthquakePredictionIndex];
+				removedEarthquakePredictions.push(earthquakePredictionIndex);
+				const pWaveTemp = {
+					x: [] as Array<number>,
+					y: [] as Array<number>,
+					line: {
+						color: "#FF0000",
+						width: 2,
+					},
+					showlegend: false,
+					xaxis: "x",
+				};
+
+				const date = new Date(earthquakePrediction.creation_date);
+				pWaveTemp.x.push(date.getTime());
+				pWaveTemp.y.push(0);
+				pWaveTemp.x.push(date.getTime());
+				pWaveTemp.y.push(6000);
+
+				pWaves.push(
+					{
+						...pWaveTemp,
+						yaxis: "y4",
+					},
+					{
+						...pWaveTemp,
+						yaxis: "y5",
+					},
+					{
+						...pWaveTemp,
+						yaxis: "y6",
+					}
+				);
+			}
 		}
 
 		channelZ.x = [...channelZ.x, ...tempX];
@@ -219,6 +328,10 @@ export default class DynamicLineChart extends React.Component<Props> {
 			channelZ,
 			channelN,
 			channelE,
+			pWaves,
+			earthquakePredictions: earthquakePredictions.filter(
+				(_, index) => !removedEarthquakePredictions.includes(index)
+			),
 		});
 		layout.datarevision = this.state.revision + 1;
 	};

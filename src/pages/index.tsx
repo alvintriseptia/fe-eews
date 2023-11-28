@@ -5,7 +5,6 @@ import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { IExternalSource } from "@/entities/IExternalSource";
 import { NavbarProps } from "@/components/Navbar";
-import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
 import { EarthquakeRealtimeProps } from "@/components/Sidebar";
 import SeismogramContext from "@/stores/SeismogramContext";
 

@@ -125,7 +125,7 @@ export default class MainController {
 				// TODO: add pWave into seismogram
 
 				// GET RANDOM STATION (TESTING)
-				const stasiun = STATIONS_DATA[Math.floor(Math.random() * 10)];
+				const stasiun = STATIONS_DATA.find((station) => station.code === earthquakePrediction.station);
 
 				// EARTHQUAKE PREDICTION LOCATION
 				this.map.addEarthquakePredictionLocations({

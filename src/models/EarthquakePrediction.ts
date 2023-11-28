@@ -5,6 +5,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction{
     title: string;
     description: string;
     prediction: string;
+    station: string;
     creation_date: number;
     depth: number;
     lat: number;
@@ -23,6 +24,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction{
             this.long = earthquakePrediction.long;
             this.mag = earthquakePrediction.mag;
             this.countdown = earthquakePrediction.countdown;
+            this.station = earthquakePrediction.station;
         }
     }
 
