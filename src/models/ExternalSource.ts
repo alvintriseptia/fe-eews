@@ -27,17 +27,10 @@ export default class ExternalSource implements IExternalSource {
 			
 			
 			const earthquakes = data.features.map((earthquake) => {
-				const time = new Date(earthquake.properties.time);
-				const zoneOffset = time.getTimezoneOffset() / 60;
-				time.setHours(time.getHours() - zoneOffset);
 				const [long, lat, elevation] = earthquake.geometry.coordinates;
 				return {
 					location: earthquake.properties.place,
-					time: time.toLocaleTimeString("id-ID", {
-						hour: "2-digit",
-						minute: "2-digit",
-						second: "2-digit",
-					}),
+					time: earthquake.properties.time,
 					magnitude: parseFloat(earthquake.properties.mag).toFixed(2),
 					depth: parseFloat(earthquake.properties.depth).toFixed(2),
 					latitude: parseFloat(lat).toFixed(2),

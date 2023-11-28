@@ -7,6 +7,23 @@ export default class Seismogram implements ISeismogram{
     e_channel: number;
     station: string;
 
-    streamSeismogram(){}
+    constructor(station: string){
+        this.station = station;
+    }
+
+    streamSeismogram(seismogramWorker: Worker){
+        seismogramWorker.postMessage({
+            station: this.station,
+            message: "stream",
+        });
+    }
+
+    stopSeismogram(seismogramWorker: Worker){
+        seismogramWorker.postMessage({
+            station: this.station,
+            message: "stop",
+        });
+    }
+
     displaySeismogram(seismogram: ISeismogram[]){}
 }

@@ -7,6 +7,7 @@ import { IExternalSource } from "@/entities/IExternalSource";
 import { NavbarProps } from "@/components/Navbar";
 import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
 import { EarthquakeRealtimeProps } from "@/components/Sidebar";
+import SeismogramContext from "@/stores/SeismogramContext";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
@@ -52,13 +53,13 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			weeklyEarthquake,
 		};
 
-		if(!latestEarthquake){
+		if (!latestEarthquake) {
 			delete props.sidebarProps.latestEarthquake;
 		}
-		if(!latestFeltEarthquake){
+		if (!latestFeltEarthquake) {
 			delete props.sidebarProps.latestFeltEarthquake;
 		}
-		if(!weeklyEarthquake){
+		if (!weeklyEarthquake) {
 			delete props.weeklyEarthquake;
 		}
 
@@ -95,24 +96,49 @@ interface Props {
 }
 
 export default class Main extends React.Component<Props> {
+	state = {
+		seismogramWorker: null as Worker | null,
+		stationController: {} as StationController,
+	};
+
 	constructor(props: Props) {
 		super(props);
+		this.state = {
+			seismogramWorker: null,
+			stationController: {} as StationController,
+		};
 	}
+
+	componentDidMount() {
+		const seismogramWorker = new Worker(
+			new URL("../workers/seismogram.ts", import.meta.url)
+		);
+		this.setState({ seismogramWorker, stationController: new StationController(seismogramWorker) });
+	}
+
+	componentWillUnmount(): void {
+		if (this.state.seismogramWorker !== null) {
+			this.state.seismogramWorker.terminate();
+		}
+	}
+
 	render() {
+		if(!this.state.seismogramWorker) return (<></>)
 		const controller = new MainController();
-		const stationController = new StationController();
 		return (
 			<>
 				<Head>
 					<title>InaEEWS</title>
 				</Head>
-				<MainView
-					controller={controller}
-					stationController={stationController}
-					weeklyEarthquake={this.props.weeklyEarthquake}
-					navbar={this.props.navbar}
-					sidebarProps={this.props.sidebarProps}
-				/>
+				<SeismogramContext.Provider value={this.state.seismogramWorker}>
+					<MainView
+						controller={controller}
+						stationController={this.state.stationController}
+						weeklyEarthquake={this.props.weeklyEarthquake}
+						navbar={this.props.navbar}
+						sidebarProps={this.props.sidebarProps}
+					/>
+				</SeismogramContext.Provider>
 			</>
 		);
 	}

@@ -9,11 +9,18 @@ import {
 	IMap,
 	INotification,
 	ISeismogram,
+	IStation,
 } from "@/entities/_index";
-import { EarthquakeHistorySidebar, Navbar, Sidebar } from "@/components/_index";
+import {
+	EarthquakeHistorySidebar,
+	Navbar,
+	Seismogram,
+	Sidebar,
+} from "@/components/_index";
 import { NavbarProps } from "@/components/Navbar";
 import { observe } from "mobx";
 import { EarthquakeRealtimeProps } from "@/components/Sidebar";
+import STATIONS_DATA from "@/assets/data/stations.json";
 
 interface Props {
 	controller: MainController;
@@ -53,6 +60,7 @@ class MainView extends React.Component<Props> {
 			earthquakePrediction: {} as EarthquakeRealtimeProps,
 		},
 		countdown: 0,
+		stations: STATIONS_DATA as IStation[],
 	};
 	constructor(props: Props) {
 		super(props);
@@ -89,7 +97,7 @@ class MainView extends React.Component<Props> {
 		}, 2000);
 
 		observe(this.state.controller, "earthquakePrediction", (change) => {
-			console.log(change.newValue, "observer")
+			console.log(change.newValue, "observer");
 			if (change.newValue) {
 				this.setState({
 					sidebarProps: {
@@ -101,6 +109,8 @@ class MainView extends React.Component<Props> {
 				});
 			}
 		});
+
+		this.state.stationController.connectSeismogram();
 	}
 
 	componentWillUnmount(): void {
@@ -119,7 +129,11 @@ class MainView extends React.Component<Props> {
 						weeklyEarthquake={this.state.weeklyEarthquake}
 					/>
 
-					<Sidebar {...this.state.sidebarProps}/>
+					<Seismogram
+						seismogramStations={this.state.stations.map((s) => s.code)}
+					/>
+
+					<Sidebar {...this.state.sidebarProps} />
 
 					<div className="w-full h-full" id="eews-map"></div>
 				</section>

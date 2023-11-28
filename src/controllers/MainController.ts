@@ -17,7 +17,6 @@ import * as turf from "@turf/turf";
  * MainController class responsible for managing the main functionalities of the application.
  */
 export default class MainController {
-	private seismogram = new Seismogram();
 	private externalSource = new ExternalSource();
 	private notificationEarthquakePrediction = new Notification();
 	private notificationEarthquake = new Notification();
@@ -46,7 +45,6 @@ export default class MainController {
 			getLatestFeltEarthquake: action,
 			getLatestEarthquakePrediction: action,
 			connectEarthquakePrediction: action,
-			connectSeismogram: action,
 			showStations: action,
 			showMap: action,
 			stopSimulation: action,
@@ -105,7 +103,6 @@ export default class MainController {
 	}
 
 	// EARTHQUAKE PREDICTION
-
 	/**
 	 * Retrieves the latest earthquake prediction.
 	 */
@@ -125,6 +122,9 @@ export default class MainController {
 		this.earthquakePredictionWorker.onmessage = async (event: MessageEvent) => {
 			const earthquakePrediction: IEarthquakePrediction = event.data;
 			if (earthquakePrediction.prediction === "warning") {
+				// TODO: add pWave into seismogram
+
+				// GET RANDOM STATION (TESTING)
 				const stasiun = STATIONS_DATA[Math.floor(Math.random() * 10)];
 
 				// EARTHQUAKE PREDICTION LOCATION
@@ -279,13 +279,6 @@ export default class MainController {
 		this.earthquakePredictionWorker = null;
 		clearInterval(this.earthquakePredictionInterval);
 	}
-
-	// SEISMOGRAM
-
-	/**
-	 * Connects to the seismogram service.
-	 */
-	connectSeismogram() {}
 
 	// MAP
 
