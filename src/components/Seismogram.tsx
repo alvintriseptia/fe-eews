@@ -35,7 +35,7 @@ export default class Seismogram extends Component<SeismogramProps> {
 					</button>
 				</section>
 				<section
-					className={`absolute bg-eews-cinder right-0 w-[550px] h-screen z-50 transition-all duration-200 ease-in-out overflow-y-auto
+					className={`absolute bg-eews-cinder right-0 w-[550px] h-screen z-50 transition-all duration-200 ease-in-ou
 					${this.state.open ? "translate-x-0" : "translate-x-full"}
 					`}
 				>
@@ -45,9 +45,11 @@ export default class Seismogram extends Component<SeismogramProps> {
 					>
 						<ChevronDoubleRightIcon className={`w-6 h-6 transition-all`} />
 					</button>
-					{this.state.seismogramStations.map((station, index) => {
-						return <DynamicLineChart station={station} key={index} />;
-					})}
+					<aside  className="flex flex-col h-full overflow-y-auto">
+						{this.state.seismogramStations.map((station, index) => {
+							return <DynamicLineChart station={station} key={index} />;
+						})}
+					</aside>
 				</section>
 			</>
 		);
