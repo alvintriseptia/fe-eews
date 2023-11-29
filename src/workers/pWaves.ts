@@ -19,17 +19,17 @@ const onmessage = (event: MessageEvent) => {
 			runPWave(earthquakeEpicenter);
 		}, updateFrequency);
 	}
-
-	function runPWave(waveCenter: CoordinateType) {
-		pWaveRadius += Math.random() * (3.5 - 2.5) + 2.5;
-		const center = turf.point([waveCenter.longitude, waveCenter.latitude]);
-		const options = { steps: 25 }; 
-		const pWavePolygon = turf.circle(center, pWaveRadius, options);
-		postMessage({
-			pWave: pWavePolygon,
-			radius: pWaveRadius,
-		});
-	}
 };
+
+function runPWave(waveCenter: CoordinateType) {
+	pWaveRadius += Math.random() * (3.5 - 2.5) + 2.5;
+	const center = turf.point([waveCenter.longitude, waveCenter.latitude]);
+	const options = { steps: 25 };
+	const pWavePolygon = turf.circle(center, pWaveRadius, options);
+	postMessage({
+		pWave: pWavePolygon,
+		radius: pWaveRadius,
+	});
+}
 
 addEventListener("message", onmessage);

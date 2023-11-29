@@ -14,9 +14,9 @@ import REGENCIES_DATA from "@/assets/data/regencies.json";
 import * as turf from "@turf/turf";
 
 /**
- * MainController class responsible for managing the main functionalities of the application.
+ * SimulationController class responsible for managing the main functionalities of the application.
  */
-export default class MainController {
+export default class SimulationController {
 	private externalSource = new ExternalSource();
 	private notificationEarthquakePrediction = new Notification();
 	private notificationEarthquake = new Notification();
@@ -116,10 +116,11 @@ export default class MainController {
 		this.earthquakePredictionWorker = new Worker(
 			new URL("../workers/earthquakePrediction.ts", import.meta.url)
 		);
-
-		this.earthquakePredictionWorker.postMessage({
-			mode: "realtime",
-		});
+		setTimeout(() => {
+			this.earthquakePredictionWorker.postMessage({
+				mode: "simulation",
+			});
+		}, 3000);
 
 		this.earthquakePredictionWorker.onmessage = async (event: MessageEvent) => {
 			const earthquakePrediction: IEarthquakePrediction = event.data;
@@ -288,7 +289,6 @@ export default class MainController {
 		clearInterval(this.earthquakePredictionInterval);
 	}
 
-
 	clearEarthquakePrediction(delay: boolean) {
 		if (!delay) {
 			this.stopSimulation();
@@ -329,6 +329,7 @@ export default class MainController {
 			}, 180000);
 		}
 	}
+
 	// MAP
 
 	/**
@@ -353,12 +354,16 @@ export default class MainController {
 	 * Stops the simulation.
 	 */
 	stopSimulation() {
-		this.pWavesWorker.postMessage({
-			command: "stop",
-		});
-		this.sWavesWorker.postMessage({
-			command: "stop",
-		});
+		if (this.pWavesWorker) {
+			this.pWavesWorker.postMessage({
+				command: "stop",
+			});
+		}
+		if (this.sWavesWorker) {
+			this.sWavesWorker.postMessage({
+				command: "stop",
+			});
+		}
 		this.map.stopSimulation();
 	}
 }

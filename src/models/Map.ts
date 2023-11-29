@@ -3,7 +3,7 @@ import { CoordinateType, GeoJsonCollection } from "@/types/_index";
 import MapLibreGL, { StyleSpecification } from "maplibre-gl";
 import { Map as MapLibre } from "maplibre-gl";
 import BallMarker from "@/assets/images/ball-marker.ico";
-import { RegionType } from '../types/RegionType';
+import { RegionType } from "../types/RegionType";
 import { getIntensityColor } from "@/utils/map-style";
 
 class EEWSMap implements IMap {
@@ -13,6 +13,8 @@ class EEWSMap implements IMap {
 	mapStyle: string | StyleSpecification;
 	map: MapLibre;
 	sWaveAffectedMarker: Map<string, maplibregl.Marker> = new Map();
+	earthquakeEpicenter: maplibregl.Marker;
+	stationMarker: maplibregl.Marker;
 
 	initMap(map: IMap) {
 		this.id = map.id;
@@ -25,6 +27,48 @@ class EEWSMap implements IMap {
 			style: this.mapStyle,
 			center: [this.initialViewState.longitude, this.initialViewState.latitude],
 			zoom: this.zoom,
+		});
+
+		this.map.on("load", () => {
+			this.map.addSource("pWaveAffected", {
+				type: "geojson",
+				data: {
+					type: "FeatureCollection",
+					features: [],
+				},
+			});
+
+			this.map.addSource("pWave", {
+				type: "geojson",
+				data: {
+					type: "FeatureCollection",
+					features: [
+						{
+							type: "Feature",
+							geometry: {
+								type: "Point",
+								coordinates: [],
+							},
+						},
+					],
+				},
+			});
+
+			this.map.addSource("sWave", {
+				type: "geojson",
+				data: {
+					type: "FeatureCollection",
+					features: [
+						{
+							type: "Feature",
+							geometry: {
+								type: "Point",
+								coordinates: [],
+							},
+						},
+					],
+				},
+			});
 		});
 	}
 
@@ -83,13 +127,30 @@ class EEWSMap implements IMap {
 	addEarthquakePrediction(earthquake: IEarthquakePrediction) {}
 
 	clearEarthquakePrediction() {
-		this.map.remove();
-		this.map = new MapLibreGL.Map({
-			container: this.id,
-			style: this.mapStyle,
-			center: [this.initialViewState.longitude, this.initialViewState.latitude],
-			zoom: this.zoom,
-		});
+		// check if exist
+		if (this.map.getLayer("pWaveAffected")) {
+			this.map.removeLayer("pWaveAffected");
+			const source = this.map.getSource(
+				"pWaveAffected"
+			) as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+
+		if (this.sWaveAffectedMarker.size > 0) {
+			this.sWaveAffectedMarker.forEach((marker) => marker.remove());
+			this.sWaveAffectedMarker.clear();
+		}
+
+		if (this.earthquakeEpicenter) {
+			this.earthquakeEpicenter.remove();
+		}
+
+		if (this.stationMarker) {
+			this.stationMarker.remove();
+		}
 	}
 
 	simulatePWaves(pWave: any) {
@@ -97,7 +158,9 @@ class EEWSMap implements IMap {
 		const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
 
 		// update source
-		source.setData(pWave);
+		if (source) {
+			source.setData(pWave);
+		}
 	}
 
 	simulateSWaves(sWave: any) {
@@ -105,13 +168,30 @@ class EEWSMap implements IMap {
 		const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
 
 		// update source
-		source.setData(sWave);
+		if (source) {
+			source.setData(sWave);
+		}
 	}
 
 	stopSimulation() {
 		//remove layer
-		this.map.removeLayer("pWave");
-		this.map.removeLayer("sWave");
+		if (this.map.getLayer("pWave")) {
+			this.map.removeLayer("pWave");
+			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+
+		if (this.map.getLayer("sWave")) {
+			this.map.removeLayer("sWave");
+			const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
 	}
 
 	addAreaAffectedPWave(areas: any) {
@@ -121,19 +201,25 @@ class EEWSMap implements IMap {
 		) as maplibregl.GeoJSONSource;
 
 		// update source
-		source.setData(areas);
+		if (source) {
+			source.setData(areas);
+		}
 	}
 
 	addAreaAffectedSWave(regencies: RegionType[]) {
 		// add area affected
 		regencies.forEach((regency) => {
-			if(this.sWaveAffectedMarker.has(regency.id.toString())){
+			if (this.sWaveAffectedMarker.has(regency.id.toString())) {
 				return;
 			}
 
 			const el = document.createElement("div");
 			const innerEl = `
-			<div class="font-bold text-lg w-[24px] h-[24px] flex justify-center items-center rounded-full ${regency.intensity === 1 ? "text-gray-900" : "text-white"} ${getIntensityColor(regency.intensity)} hover:scale-110 transform transition-all duration-300 ease-in-out">
+			<div class="font-bold text-lg w-[24px] h-[24px] flex justify-center items-center rounded-full ${
+				regency.intensity === 1 ? "text-gray-900" : "text-white"
+			} ${getIntensityColor(
+				regency.intensity
+			)} hover:scale-110 transform transition-all duration-300 ease-in-out">
 				${regency.intensity}
 			</div>
 			`;
@@ -144,7 +230,7 @@ class EEWSMap implements IMap {
 				element: el,
 			})
 				.setLngLat([regency.longitude, regency.latitude])
-				.addTo(this.map)
+				.addTo(this.map);
 
 			this.sWaveAffectedMarker.set(regency.id.toString(), marker);
 		});
@@ -161,7 +247,7 @@ class EEWSMap implements IMap {
 			</div>
 			`;
 		el.innerHTML = innerEl;
-		new MapLibreGL.Marker({
+		this.earthquakeEpicenter = new MapLibreGL.Marker({
 			draggable: false,
 			scale: 1,
 			element: el,
@@ -173,7 +259,7 @@ class EEWSMap implements IMap {
 		const pulseCircle = document.createElement("div");
 		pulseCircle.innerHTML = `<div class="animate-pulse bg-eews-mmi-X/40 rounded-full relative -z-10 w-12 h-12"></div>`;
 
-		new MapLibreGL.Marker({
+		this.stationMarker = new MapLibreGL.Marker({
 			draggable: false,
 			scale: 1,
 			element: pulseCircle,
@@ -192,22 +278,6 @@ class EEWSMap implements IMap {
 			essential: true,
 		});
 
-		this.map.addSource("pWave", {
-			type: "geojson",
-			data: {
-				type: "FeatureCollection",
-				features: [
-					{
-						type: "Feature",
-						geometry: {
-							type: "Point",
-							coordinates: [location.longitude, location.latitude],
-						},
-					},
-				],
-			},
-		});
-
 		this.map.addLayer({
 			id: "pWave",
 			source: "pWave",
@@ -218,22 +288,6 @@ class EEWSMap implements IMap {
 			},
 		});
 
-		this.map.addSource("sWave", {
-			type: "geojson",
-			data: {
-				type: "FeatureCollection",
-				features: [
-					{
-						type: "Feature",
-						geometry: {
-							type: "Point",
-							coordinates: [location.longitude, location.latitude],
-						},
-					},
-				],
-			},
-		});
-
 		this.map.addLayer({
 			id: "sWave",
 			source: "sWave",
@@ -241,14 +295,6 @@ class EEWSMap implements IMap {
 			paint: {
 				"fill-outline-color": "#ff0000",
 				"fill-color": "transparent",
-			},
-		});
-
-		this.map.addSource("pWaveAffected", {
-			type: "geojson",
-			data: {
-				type: "FeatureCollection",
-				features: [],
 			},
 		});
 

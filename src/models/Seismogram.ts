@@ -11,10 +11,11 @@ export default class Seismogram implements ISeismogram{
         this.station = station;
     }
 
-    streamSeismogram(seismogramWorker: Worker){
+    streamSeismogram(seismogramWorker: Worker, mode: string){
         seismogramWorker.postMessage({
             station: this.station,
             message: "stream",
+            mode: mode,
         });
     }
 
@@ -24,6 +25,4 @@ export default class Seismogram implements ISeismogram{
             message: "stop",
         });
     }
-
-    displaySeismogram(seismogram: ISeismogram[]){}
 }

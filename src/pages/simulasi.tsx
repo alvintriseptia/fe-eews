@@ -1,6 +1,6 @@
 import React from "react";
 import MainView from "@/views/MainView";
-import { MainController, StationController } from "@/controllers/_index";
+import { MainController, SimulationController, StationController } from "@/controllers/_index";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { IExternalSource } from "@/entities/IExternalSource";
@@ -94,7 +94,7 @@ interface Props {
 	};
 }
 
-export default class Main extends React.Component<Props> {
+export default class Simulation extends React.Component<Props> {
 	state = {
 		seismogramWorker: null as Worker | null,
 		stationController: {} as StationController,
@@ -123,7 +123,7 @@ export default class Main extends React.Component<Props> {
 
 	render() {
 		if(!this.state.seismogramWorker) return (<></>)
-		const controller = new MainController();
+		const controller = new SimulationController();
 		return (
 			<>
 				<Head>
@@ -131,7 +131,7 @@ export default class Main extends React.Component<Props> {
 				</Head>
 				<SeismogramContext.Provider value={this.state.seismogramWorker}>
 					<MainView
-						mode="realtime"
+                        mode="simulation"
 						controller={controller}
 						stationController={this.state.stationController}
 						weeklyEarthquake={this.props.weeklyEarthquake}

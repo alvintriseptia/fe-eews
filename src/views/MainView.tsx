@@ -2,7 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import { StyleSpecification } from "maplibre-gl";
 import mapStyle from "@/assets/data/dataviz_dark.json";
-import { MainController, StationController } from "@/controllers/_index";
+import { MainController, SimulationController, StationController } from "@/controllers/_index";
 import {
 	IExternalSource,
 	IMap,
@@ -23,7 +23,8 @@ import STATIONS_DATA from "@/assets/data/stations.json";
 import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
 
 interface Props {
-	controller: MainController;
+	mode: "simulation" | "realtime";
+	controller: MainController | SimulationController;
 	stationController: StationController;
 	weeklyEarthquake: IExternalSource[];
 	navbar: NavbarProps;
@@ -36,7 +37,7 @@ interface Props {
 
 class MainView extends React.Component<Props> {
 	state = {
-		controller: {} as MainController,
+		controller: {} as MainController | SimulationController,
 		stationController: {} as StationController,
 		earthquakePrediction: {} as EarthquakeRealtimeProps,
 		map: {} as IMap,
@@ -97,7 +98,6 @@ class MainView extends React.Component<Props> {
 		}, 2000);
 
 		observe(this.state.controller, "earthquakePrediction", (change) => {
-			console.log(change.newValue, "observer");
 			if (change.newValue) {
 				this.setState({
 					sidebarProps: {
@@ -110,7 +110,7 @@ class MainView extends React.Component<Props> {
 			}
 		});
 
-		this.state.stationController.connectSeismogram();
+		this.state.stationController.connectSeismogram(this.props.mode);
 	}
 
 	componentWillUnmount(): void {

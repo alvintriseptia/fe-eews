@@ -67,39 +67,39 @@ export default class DynamicLineChart extends React.Component<Props> {
 			yaxis: {
 				type: "linear",
 				color: "#fff",
-				range: [-1000, 7000],
+				range: [-500, 3000],
 				fixedrange: true,
 			},
 			yaxis2: {
 				type: "linear",
 				color: "#fff",
-				range: [-1000, 7000],
+				range: [-500, 3000],
 				fixedrange: true,
 			},
 			yaxis3: {
 				type: "linear",
 				color: "#fff",
-				range: [-1000, 7000],
+				range: [-500, 3000],
 				fixedrange: true,
 			},
 			yaxis4: {
 				type: "linear",
 				color: "#fff",
-				range: [-1000, 7000],
+				range: [-500, 3000],
 				fixedrange: true,
 				overlaying: "y",
 			},
 			yaxis5: {
 				type: "linear",
 				color: "#fff",
-				range: [-1000, 7000],
+				range: [-500, 3000],
 				fixedrange: true,
 				overlaying: "y2",
 			},
 			yaxis6: {
 				type: "linear",
 				color: "#fff",
-				range: [-1000, 7000],
+				range: [-500, 3000],
 				fixedrange: true,
 				overlaying: "y3",
 			},
@@ -129,7 +129,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 	}
 
 	componentDidMount() {
-		setInterval(this.simulateSeismogram, 1000);
 		const seismogramWorker = (this.context as any)
 			?.seismogramWorker as Worker | null;
 
@@ -138,9 +137,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 			if (station !== this.state.station) {
 				return; // Ignore messages not meant for this station
 			}
-			this.setState((prevState: any) => ({
-				waveData: [...prevState.waveData, ...seismogram],
-			}));
+			this.simulateSeismogram(seismogram);
 		};
 
 		seismogramWorker?.addEventListener("message", handleSeismogramWorker);
@@ -165,11 +162,11 @@ export default class DynamicLineChart extends React.Component<Props> {
 				this.state.station
 			);
 
-			//if the creation date is less than the last data, then directly add it to the pWaves
-			if (
-				this.state.channelZ.x[this.state.channelZ.x.length - 1] >
-				earthquakePrediction.creation_date
-			) {
+			// //if the creation date is less than the last data, then directly add it to the pWaves
+			// if (
+			// 	this.state.channelZ.x[this.state.channelZ.x.length - 1] >
+			// 	earthquakePrediction.creation_date
+			// ) {
 				const pWaveTemp = {
 					x: [] as Array<number>,
 					y: [] as Array<number>,
@@ -205,106 +202,102 @@ export default class DynamicLineChart extends React.Component<Props> {
 					],
 					prevContextValue: earthquakePrediction,
 				}));
-			} else {
-				this.setState((prevState: any) => ({
-					earthquakePredictions: [
-						...prevState.earthquakePredictions,
-						earthquakePrediction,
-					],
-					prevContextValue: earthquakePrediction,
-				}));
-			}
+			// } else {
+			// 	this.setState((prevState: any) => ({
+			// 		earthquakePredictions: [
+			// 			...prevState.earthquakePredictions,
+			// 			earthquakePrediction,
+			// 		],
+			// 		prevContextValue: earthquakePrediction,
+			// 	}));
+			// }
 		}
 	}
-	simulateSeismogram = () => {
+	simulateSeismogram = (seismogram: ISeismogram) => {
 		const {
 			channelZ,
 			channelN,
 			channelE,
-			waveData,
-			samplingRate,
 			layout,
 			userDefinedRange,
-			pWaves,
-			earthquakePredictions,
 		} = this.state;
-		if (!waveData || waveData.length === 0) {
-			return;
-		}
+		// if (!waveData || waveData.length === 0) {
+		// 	return;
+		// }
 
-		const length =
-			samplingRate > waveData.length ? waveData.length : samplingRate;
-		const newData = waveData.slice(0, length);
+		// const length =
+		// 	samplingRate > waveData.length ? waveData.length : samplingRate;
+		// const newData = waveData.slice(0, length);
 
-		const tempZ: number[] = [];
-		const tempN: number[] = [];
-		const tempE: number[] = [];
-		const tempX: number[] = [];
-		const removedEarthquakePredictions: number[] = [];
-		for (let i = 0; i < length; i++) {
-			const data = newData[i];
-			//if data.creation_date < last channelZ.x or data.creation_date
-			if (
-				data.creation_date < channelZ.x[channelZ.x.length - 1] ||
-				isNaN(data.creation_date)
-			) {
-				continue;
-			}
+		// const tempZ: number[] = [];
+		// const tempN: number[] = [];
+		// const tempE: number[] = [];
+		// const tempX: number[] = [];
+		// const removedEarthquakePredictions: number[] = [];
+		// for (let i = 0; i < length; i++) {
+		// 	const data = newData[i];
+		// 	//if data.creation_date < last channelZ.x or data.creation_date
+		// 	if (
+		// 		data.creation_date < channelZ.x[channelZ.x.length - 1] ||
+		// 		isNaN(data.creation_date)
+		// 	) {
+		// 		continue;
+		// 	}
 
-			tempX.push(data.creation_date);
-			tempZ.push(data.z_channel);
-			tempN.push(data.n_channel);
-			tempE.push(data.e_channel);
+		// 	tempX.push(data.creation_date);
+		// 	tempZ.push(data.z_channel);
+		// 	tempN.push(data.n_channel);
+		// 	tempE.push(data.e_channel);
 
-			// Check if earthquake prediction is available, and the time is same as the current data
-			const earthquakePredictionIndex = earthquakePredictions.findIndex(
-				(prediction) => prediction.creation_date <= data.creation_date
-			);
+		// 	// Check if earthquake prediction is available, and the time is same as the current data
+		// 	const earthquakePredictionIndex = earthquakePredictions.findIndex(
+		// 		(prediction) => prediction.creation_date <= data.creation_date
+		// 	);
 
-			if (earthquakePredictionIndex !== -1) {
-				const earthquakePrediction =
-					earthquakePredictions[earthquakePredictionIndex];
-				removedEarthquakePredictions.push(earthquakePredictionIndex);
-				const pWaveTemp = {
-					x: [] as Array<number>,
-					y: [] as Array<number>,
-					line: {
-						color: "#FF0000",
-						width: 2,
-					},
-					showlegend: false,
-					xaxis: "x",
-				};
+		// 	if (earthquakePredictionIndex !== -1) {
+		// 		const earthquakePrediction =
+		// 			earthquakePredictions[earthquakePredictionIndex];
+		// 		removedEarthquakePredictions.push(earthquakePredictionIndex);
+		// 		const pWaveTemp = {
+		// 			x: [] as Array<number>,
+		// 			y: [] as Array<number>,
+		// 			line: {
+		// 				color: "#FF0000",
+		// 				width: 2,
+		// 			},
+		// 			showlegend: false,
+		// 			xaxis: "x",
+		// 		};
 
-				const date = new Date(earthquakePrediction.creation_date);
-				pWaveTemp.x.push(date.getTime());
-				pWaveTemp.y.push(0);
-				pWaveTemp.x.push(date.getTime());
-				pWaveTemp.y.push(6000);
+		// 		const date = new Date(earthquakePrediction.creation_date);
+		// 		pWaveTemp.x.push(date.getTime());
+		// 		pWaveTemp.y.push(0);
+		// 		pWaveTemp.x.push(date.getTime());
+		// 		pWaveTemp.y.push(6000);
 
-				pWaves.push(
-					{
-						...pWaveTemp,
-						yaxis: "y4",
-					},
-					{
-						...pWaveTemp,
-						yaxis: "y5",
-					},
-					{
-						...pWaveTemp,
-						yaxis: "y6",
-					}
-				);
-			}
-		}
+		// 		pWaves.push(
+		// 			{
+		// 				...pWaveTemp,
+		// 				yaxis: "y4",
+		// 			},
+		// 			{
+		// 				...pWaveTemp,
+		// 				yaxis: "y5",
+		// 			},
+		// 			{
+		// 				...pWaveTemp,
+		// 				yaxis: "y6",
+		// 			}
+		// 		);
+		// 	}
+		// }
 
-		channelZ.x = [...channelZ.x, ...tempX];
-		channelZ.y = [...channelZ.y, ...tempZ];
-		channelN.x = [...channelN.x, ...tempX];
-		channelN.y = [...channelN.y, ...tempN];
-		channelE.x = [...channelE.x, ...tempX];
-		channelE.y = [...channelE.y, ...tempE];
+		channelZ.x = [...channelZ.x, seismogram.creation_date];
+		channelZ.y = [...channelZ.y, seismogram.z_channel];
+		channelN.x = [...channelN.x, seismogram.creation_date];
+		channelN.y = [...channelN.y, seismogram.n_channel];
+		channelE.x = [...channelE.x, seismogram.creation_date];
+		channelE.y = [...channelE.y, seismogram.e_channel];
 
 		// Use user-defined range if available, otherwise calculate a new range
 		if (userDefinedRange) {
@@ -323,15 +316,15 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 		this.setState({
 			revision: this.state.revision + 1,
-			currentIndex: length,
-			waveData: waveData.slice(length),
+			// currentIndex: length,
+			// waveData: waveData.slice(length),
 			channelZ,
 			channelN,
 			channelE,
-			pWaves,
-			earthquakePredictions: earthquakePredictions.filter(
-				(_, index) => !removedEarthquakePredictions.includes(index)
-			),
+			// pWaves,
+			// earthquakePredictions: earthquakePredictions.filter(
+				// (_, index) => !removedEarthquakePredictions.includes(index)
+			// ),
 		});
 		layout.datarevision = this.state.revision + 1;
 	};

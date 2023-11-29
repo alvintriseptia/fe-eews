@@ -64,29 +64,29 @@ class StationController {
 	 * Displays the seismogram of a station.
 	 * @param seismogram - The seismogram to display.
 	 */
-	connectSeismogram() {
-		this.seismogramBBJI.streamSeismogram(this.seismogramWorker);
-		this.seismogramSMRI.streamSeismogram(this.seismogramWorker);
-		this.seismogramJAGI.streamSeismogram(this.seismogramWorker);
-		this.seismogramUGM.streamSeismogram(this.seismogramWorker);
-		this.seismogramBKB.streamSeismogram(this.seismogramWorker);
-		this.seismogramCISI.streamSeismogram(this.seismogramWorker);
-		this.seismogramGSI.streamSeismogram(this.seismogramWorker);
-		this.seismogramBKNI.streamSeismogram(this.seismogramWorker);
-		this.seismogramPMBI.streamSeismogram(this.seismogramWorker);
-		this.seismogramLHMI.streamSeismogram(this.seismogramWorker);
-		this.seismogramMNAI.streamSeismogram(this.seismogramWorker);
-		this.seismogramPLAI.streamSeismogram(this.seismogramWorker);
-		this.seismogramMMRI.streamSeismogram(this.seismogramWorker);
-		this.seismogramSOEI.streamSeismogram(this.seismogramWorker);
-		this.seismogramLUWI.streamSeismogram(this.seismogramWorker);
-		this.seismogramSAUI.streamSeismogram(this.seismogramWorker);
-		this.seismogramTOLI.streamSeismogram(this.seismogramWorker);
-		this.seismogramSANI.streamSeismogram(this.seismogramWorker);
-		this.seismogramBNDI.streamSeismogram(this.seismogramWorker);
-		this.seismogramFAKI.streamSeismogram(this.seismogramWorker);
-		this.seismogramGENI.streamSeismogram(this.seismogramWorker);
-		this.seismogramTNTI.streamSeismogram(this.seismogramWorker);
+	connectSeismogram(mode: string) {
+		this.seismogramBBJI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramSMRI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramJAGI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramUGM.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramBKB.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramCISI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramGSI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramBKNI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramPMBI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramLHMI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramMNAI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramPLAI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramMMRI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramSOEI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramLUWI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramSAUI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramTOLI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramSANI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramBNDI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramFAKI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramGENI.streamSeismogram(this.seismogramWorker, mode);
+		// this.seismogramTNTI.streamSeismogram(this.seismogramWorker, mode);
 	}
 
 	/**

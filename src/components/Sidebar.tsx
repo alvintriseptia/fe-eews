@@ -301,7 +301,7 @@ class Sidebar extends React.Component<SidebarProps> {
 			this.setState({ latestEarthquake: this.props.latestEarthquake });
 		}
 
-		if (this.props.earthquakePrediction !== prevProps.earthquakePrediction) {
+		if (this.props.earthquakePrediction?.earthquake !== prevProps.earthquakePrediction?.earthquake) {
 			this.setState({ earthquakePrediction: this.props.earthquakePrediction });
 		}
 	}

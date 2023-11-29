@@ -1,5 +1,4 @@
 import { IEarthquakePrediction } from "@/entities/_index";
-import { extendObservable, observable } from "mobx";
 
 export default class EarthquakePrediction implements IEarthquakePrediction{
     title: string;
