@@ -33,6 +33,7 @@ const seismogramData: Record<string, SeismogramDataType> = {
 };
 
 const SAMPLING_RATE = 20;
+const BUFFER = 20000;
 
 const seismogramTempData: Record<string, SeismogramDataType> = {
 	...stations.reduce((acc, s) => {
@@ -174,14 +175,14 @@ function streamStationSeismogram(station: string) {
 			seismogramData[station].channelE.x.push(...newData.channelE.x);
 			seismogramData[station].channelE.y.push(...newData.channelE.y);
 
-			// if the current length waves is more than 200.000, then remove the first 100.000
-			if (seismogramData[station].channelZ.x.length > 200000) {
-				seismogramData[station].channelZ.x.splice(0, 100000);
-				seismogramData[station].channelZ.y.splice(0, 100000);
-				seismogramData[station].channelN.x.splice(0, 100000);
-				seismogramData[station].channelN.y.splice(0, 100000);
-				seismogramData[station].channelE.x.splice(0, 100000);
-				seismogramData[station].channelE.y.splice(0, 100000);
+			// if the current length waves is more than 20.000, then remove the first 10.000
+			if (seismogramData[station].channelZ.x.length > BUFFER) {
+				seismogramData[station].channelZ.x.splice(0, BUFFER / 2);
+				seismogramData[station].channelZ.y.splice(0, BUFFER / 2);
+				seismogramData[station].channelN.x.splice(0, BUFFER / 2);
+				seismogramData[station].channelN.y.splice(0, BUFFER / 2);
+				seismogramData[station].channelE.x.splice(0, BUFFER / 2);
+				seismogramData[station].channelE.y.splice(0, BUFFER / 2);
 			}
 
 			postMessage({

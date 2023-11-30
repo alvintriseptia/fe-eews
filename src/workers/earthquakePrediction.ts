@@ -21,14 +21,14 @@ const onmessage = (event: MessageEvent) => {
 
 		postMessage(earthquakePrediction);
 
-		// setTimeout(() => {
-		// 	earthquakePrediction.lat = -7.9125;
-		// 	earthquakePrediction.long = 110.5231;
-		// 	earthquakePrediction.prediction = typePrediction[Math.floor(Math.random() * 3)];
-		// 	earthquakePrediction.station = "UGM"
+		setInterval(() => {
+			earthquakePrediction.lat = Math.random() * 10 - 5;
+			earthquakePrediction.long = Math.random() * 10 - 5;
+			earthquakePrediction.prediction = typePrediction[Math.floor(Math.random() * 3)];
+			earthquakePrediction.station = "UGM"
 
-		// 	postMessage(earthquakePrediction);
-		// }, 15000);
+			postMessage(earthquakePrediction);
+		}, 15000);
 	} else {
 		console.log("earthquake prediction worker")
 		const socket = io("http://localhost:3333", {
