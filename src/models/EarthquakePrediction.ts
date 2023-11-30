@@ -78,7 +78,8 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 		end_date = Math.floor(end_date / 1000);
 		const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
-		let response = await fetch(url);
+		// test url karena data seismogram tidak ada
+		let response = await fetch(test_url);
 
 		let data = await response.json();
 
