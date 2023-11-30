@@ -133,7 +133,7 @@ export default class SimulationController {
 				);
 
 				// EARTHQUAKE PREDICTION LOCATION
-				this.map.addEarthquakePredictionLocations(
+				this.map.addEarthquakePrediction(
 					{
 						longitude: earthquakePrediction.long,
 						latitude: earthquakePrediction.lat,

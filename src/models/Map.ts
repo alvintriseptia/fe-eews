@@ -124,7 +124,79 @@ class EEWSMap implements IMap {
 		}
 	}
 
-	addEarthquakePrediction(earthquake: IEarthquakePrediction) {}
+
+	addEarthquakePrediction(
+		location: CoordinateType,
+		station: IStation
+	) {
+		const el = document.createElement("div");
+		const innerEl = `
+			<div class="animate-pulse font-bold text-4xl text-red-500 drop-shadow-[2px_2px_0_rgba(255,255,255,0.8)]">
+				&#x2715;
+			</div>
+			`;
+		el.innerHTML = innerEl;
+		this.earthquakeEpicenter = new MapLibreGL.Marker({
+			draggable: false,
+			scale: 1,
+			element: el,
+		})
+			.setLngLat([location.longitude, location.latitude])
+			.addTo(this.map);
+
+		// add pulse circle at station
+		const pulseCircle = document.createElement("div");
+		pulseCircle.innerHTML = `<div class="animate-pulse bg-eews-mmi-X/40 rounded-full relative -z-10 w-12 h-12"></div>`;
+
+		this.stationMarker = new MapLibreGL.Marker({
+			draggable: false,
+			scale: 1,
+			element: pulseCircle,
+		})
+			.setLngLat([station.longitude, station.latitude])
+			.addTo(this.map);
+
+		this.map.flyTo({
+			center: [location.longitude, location.latitude],
+			zoom: 7,
+			speed: 1.4,
+			curve: 1,
+			easing(t) {
+				return t;
+			},
+			essential: true,
+		});
+
+		this.map.addLayer({
+			id: "pWave",
+			source: "pWave",
+			type: "fill",
+			paint: {
+				"fill-outline-color": "#0000ff",
+				"fill-color": "transparent",
+			},
+		});
+
+		this.map.addLayer({
+			id: "sWave",
+			source: "sWave",
+			type: "fill",
+			paint: {
+				"fill-outline-color": "#ff0000",
+				"fill-color": "transparent",
+			},
+		});
+
+		this.map.addLayer({
+			id: "pWaveAffected",
+			source: "pWaveAffected",
+			type: "fill",
+			paint: {
+				"fill-color": "#ff0000",
+				"fill-opacity": 0.2,
+			},
+		});
+	}
 
 	clearEarthquakePrediction() {
 		// check if exist
@@ -235,79 +307,7 @@ class EEWSMap implements IMap {
 			this.sWaveAffectedMarker.set(regency.id.toString(), marker);
 		});
 	}
-
-	addEarthquakePredictionLocations(
-		location: CoordinateType,
-		station: IStation
-	) {
-		const el = document.createElement("div");
-		const innerEl = `
-			<div class="animate-pulse font-bold text-4xl text-red-500 drop-shadow-[2px_2px_0_rgba(255,255,255,0.8)]">
-				&#x2715;
-			</div>
-			`;
-		el.innerHTML = innerEl;
-		this.earthquakeEpicenter = new MapLibreGL.Marker({
-			draggable: false,
-			scale: 1,
-			element: el,
-		})
-			.setLngLat([location.longitude, location.latitude])
-			.addTo(this.map);
-
-		// add pulse circle at station
-		const pulseCircle = document.createElement("div");
-		pulseCircle.innerHTML = `<div class="animate-pulse bg-eews-mmi-X/40 rounded-full relative -z-10 w-12 h-12"></div>`;
-
-		this.stationMarker = new MapLibreGL.Marker({
-			draggable: false,
-			scale: 1,
-			element: pulseCircle,
-		})
-			.setLngLat([station.longitude, station.latitude])
-			.addTo(this.map);
-
-		this.map.flyTo({
-			center: [location.longitude, location.latitude],
-			zoom: 7,
-			speed: 1.4,
-			curve: 1,
-			easing(t) {
-				return t;
-			},
-			essential: true,
-		});
-
-		this.map.addLayer({
-			id: "pWave",
-			source: "pWave",
-			type: "fill",
-			paint: {
-				"fill-outline-color": "#0000ff",
-				"fill-color": "transparent",
-			},
-		});
-
-		this.map.addLayer({
-			id: "sWave",
-			source: "sWave",
-			type: "fill",
-			paint: {
-				"fill-outline-color": "#ff0000",
-				"fill-color": "transparent",
-			},
-		});
-
-		this.map.addLayer({
-			id: "pWaveAffected",
-			source: "pWaveAffected",
-			type: "fill",
-			paint: {
-				"fill-color": "#ff0000",
-				"fill-opacity": 0.2,
-			},
-		});
-	}
+	
+	addEarthquakePredictionLocations(earthquake: IEarthquakePrediction[]) {}
 }
-
 export default EEWSMap;

@@ -7,7 +7,6 @@ import {
 	ArrowLeftOnRectangleIcon,
 	ArrowRightOnRectangleIcon,
 	BookOpenIcon,
-	ChartBarIcon,
 	HomeIcon,
 } from "@heroicons/react/24/outline";
 
@@ -87,11 +86,10 @@ class HeaderInfo extends React.Component<HeaderInfoProps> {
 export interface NavbarProps {
 	isLoggedIn: boolean;
 	navLinks: NavlinkProps[];
-	totalEarthquakes: number;
-	maximumMagnitude: number;
-	minimumMagnitude: number;
+	totalEarthquakes: number | null;
+	maximumMagnitude: number | null;
+	minimumMagnitude: number | null;
 	headerInfos: HeaderInfoProps[] | [];
-	btnAuth: NavlinkProps | null;
 }
 
 class Navbar extends React.Component<NavbarProps> {
@@ -105,6 +103,13 @@ class Navbar extends React.Component<NavbarProps> {
 				backgroundColor: "bg-eews-dark",
 				fontStyle: "text-white font-semibold",
 			},
+			{
+				icon: <BookOpenIcon className="w-6 h-6" />,
+				label: "Prediksi",
+				link: "/prediksi",
+				backgroundColor: "bg-eews-dark",
+				fontStyle: "text-white font-semibold",
+			},
 		] as NavlinkProps[],
 		totalEarthquakes: 0,
 		maximumMagnitude: 0,
@@ -115,10 +120,10 @@ class Navbar extends React.Component<NavbarProps> {
 			{ total: 0, title: "Minimum \nMagnitude" },
 		] as HeaderInfoProps[],
 		btnAuth: {
-			icon: <ArrowRightOnRectangleIcon className="w-6 h-6" />,
-			label: "Masuk",
-			link: "/login",
-			backgroundColor: "bg-eews-mmi-V",
+			icon: <ArrowLeftOnRectangleIcon className="w-6 h-6" />,
+			label: "Keluar",
+			link: "/logout",
+			backgroundColor: "bg-eews-mmi-X",
 			fontStyle: "text-white font-semibold",
 		} as NavlinkProps,
 	};
@@ -130,9 +135,6 @@ class Navbar extends React.Component<NavbarProps> {
 		}
 		if (props.headerInfos && props.headerInfos.length > 0) {
 			this.state.headerInfos = props.headerInfos;
-		}
-		if (props.btnAuth) {
-			this.state.btnAuth = props.btnAuth;
 		}
 
 		this.state = {
@@ -157,26 +159,7 @@ class Navbar extends React.Component<NavbarProps> {
 			currentHeaderInfos[2].total = this.props.minimumMagnitude;
 		}
 
-		let currentBtnAuth = this.state.btnAuth;
-		if (this.props.isLoggedIn) {
-			currentBtnAuth = {
-				icon: <ArrowLeftOnRectangleIcon className="w-6 h-6" />,
-				label: "Keluar",
-				link: "/logout",
-				backgroundColor: "bg-eews-mmi-X",
-				fontStyle: "text-white font-semibold",
-			};
-		} else {
-			currentBtnAuth = {
-				icon: <ArrowRightOnRectangleIcon className="w-6 h-6" />,
-				label: "Masuk",
-				link: "/login",
-				backgroundColor: "bg-eews-mmi-V",
-				fontStyle: "text-white font-semibold",
-			};
-		}
-
-		this.setState({ headerInfos: currentHeaderInfos, btnAuth: currentBtnAuth });
+		this.setState({ headerInfos: currentHeaderInfos});
 	}
 
 	componentDidUpdate(prevProps: Readonly<NavbarProps>): void {

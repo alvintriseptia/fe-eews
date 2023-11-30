@@ -36,7 +36,6 @@ const onmessage = (event: MessageEvent) => {
 		});
 
 		socket.on("prediction-warning-only", (message: any) => {
-			console.log(message)
 			postMessage(message);
 		});
 	}

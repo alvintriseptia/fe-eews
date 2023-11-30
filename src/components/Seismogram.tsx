@@ -7,6 +7,9 @@ import DynamicLineChart from "./DynamicLineChart";
 import SeismogramContext from "@/stores/SeismogramContext";
 import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
 import MainContext from "@/stores/MainContext";
+import RenderIfVisible from 'react-render-if-visible';
+
+const ESTIMATED_ITEM_HEIGHT = 300;
 
 interface SeismogramProps {
 	seismogramStations: string[];
@@ -60,7 +63,11 @@ export default class Seismogram extends Component<SeismogramProps> {
 									</button>
 									<aside className="flex flex-col h-full overflow-y-auto">
 										{this.state.seismogramStations.map((station, index) => {
-											return <DynamicLineChart station={station} key={index} />;
+											return (
+												<RenderIfVisible key={index} defaultHeight={ESTIMATED_ITEM_HEIGHT}>
+													<DynamicLineChart station={station} />;
+												</RenderIfVisible>
+											);
 										})}
 									</aside>
 								</section>

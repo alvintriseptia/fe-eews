@@ -29,7 +29,9 @@ export default class EarthquakePrediction implements IEarthquakePrediction{
 
     fetchLatestEarthquakePrediction(){}
 
-    fetchHistoryEarthquakePrediction(){}
+    async fetchHistoryEarthquakePrediction(){
+        return [] as IEarthquakePrediction[];
+    }
 
     fetchDetailEarthquakePrediction(earthquakeId: string){}
 }

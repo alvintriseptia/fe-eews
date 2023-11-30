@@ -6,5 +6,12 @@ export default class User implements IUser{
 
     login(username: string, password: string){}
 
-    logout(){}
+    async logout(){
+        
+        try {
+            // return auth.signOut();
+    } catch (error) {
+            console.error("Error signing out with Google", error);
+    }
+    }
 }

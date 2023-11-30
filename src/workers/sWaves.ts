@@ -1,4 +1,4 @@
-import { CoordinateType } from "@/types/CoordinateType";
+import { CoordinateType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
 let sWaveRadius = 0;

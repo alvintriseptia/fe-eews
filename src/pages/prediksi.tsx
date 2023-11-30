@@ -8,7 +8,7 @@ export default class Prediksi extends React.Component {
 		const controller = new PredictionController();
 		return <>
 			<Head>
-				<title>InaEEWS</title>
+				<title>InaEEWS | Prediksi</title>
 			</Head>
 			<PredictionView controller={controller}/>
 		</>

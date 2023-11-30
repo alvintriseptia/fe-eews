@@ -2,7 +2,11 @@ import React from "react";
 import { observer } from "mobx-react";
 import { StyleSpecification } from "maplibre-gl";
 import mapStyle from "@/assets/data/dataviz_dark.json";
-import { MainController, SimulationController, StationController } from "@/controllers/_index";
+import {
+	MainController,
+	SimulationController,
+	StationController,
+} from "@/controllers/_index";
 import {
 	IExternalSource,
 	IMap,
@@ -12,9 +16,11 @@ import {
 } from "@/entities/_index";
 import {
 	EarthquakeHistorySidebar,
+	MMIScale,
 	Navbar,
 	Seismogram,
 	Sidebar,
+	Time,
 } from "@/components/_index";
 import { NavbarProps } from "@/components/Navbar";
 import { observe } from "mobx";
@@ -53,7 +59,6 @@ class MainView extends React.Component<Props> {
 			maximumMagnitude: 0,
 			minimumMagnitude: 100,
 			headerInfos: [],
-			btnAuth: null,
 		},
 		sidebarProps: {
 			latestFeltEarthquake: {} as IExternalSource,
@@ -125,21 +130,33 @@ class MainView extends React.Component<Props> {
 
 				{/* CONTENT */}
 				<section className="flex h-full relative overflow-hidden">
+					<Sidebar {...this.state.sidebarProps} />
+
 					<EarthquakeHistorySidebar
 						weeklyEarthquake={this.state.weeklyEarthquake}
 					/>
 
-					<EarthquakePredictionContext.Provider
-						value={this.state.sidebarProps.earthquakePrediction?.earthquake}
-					>
-						<Seismogram
-							seismogramStations={this.state.stations.map((s) => s.code)}
-						/>
-					</EarthquakePredictionContext.Provider>
+					<div className="flex flex-col w-full">
+						<div className="relative h-full">
+							<div className="w-full h-full" id="eews-map"></div>
 
-					<Sidebar {...this.state.sidebarProps} />
+							<section className="absolute bottom-4 left-0 right-4 z-20 text-right">
+								<Time />
+							</section>
 
-					<div className="w-full h-full" id="eews-map"></div>
+							<section className="absolute bottom-3 left-2 z-20">
+								<MMIScale />
+							</section>
+						</div>
+
+						<EarthquakePredictionContext.Provider
+							value={this.state.sidebarProps.earthquakePrediction?.earthquake}
+						>
+							<Seismogram
+								seismogramStations={this.state.stations.map((s) => s.code)}
+							/>
+						</EarthquakePredictionContext.Provider>
+					</div>
 				</section>
 			</main>
 		);

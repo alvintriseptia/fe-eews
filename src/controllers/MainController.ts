@@ -122,7 +122,24 @@ export default class MainController {
 		});
 
 		this.earthquakePredictionWorker.onmessage = async (event: MessageEvent) => {
-			const earthquakePrediction: IEarthquakePrediction = event.data;
+			const { data } = event;
+			const date = new Date(data.time_stamp);
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			date.setTime(date.getTime() - offset);;
+
+			const earthquakePrediction: IEarthquakePrediction = {
+				title: "Terdeteksi Gelombang P",
+				description: `Harap perhatian, muncul deteksi gelombang P di stasiun ${data.station}`,
+				creation_date: date.getTime(),
+				depth: data.depth,
+				lat: data.lat,
+				long: data.long,
+				mag: data.mag,
+				prediction: "warning",
+				countdown: 10,
+				station: "BBJI",
+			};
+
 			if (earthquakePrediction.prediction === "warning") {
 				this.clearEarthquakePrediction(false);
 
@@ -132,7 +149,7 @@ export default class MainController {
 				);
 
 				// EARTHQUAKE PREDICTION LOCATION
-				this.map.addEarthquakePredictionLocations(
+				this.map.addEarthquakePrediction(
 					{
 						longitude: earthquakePrediction.long,
 						latitude: earthquakePrediction.lat,
@@ -150,13 +167,9 @@ export default class MainController {
 					latitude: earthquakePrediction.lat,
 				});
 
-				if (address) {
-					this.notificationEarthquakePrediction.setMessage(`
-                        Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`);
-				} else {
-					this.notificationEarthquakePrediction.setMessage(`
-                        Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`);
-				}
+				this.notificationEarthquakePrediction.setMessage(
+					`Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`
+				);
 				this.notificationEarthquakePrediction.playNotification();
 
 				// SORTING NEAREST REGENCIES
@@ -287,7 +300,6 @@ export default class MainController {
 		this.earthquakePredictionWorker = null;
 		clearInterval(this.earthquakePredictionInterval);
 	}
-
 
 	clearEarthquakePrediction(delay: boolean) {
 		if (!delay) {
