@@ -35,7 +35,7 @@ const onmessage = (event: MessageEvent) => {
 			transports: ["websocket"],
 		});
 
-		socket.on("prediction-warning-only", (message: any) => {
+		socket.on("prediction-data-all", (message: any) => {
 			postMessage(message);
 		});
 	}
