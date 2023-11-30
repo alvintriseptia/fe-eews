@@ -163,7 +163,7 @@ class Navbar extends React.Component<NavbarProps> {
 	}
 
 	componentDidUpdate(prevProps: Readonly<NavbarProps>): void {
-		console.log(this.props);
+		// console.log(this.props);
 		if (prevProps.totalEarthquakes !== this.props.totalEarthquakes) {
 			let currentHeaderInfos = this.state.headerInfos;
 			if (this.props.totalEarthquakes) {

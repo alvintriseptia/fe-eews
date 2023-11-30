@@ -95,8 +95,8 @@ export default class PredictionController {
 	 * Retrieves the detailed information of an earthquake prediction.
 	 */
 	async getSeismogramEarthquakePrediction(station: string, time_stamp: number) {
-		const start_date = new Date(time_stamp).getTime() - 30;
-		const end_date = new Date(time_stamp).getTime() + 30;
+		const start_date = new Date(time_stamp).getTime() - 180;
+		const end_date = new Date(time_stamp).getTime() + 180;
 		const response =
 			await this.earthquakePrediction.fetchSeismogramEarthquakePrediction(
 				station,

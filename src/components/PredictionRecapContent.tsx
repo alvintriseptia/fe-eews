@@ -26,6 +26,7 @@ export interface PredictionRecapContentProps {
 	z_channel: WaveChannel;
 	n_channel: WaveChannel;
 	e_channel: WaveChannel;
+	pwaves: WaveChannel[];
 }
 
 class PredictionRecapContent extends Component<PredictionRecapContentProps> {
@@ -33,6 +34,7 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 		z_channel: {} as WaveChannel,
 		n_channel: {} as WaveChannel,
 		e_channel: {} as WaveChannel,
+		pwaves: [] as WaveChannel[],
 	};
 	
 	layout = {
@@ -102,11 +104,12 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 		this.state.z_channel = props.z_channel;
 		this.state.n_channel = props.n_channel;
 		this.state.e_channel = props.e_channel;
+		this.state.pwaves = props.pwaves;
 	}
 
 	
 	render() {
-		console.log(this.state.z_channel, "z_channel")
+		// console.log(this.state.z_channel, "z_channel")
 		let date = new Date(this.props.time_stamp);
 		const offset = new Date().getTimezoneOffset() * 60 * 1000;
 		date.setTime(date.getTime() - offset);
@@ -158,6 +161,7 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 							this.state.z_channel,
 							this.state.n_channel,
 							this.state.e_channel,
+							...this.state.pwaves,
 						]}
 						layout={this.layout}
 						style={{ width: "100%", height: "100%" }}

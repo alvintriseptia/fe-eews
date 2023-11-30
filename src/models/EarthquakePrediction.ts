@@ -1,95 +1,104 @@
 import { IEarthquakePrediction, ISeismogram } from "@/entities/_index";
 
-export default class EarthquakePrediction implements IEarthquakePrediction{
-    title: string;
-    description: string;
-    prediction: string;
-    station: string;
-    time_stamp: number;
-    depth: number;
-    lat: number;
-    long: number;
-    mag: number;
-    countdown: number;
-    location: string;
+export default class EarthquakePrediction implements IEarthquakePrediction {
+	title: string;
+	description: string;
+	prediction: string;
+	station: string;
+	time_stamp: number;
+	depth: number;
+	lat: number;
+	long: number;
+	mag: number;
+	countdown: number;
+	location: string;
 
-    constructor(earthquakePrediction?: IEarthquakePrediction){
-        if(earthquakePrediction){
-            this.title = earthquakePrediction.title;
-            this.description = earthquakePrediction.description;
-            this.prediction = earthquakePrediction.prediction;
-            this.time_stamp = earthquakePrediction.time_stamp;
-            this.depth = earthquakePrediction.depth;
-            this.lat = earthquakePrediction.lat;
-            this.long = earthquakePrediction.long;
-            this.mag = earthquakePrediction.mag;
-            this.countdown = earthquakePrediction.countdown;
-            this.station = earthquakePrediction.station;
-            this.location = earthquakePrediction.location;
-        }
-    }
+	constructor(earthquakePrediction?: IEarthquakePrediction) {
+		if (earthquakePrediction) {
+			this.title = earthquakePrediction.title;
+			this.description = earthquakePrediction.description;
+			this.prediction = earthquakePrediction.prediction;
+			this.time_stamp = earthquakePrediction.time_stamp;
+			this.depth = earthquakePrediction.depth;
+			this.lat = earthquakePrediction.lat;
+			this.long = earthquakePrediction.long;
+			this.mag = earthquakePrediction.mag;
+			this.countdown = earthquakePrediction.countdown;
+			this.station = earthquakePrediction.station;
+			this.location = earthquakePrediction.location;
+		}
+	}
 
-    async fetchLatestEarthquakePrediction(){
-        const time_stamp = new Date().getTime();
-        let start_date = time_stamp - 1 * 24 * 60 * 60 * 1000;
-        let end_date = time_stamp;
+	async fetchLatestEarthquakePrediction() {
+		const time_stamp = new Date().getTime();
+		let start_date = time_stamp - 1 * 24 * 60 * 60 * 1000;
+		let end_date = time_stamp;
 
-        // to unix
-        start_date = Math.floor(start_date / 1000);
-        end_date = Math.floor(end_date / 1000);
+		// to unix
+		start_date = Math.floor(start_date / 1000);
+		end_date = Math.floor(end_date / 1000);
 
-        const response = await this.fetchHistoryEarthquakePrediction(start_date, end_date);
+		const response = await this.fetchHistoryEarthquakePrediction(
+			start_date,
+			end_date
+		);
 
-        if(response.length) return response[0];
+		if (response.length) return response[0];
 
-        throw new Error("No earthquake prediction found");
-    }
+		throw new Error("No earthquake prediction found");
+	}
 
-    async fetchHistoryEarthquakePrediction(start_date: number, end_date: number){
-        const test_url = "http://localhost:3333/history?start_date=1701354000&end_date=1701355500"
+	async fetchHistoryEarthquakePrediction(start_date: number, end_date: number) {
+		const test_url =
+			"http://localhost:3333/history?start_date=1701354000&end_date=1701355500";
 
-        // to unix
-        start_date = Math.floor(start_date / 1000);
-        end_date = Math.floor(end_date / 1000);
-        const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}`;
+		// to unix
+		start_date = Math.floor(start_date / 1000);
+		end_date = Math.floor(end_date / 1000);
+		const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}`;
 
-        const response = await fetch(url);
-        const data = await response.json();
+		const response = await fetch(url);
+		const data = await response.json();
 
-        if(data.error) throw new Error(data.error);
+		if (data.error) throw new Error(data.error);
 
-        return Object.values(data) as IEarthquakePrediction[];
-    }
+		return Object.values(data) as IEarthquakePrediction[];
+	}
 
-    async fetchSeismogramEarthquakePrediction(station: string, start_date: number, end_date:number){
-        const test_url = "http://localhost:3333/waves?station=BBJI&start_date=1701370806&end_date=1701458526"
+	async fetchSeismogramEarthquakePrediction(
+		station: string,
+		start_date: number,
+		end_date: number
+	) {
+		const test_url =
+			"http://localhost:3333/waves?station=BBJI&start_date=1701370806&end_date=1701458526";
 
-        // to unix
-        start_date = Math.floor(start_date / 1000);
-        end_date = Math.floor(end_date / 1000);
-        const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
+		// to unix
+		start_date = Math.floor(start_date / 1000);
+		end_date = Math.floor(end_date / 1000);
+		const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
-        const response = await fetch(test_url);
+		let response = await fetch(url);
 
-        const data = await response.json();
+		let data = await response.json();
 
-        if(data.error) throw new Error(data.error);
+		if (data.error) throw new Error(data.error);
 
-        const seismogram = [] as ISeismogram[]
+        const seismogram = [] as ISeismogram[];
 
-        for(const obj of Object.entries(data) as any){
-            const key = obj[0];
-            const dataValue = obj[1];
-            const seismogramData = {
-                creation_date: new Date(key*1000).getTime(),
-                z_channel: dataValue.Z,
-                n_channel: dataValue.N,
-                e_channel: dataValue.E
-            } as ISeismogram;
-            
-            seismogram.push(seismogramData);
-        }
+		for (const obj of Object.entries(data) as any) {
+			const key = obj[0];
+			const dataValue = obj[1];
+			const seismogramData = {
+				creation_date: new Date(key * 1000).getTime(),
+				z_channel: dataValue.Z,
+				n_channel: dataValue.N,
+				e_channel: dataValue.E,
+			} as ISeismogram;
 
-        return seismogram;
-    }
+			seismogram.push(seismogramData);
+		}
+
+		return seismogram;
+	}
 }

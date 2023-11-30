@@ -95,8 +95,10 @@ class PredictionView extends React.Component<Props> {
 			xaxis: "x",
 			yaxis: "y3",
 		};
+		const pwaves = [];
 
 		seismogram.forEach((wave: ISeismogram) => {
+
 			z_channel.x.push(wave.creation_date);
 			z_channel.y.push(wave.z_channel);
 			n_channel.x.push(wave.creation_date);
@@ -105,11 +107,40 @@ class PredictionView extends React.Component<Props> {
 			e_channel.y.push(wave.e_channel);
 		});
 
+		
+		let date = new Date(earthquake.time_stamp);
+		const offset = new Date().getTimezoneOffset() * 60 * 1000;
+		date.setTime(date.getTime() - offset);
+		const pWaveTemp = {
+			x: [date.getTime(), date.getTime()],
+			y: [0, 5000],
+			line: {
+				color: "#FF0000",
+				width: 2,
+			},
+			showlegend: false,
+			xaxis: "x",
+		};
+		pwaves.push(
+			{
+				...pWaveTemp,
+				yaxis: "y4",
+			},
+			{
+				...pWaveTemp,
+				yaxis: "y5",
+			},
+			{
+				...pWaveTemp,
+				yaxis: "y6",
+			}
+		);
 		const data: PredictionRecapContentProps = {
 			...earthquake,
 			z_channel,
 			n_channel,
 			e_channel,
+			pwaves,
 			magnitude: earthquake.mag,
 			latitude: earthquake.lat,
 			longitude: earthquake.long,
@@ -159,7 +190,10 @@ class PredictionView extends React.Component<Props> {
 					</div>
 
 					<div className="col-span-7">
-						<div id="eews-history-map" className="w-full h-[48%] relative -z-10"></div>
+						<div
+							id="eews-history-map"
+							className="w-full h-[48%] relative -z-10"
+						></div>
 						<div className="w-full">
 							{this.state.recapPrediction &&
 								this.state.recapPrediction.station && (
