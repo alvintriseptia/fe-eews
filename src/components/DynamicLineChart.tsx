@@ -2,8 +2,8 @@ import React from "react";
 import { IEarthquakePrediction, ISeismogram } from "@/entities/_index";
 import dynamic from "next/dynamic";
 import { Layout, PlotRelayoutEvent } from "plotly.js";
-import MainContext from "@/stores/MainContext";
 import { SeismogramDataType } from "@/workers/seismogram";
+import SeismogramContext from "@/stores/SeismogramContext";
 
 const Plot = dynamic(
 	() => import("react-plotly.js").then((mod) => mod.default),
@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default class DynamicLineChart extends React.Component<Props> {
-	static contextType = MainContext;
+	static contextType = SeismogramContext;
 
 	state = {
 		station: "",
@@ -68,43 +68,43 @@ export default class DynamicLineChart extends React.Component<Props> {
 			yaxis: {
 				type: "linear",
 				color: "#fff",
-				range: [-500, 3000],
+				range: [-1000, 3000],
 				fixedrange: true,
 			},
 			yaxis2: {
 				type: "linear",
 				color: "#fff",
-				range: [-500, 3000],
+				range: [-1000, 3000],
 				fixedrange: true,
 			},
 			yaxis3: {
 				type: "linear",
 				color: "#fff",
-				range: [-500, 3000],
+				range: [-1000, 3000],
 				fixedrange: true,
 			},
 			yaxis4: {
 				type: "linear",
 				color: "#fff",
-				range: [-500, 3000],
+				range: [-1000, 3000],
 				fixedrange: true,
 				overlaying: "y",
 			},
 			yaxis5: {
 				type: "linear",
 				color: "#fff",
-				range: [-500, 3000],
+				range: [-1000, 3000],
 				fixedrange: true,
 				overlaying: "y2",
 			},
 			yaxis6: {
 				type: "linear",
 				color: "#fff",
-				range: [-500, 3000],
+				range: [-1000, 3000],
 				fixedrange: true,
 				overlaying: "y3",
 			},
-			height: 400,
+			height: 500,
 			width: 500,
 			paper_bgcolor: "#0D121C",
 			plot_bgcolor: "transparent",
@@ -114,7 +114,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 				subplots: ["xy", "xy2", "xy3"],
 				roworder: "top to bottom",
 				xgap: 0.05,
-				ygap: 0.05,
+				ygap: 32,
 				xside: "bottom plot",
 				yside: "left plot",
 			},
@@ -130,26 +130,25 @@ export default class DynamicLineChart extends React.Component<Props> {
 	}
 
 	componentDidMount() {
-		let isMounted = true
-		const seismogramWorker = (this.context as any)
-			?.seismogramWorker as Worker | null;
+		let isMounted = true;
+		const seismogramWorker = (this.context as any) as Worker | null;
 
 		const handleSeismogramWorker = (event: MessageEvent) => {
 			const { station, data } = event.data;
-			// console.log(data, Date.now())
 			if (station !== this.state.station) {
 				return; // Ignore messages not meant for this station
 			}
-			if (!isMounted) {
+			if (!isMounted || !data) {
 				return; // Ignore messages if component is unmounted
 			}
+
 			this.simulateSeismogram(data);
 		};
 
-		if(this.state.channelZ.x.length === 0) {
+		if (this.state.channelZ.x.length === 0) {
 			seismogramWorker?.postMessage({
 				station: this.state.station,
-				message: "lastData"
+				message: "lastData",
 			});
 		}
 
@@ -166,8 +165,8 @@ export default class DynamicLineChart extends React.Component<Props> {
 	// 	if (
 	// 		earthquakePrediction &&
 	// 		earthquakePrediction.station === this.state.station &&
-	// 		earthquakePrediction.creation_date !==
-	// 			this.state.prevContextValue?.creation_date
+	// 		earthquakePrediction.time_stamp !==
+	// 			this.state.prevContextValue?.time_stamp
 	// 	) {
 	// 		console.log(
 	// 			earthquakePrediction,
@@ -176,64 +175,47 @@ export default class DynamicLineChart extends React.Component<Props> {
 	// 		);
 
 	// 		// //if the creation date is less than the last data, then directly add it to the pWaves
-	// 		// if (
-	// 		// 	this.state.channelZ.x[this.state.channelZ.x.length - 1] >
-	// 		// 	earthquakePrediction.creation_date
-	// 		// ) {
-	// 			// const pWaveTemp = {
-	// 			// 	x: [] as Array<number>,
-	// 			// 	y: [] as Array<number>,
-	// 			// 	line: {
-	// 			// 		color: "#FF0000",
-	// 			// 		width: 2,
-	// 			// 	},
-	// 			// 	showlegend: false,
-	// 			// 	xaxis: "x",
-	// 			// };
 
-	// 			// const date = new Date(earthquakePrediction.creation_date);
-	// 			// pWaveTemp.x.push(date.getTime());
-	// 			// pWaveTemp.y.push(0);
-	// 			// pWaveTemp.x.push(date.getTime());
-	// 			// pWaveTemp.y.push(6000);
+	// 		const pWaveTemp = {
+	// 			x: [] as Array<number>,
+	// 			y: [] as Array<number>,
+	// 			line: {
+	// 				color: "#FF0000",
+	// 				width: 2,
+	// 			},
+	// 			showlegend: false,
+	// 			xaxis: "x",
+	// 		};
 
-	// 			this.setState((prevState: any) => ({
-	// 				pWaves: [
-	// 					...prevState.pWaves,
-	// 					{
-	// 						...pWaveTemp,
-	// 						yaxis: "y4",
-	// 					},
-	// 					{
-	// 						...pWaveTemp,
-	// 						yaxis: "y5",
-	// 					},
-	// 					{
-	// 						...pWaveTemp,
-	// 						yaxis: "y6",
-	// 					},
-	// 				],
-	// 				prevContextValue: earthquakePrediction,
-	// 			}));
-	// 		// } else {
-	// 		// 	this.setState((prevState: any) => ({
-	// 		// 		earthquakePredictions: [
-	// 		// 			...prevState.earthquakePredictions,
-	// 		// 			earthquakePrediction,
-	// 		// 		],
-	// 		// 		prevContextValue: earthquakePrediction,
-	// 		// 	}));
-	// 		// }
+	// 		const date = new Date(earthquakePrediction.time_stamp);
+	// 		pWaveTemp.x.push(date.getTime());
+	// 		pWaveTemp.y.push(0);
+	// 		pWaveTemp.x.push(date.getTime());
+	// 		pWaveTemp.y.push(6000);
+
+	// 		this.setState((prevState: any) => ({
+	// 			pWaves: [
+	// 				...prevState.pWaves,
+	// 				{
+	// 					...pWaveTemp,
+	// 					yaxis: "y4",
+	// 				},
+	// 				{
+	// 					...pWaveTemp,
+	// 					yaxis: "y5",
+	// 				},
+	// 				{
+	// 					...pWaveTemp,
+	// 					yaxis: "y6",
+	// 				},
+	// 			],
+	// 			prevContextValue: earthquakePrediction,
+	// 		}));
 	// 	}
 	// }
 	simulateSeismogram = (seismogram: SeismogramDataType) => {
-		const {
-			channelZ,
-			channelN,
-			channelE,
-			layout,
-			userDefinedRange,
-		} = this.state;
+		const { channelZ, channelN, channelE, layout, userDefinedRange } =
+			this.state;
 		// if (!waveData || waveData.length === 0) {
 		// 	return;
 		// }
@@ -358,11 +340,12 @@ export default class DynamicLineChart extends React.Component<Props> {
 			},
 			pWaves: seismogram.pWaves,
 			// earthquakePredictions: earthquakePredictions.filter(
-				// (_, index) => !removedEarthquakePredictions.includes(index)
+			// (_, index) => !removedEarthquakePredictions.includes(index)
 			// ),
 		});
 		layout.datarevision = this.state.revision + 1;
 	};
+
 	handleRelayout = (event: PlotRelayoutEvent) => {
 		if (event["xaxis.showspikes"] === false) {
 			const { channelZ, layout } = this.state;
@@ -391,7 +374,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 	render() {
 		return (
 			<div
-				className={`p-4 pt-0 relative h-[400px] transition-all duration-200 ease-in-out -translate-y-20`}
+				className={`p-4 pt-0 relative h-[500px] transition-all duration-200 ease-in-out -translate-y-20`}
 			>
 				<h3 className="text-white text-lg font-semibold mb-2 text-center relative translate-y-20 z-10">
 					Sensor {this.state.station}

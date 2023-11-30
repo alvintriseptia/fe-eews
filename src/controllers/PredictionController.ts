@@ -1,7 +1,8 @@
-import { EarthquakePrediction, Map, Seismogram } from "@/models/_index";
+import { EarthquakePrediction, Map } from "@/models/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
-import mapStyle from '@/assets/data/dataviz_dark.json';
+import mapStyle from "@/assets/data/dataviz_dark.json";
 import { StyleSpecification } from "maplibre-gl";
+import { IEarthquakePrediction } from "@/entities/_index";
 
 /**
  * PredictionController class handles the logic for earthquake prediction.
@@ -9,7 +10,7 @@ import { StyleSpecification } from "maplibre-gl";
 export default class PredictionController {
 	earthquakePrediction = new EarthquakePrediction();
 	private map = new Map();
-    private style = mapStyle as StyleSpecification;
+	private style = mapStyle as StyleSpecification;
 	error: string = "";
 
 	constructor() {
@@ -18,9 +19,9 @@ export default class PredictionController {
 			error: observable,
 			map: observable,
 			getHistoryEarthquakePrediction: action,
-			filterHistoryEarthquakePrediction: action,
+			// filterHistoryEarthquakePrediction: action,
 			exportHistoryEarthquakePrediction: action,
-			getDetailEarthquakePrediction: action,
+			getSeismogramEarthquakePrediction: action,
 			displayError: action,
 		} as AnnotationsMap<this, any>);
 	}
@@ -28,7 +29,50 @@ export default class PredictionController {
 	/**
 	 * Retrieves the history of earthquake predictions.
 	 */
-	async getHistoryEarthquakePrediction() {
+	async getHistoryEarthquakePrediction(start_date?: number, end_date?: number) {
+		let earthquakePredictions = [] as IEarthquakePrediction[];
+		if (start_date && end_date) {
+			const response =
+				await this.earthquakePrediction.fetchHistoryEarthquakePrediction(
+					start_date,
+					end_date
+				);
+
+			earthquakePredictions = response;
+		} else {
+			const now = new Date().getTime();
+			const lastWeek = now - 30 * 24 * 60 * 60 * 1000;
+			const response =
+				await this.earthquakePrediction.fetchHistoryEarthquakePrediction(
+					lastWeek,
+					now
+				);
+
+			earthquakePredictions = response;
+		}
+
+		if (earthquakePredictions.length) {
+			// get addresses
+			for (const prediction of earthquakePredictions) {
+				const address = await this.map.getAreaName({
+					latitude: prediction.lat,
+					longitude: prediction.long,
+				});
+				prediction.location = address;
+			}
+		} else {
+			this.displayError("Data tidak ditemukan");
+			return {
+				data: [],
+			}
+		}
+
+		return {
+			data: earthquakePredictions,
+		};
+	}
+
+	addEarthquakePredictionLocations(predictions: IEarthquakePrediction[]) {
 		this.map.initMap({
 			id: "eews-history-map",
 			mapStyle: this.style,
@@ -39,15 +83,8 @@ export default class PredictionController {
 			},
 		});
 
-		const historyEarthquakePredictions = await this.earthquakePrediction.fetchHistoryEarthquakePrediction();
-
-		this.map.addEarthquakePredictionLocations(historyEarthquakePredictions);
+		this.map.addEarthquakePredictionLocations(predictions);
 	}
-
-	/**
-	 * Filters the history of earthquake predictions based on certain criteria.
-	 */
-	filterHistoryEarthquakePrediction() {}
 
 	/**
 	 * Exports the history of earthquake predictions to a file.
@@ -57,7 +94,22 @@ export default class PredictionController {
 	/**
 	 * Retrieves the detailed information of an earthquake prediction.
 	 */
-	getDetailEarthquakePrediction() {}
+	async getSeismogramEarthquakePrediction(station: string, time_stamp: number) {
+		const start_date = new Date(time_stamp).getTime() - 30;
+		const end_date = new Date(time_stamp).getTime() + 30;
+		const response =
+			await this.earthquakePrediction.fetchSeismogramEarthquakePrediction(
+				station,
+				start_date,
+				end_date
+			);
+
+		if (!response) {
+			this.displayError("Data tidak ditemukan");
+		}
+
+		return response;
+	}
 
 	/**
 	 * Displays an error message related to earthquake prediction.

@@ -9,7 +9,7 @@ const Plot = dynamic(
 	}
 );
 
-type WaveChannel = {
+export type WaveChannel = {
 	x: number[];
 	y: number[];
 	name: string;
@@ -21,106 +21,130 @@ export interface PredictionRecapContentProps {
 	latitude: number;
 	longitude: number;
 	location: string;
-	timestamp: string;
+	time_stamp: number;
 	station: string;
-	waves: WaveChannel;
+	z_channel: WaveChannel;
+	n_channel: WaveChannel;
+	e_channel: WaveChannel;
 }
 
 class PredictionRecapContent extends Component<PredictionRecapContentProps> {
+	state = {
+		z_channel: {} as WaveChannel,
+		n_channel: {} as WaveChannel,
+		e_channel: {} as WaveChannel,
+	};
+	
+	layout = {
+		datarevision: 0,
+		xaxis: {
+			type: "date",
+			color: "#fff",
+			range: [this.props.z_channel.x[0], this.props.z_channel.x[this.props.z_channel.x.length - 1]],
+		},
+		yaxis: {
+			type: "linear",
+			color: "#fff",
+			range: [-1500, 3000],
+			fixedrange: true,
+		},
+		yaxis2: {
+			type: "linear",
+			color: "#fff",
+			range: [-1500, 3000],
+			fixedrange: true,
+		},
+		yaxis3: {
+			type: "linear",
+			color: "#fff",
+			range: [-1500, 3000],
+			fixedrange: true,
+		},
+		yaxis4: {
+			type: "linear",
+			color: "#fff",
+			range: [-1500, 3000],
+			fixedrange: true,
+			overlaying: "y",
+		},
+		yaxis5: {
+			type: "linear",
+			color: "#fff",
+			range: [-1500, 3000],
+			fixedrange: true,
+			overlaying: "y2",
+		},
+		yaxis6: {
+			type: "linear",
+			color: "#fff",
+			range: [-1500, 3000],
+			fixedrange: true,
+			overlaying: "y3",
+		},
+		height: 350,
+		width: 1000,
+		paper_bgcolor: "#0D121C",
+		plot_bgcolor: "transparent",
+		grid: {
+			rows: 3,
+			columns: 1,
+			subplots: ["xy", "xy2", "xy3"],
+			roworder: "top to bottom",
+			xgap: 0.05,
+			ygap: 10,
+			xside: "bottom plot",
+			yside: "left plot",
+		},
+	} as Partial<Layout>;
+
+	constructor(props: PredictionRecapContentProps) {
+		super(props);
+		this.state.z_channel = props.z_channel;
+		this.state.n_channel = props.n_channel;
+		this.state.e_channel = props.e_channel;
+	}
+
+	
 	render() {
-		const layout = {
-			datarevision: 0,
-			xaxis: {
-				type: "date",
-				color: "#fff",
-				range: [Date.now() - 30000, Date.now()],
-			},
-			yaxis: {
-				type: "linear",
-				color: "#fff",
-				range: [-500, 3000],
-				fixedrange: true,
-			},
-			yaxis2: {
-				type: "linear",
-				color: "#fff",
-				range: [-500, 3000],
-				fixedrange: true,
-			},
-			yaxis3: {
-				type: "linear",
-				color: "#fff",
-				range: [-500, 3000],
-				fixedrange: true,
-			},
-			yaxis4: {
-				type: "linear",
-				color: "#fff",
-				range: [-500, 3000],
-				fixedrange: true,
-				overlaying: "y",
-			},
-			yaxis5: {
-				type: "linear",
-				color: "#fff",
-				range: [-500, 3000],
-				fixedrange: true,
-				overlaying: "y2",
-			},
-			yaxis6: {
-				type: "linear",
-				color: "#fff",
-				range: [-500, 3000],
-				fixedrange: true,
-				overlaying: "y3",
-			},
-			height: 500,
-			width: 950,
-			paper_bgcolor: "#0D121C",
-			plot_bgcolor: "transparent",
-			grid: {
-				rows: 3,
-				columns: 1,
-				subplots: ["xy", "xy2", "xy3"],
-				roworder: "top to bottom",
-				xgap: 0.05,
-				ygap: 0.05,
-				xside: "bottom plot",
-				yside: "left plot",
-			},
-		} as Partial<Layout>;
+		console.log(this.state.z_channel, "z_channel")
+		let date = new Date(this.props.time_stamp);
+		const offset = new Date().getTimezoneOffset() * 60 * 1000;
+		date.setTime(date.getTime() - offset);
+		const time = date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
 
 		return (
 			<section className="flex flex-col p-4 border-b">
 				<div className="flex justify-between mb-4 relative z-10">
 					<div>
 						<h6 className="text-eews-boulder text-xs">Lokasi</h6>
-						<p className="text-white max-width-[200px]">{this.props.location}</p>
+						<p className="text-white max-width-[200px]">
+							{this.props.location}
+						</p>
 					</div>
 
 					<div>
 						<h6 className="text-eews-boulder text-xs">Waktu</h6>
-						<p className="text-white">{this.props.timestamp}</p>
+						<p className="text-white">{time}</p>
 					</div>
 
 					<div>
 						<h6 className="text-eews-boulder text-xs">Magnitude</h6>
-						<p className="text-white">{this.props.magnitude}</p>
+						<p className="text-white">{this.props.magnitude?.toFixed(2) || ""}</p>
 					</div>
 
 					<div>
 						<h6 className="text-eews-boulder text-xs">Kedalaman</h6>
-						<p className="text-white">{this.props.depth}Km</p>
+						<p className="text-white">{this.props.depth?.toFixed(2) || ""}Km</p>
 					</div>
 
 					<div>
 						<h6 className="text-eews-boulder text-xs">Latitude</h6>
-						<p className="text-white">{this.props.latitude}</p>
+						<p className="text-white">{this.props.latitude?.toFixed(2) || ""}</p>
 					</div>
 
 					<div>
 						<h6 className="text-eews-boulder text-xs">Longitude</h6>
-						<p className="text-white">{this.props.longitude}</p>
+						<p className="text-white">{this.props.longitude?.toFixed(2) || ""}</p>
 					</div>
 					<div>
 						<h6 className="text-eews-boulder text-xs">Stasiun</h6>
@@ -130,8 +154,12 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 
 				<div className="w-full relative -top-10 right-0">
 					<Plot
-						data={[this.props.waves]}
-						layout={layout}
+						data={[
+							this.state.z_channel,
+							this.state.n_channel,
+							this.state.e_channel,
+						]}
+						layout={this.layout}
 						style={{ width: "100%", height: "100%" }}
 					/>
 				</div>

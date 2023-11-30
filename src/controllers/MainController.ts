@@ -28,6 +28,8 @@ export default class MainController {
 	earthquakePrediction = new EarthquakePrediction();
 	private clearTimeout: NodeJS.Timeout;
 
+	private seismogramWorker: Worker;
+
 	private pWavesWorker: Worker;
 	private affectedPWavesWorker: Worker;
 	private affectedPWaves: GeoJsonCollection;
@@ -113,10 +115,30 @@ export default class MainController {
 	 * Connects to the earthquake prediction service.
 	 */
 	connectEarthquakePrediction() {
+		this.seismogramWorker = new Worker(
+			new URL("../workers/seismogram.ts", import.meta.url)
+		);
+
 		this.earthquakePredictionWorker = new Worker(
 			new URL("../workers/earthquakePrediction.ts", import.meta.url)
 		);
 
+		this.pWavesWorker = new Worker(
+			new URL("../workers/pWaves.ts", import.meta.url)
+		);
+
+		this.sWavesWorker = new Worker(
+			new URL("../workers/sWaves.ts", import.meta.url)
+		);
+
+		this.affectedPWavesWorker = new Worker(
+			new URL("../workers/affectedPWaves.ts", import.meta.url)
+		);
+
+		this.affectedSWavesWorker = new Worker(
+			new URL("../workers/affectedSWaves.ts", import.meta.url)
+		);
+		
 		this.earthquakePredictionWorker.postMessage({
 			mode: "realtime",
 		});
@@ -125,12 +147,12 @@ export default class MainController {
 			const { data } = event;
 			const date = new Date(data.time_stamp);
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
-			date.setTime(date.getTime() - offset);;
+			date.setTime(date.getTime() - offset);
 
 			const earthquakePrediction: IEarthquakePrediction = {
 				title: "Terdeteksi Gelombang P",
 				description: `Harap perhatian, muncul deteksi gelombang P di stasiun ${data.station}`,
-				creation_date: date.getTime(),
+				time_stamp: date.getTime(),
 				depth: data.depth,
 				lat: data.lat,
 				long: data.long,
@@ -181,15 +203,9 @@ export default class MainController {
 					);
 					regency.distance = distance;
 				});
-				
+
 				//sort by distance
 				this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
-				this.affectedPWavesWorker = new Worker(
-					new URL("../workers/affectedPWaves.ts", import.meta.url)
-				);
-				this.affectedSWavesWorker = new Worker(
-					new URL("../workers/affectedSWaves.ts", import.meta.url)
-				);
 
 				// EARTHQUAKE PREDICTION COUNTDOWN
 				this.earthquakePredictionInterval = setInterval(() => {
@@ -202,7 +218,7 @@ export default class MainController {
 							title: "Terjadi Gempa Bumi",
 							prediction: "earthquake",
 							description: `Perhatian! telah terjadi gempa bumi di wilayah ${address}, segera lakukan tindakan mitigasi!`,
-							creation_date: Date.now(),
+							time_stamp: Date.now(),
 							depth: this.earthquakePrediction.depth,
 							lat: this.earthquakePrediction.lat,
 							long: this.earthquakePrediction.long,
@@ -219,10 +235,6 @@ export default class MainController {
 				}, 1000);
 
 				// EARTHQUAKE PREDICTION PWAVE
-				this.pWavesWorker = new Worker(
-					new URL("../workers/pWaves.ts", import.meta.url)
-				);
-
 				this.pWavesWorker.postMessage({
 					command: "start",
 					earthquakeEpicenter: {
@@ -245,10 +257,6 @@ export default class MainController {
 				};
 
 				// EARTHQUAKE PREDICTION SWAVE
-				this.sWavesWorker = new Worker(
-					new URL("../workers/sWaves.ts", import.meta.url)
-				);
-
 				this.sWavesWorker.postMessage({
 					command: "start",
 					earthquakeEpicenter: {
@@ -366,11 +374,11 @@ export default class MainController {
 	 * Stops the simulation.
 	 */
 	stopSimulation() {
-		if(this.pWavesWorker) {
+		if (this.pWavesWorker) {
 			this.pWavesWorker.postMessage({
 				command: "stop",
 			});
-		}else if(this.sWavesWorker) {
+		} else if (this.sWavesWorker) {
 			this.sWavesWorker.postMessage({
 				command: "stop",
 			});

@@ -1,9 +1,8 @@
 import { IEarthquakePrediction, IMap, IStation } from "@/entities/_index";
-import { CoordinateType, GeoJsonCollection } from "@/types/_index";
+import { CoordinateType, GeoJsonCollection, RegionType } from "@/types/_index";
 import MapLibreGL, { StyleSpecification } from "maplibre-gl";
 import { Map as MapLibre } from "maplibre-gl";
 import BallMarker from "@/assets/images/ball-marker.ico";
-import { RegionType } from "../types/RegionType";
 import { getIntensityColor } from "@/utils/map-style";
 
 class EEWSMap implements IMap {
@@ -15,6 +14,7 @@ class EEWSMap implements IMap {
 	sWaveAffectedMarker: Map<string, maplibregl.Marker> = new Map();
 	earthquakeEpicenter: maplibregl.Marker;
 	stationMarker: maplibregl.Marker;
+	earthquakePredictionMarker: Map<string, maplibregl.Marker> = new Map();
 
 	initMap(map: IMap) {
 		this.id = map.id;
@@ -69,6 +69,36 @@ class EEWSMap implements IMap {
 					],
 				},
 			});
+
+			this.map.addLayer({
+				id: "pWave",
+				source: "pWave",
+				type: "fill",
+				paint: {
+					"fill-outline-color": "#0000ff",
+					"fill-color": "transparent",
+				},
+			});
+
+			this.map.addLayer({
+				id: "sWave",
+				source: "sWave",
+				type: "fill",
+				paint: {
+					"fill-outline-color": "#ff0000",
+					"fill-color": "transparent",
+				},
+			});
+
+			this.map.addLayer({
+				id: "pWaveAffected",
+				source: "pWaveAffected",
+				type: "fill",
+				paint: {
+					"fill-color": "#ff0000",
+					"fill-opacity": 0.2,
+				},
+			});
 		});
 	}
 
@@ -117,18 +147,20 @@ class EEWSMap implements IMap {
 				`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coordinate.latitude}&longitude=${coordinate.longitude}&localityLanguage=id`
 			);
 			const data = await response.json();
-			return `${data.locality}, ${data.principalSubdivision}`;
+
+			let address = "";
+
+			if(data.locality) address += data.locality;
+			if(data.principalSubdivision) address += `, ${data.principalSubdivision}`;
+			
+			return address;
 		} catch (error) {
 			console.error(error);
 			return "";
 		}
 	}
 
-
-	addEarthquakePrediction(
-		location: CoordinateType,
-		station: IStation
-	) {
+	addEarthquakePrediction(location: CoordinateType, station: IStation) {
 		const el = document.createElement("div");
 		const innerEl = `
 			<div class="animate-pulse font-bold text-4xl text-red-500 drop-shadow-[2px_2px_0_rgba(255,255,255,0.8)]">
@@ -166,42 +198,27 @@ class EEWSMap implements IMap {
 			},
 			essential: true,
 		});
-
-		this.map.addLayer({
-			id: "pWave",
-			source: "pWave",
-			type: "fill",
-			paint: {
-				"fill-outline-color": "#0000ff",
-				"fill-color": "transparent",
-			},
-		});
-
-		this.map.addLayer({
-			id: "sWave",
-			source: "sWave",
-			type: "fill",
-			paint: {
-				"fill-outline-color": "#ff0000",
-				"fill-color": "transparent",
-			},
-		});
-
-		this.map.addLayer({
-			id: "pWaveAffected",
-			source: "pWaveAffected",
-			type: "fill",
-			paint: {
-				"fill-color": "#ff0000",
-				"fill-opacity": 0.2,
-			},
-		});
 	}
 
 	clearEarthquakePrediction() {
+		if (this.map.getSource("pWave")) {
+			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+
+		if (this.map.getSource("sWave")) {
+			const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+
 		// check if exist
-		if (this.map.getLayer("pWaveAffected")) {
-			this.map.removeLayer("pWaveAffected");
+		if (this.map.getSource("pWaveAffected")) {
 			const source = this.map.getSource(
 				"pWaveAffected"
 			) as maplibregl.GeoJSONSource;
@@ -247,8 +264,7 @@ class EEWSMap implements IMap {
 
 	stopSimulation() {
 		//remove layer
-		if (this.map.getLayer("pWave")) {
-			this.map.removeLayer("pWave");
+		if (this.map.getSource("pWave")) {
 			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
 			source.setData({
 				type: "FeatureCollection",
@@ -256,8 +272,7 @@ class EEWSMap implements IMap {
 			});
 		}
 
-		if (this.map.getLayer("sWave")) {
-			this.map.removeLayer("sWave");
+		if (this.map.getSource("sWave")) {
 			const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
 			source.setData({
 				type: "FeatureCollection",
@@ -288,11 +303,11 @@ class EEWSMap implements IMap {
 			const el = document.createElement("div");
 			const innerEl = `
 			<div class="font-bold text-lg w-[24px] h-[24px] flex justify-center items-center rounded-full ${
-				regency.intensity === 1 ? "text-gray-900" : "text-white"
+				Math.round(regency.intensity) === 1 ? "text-gray-900" : "text-white"
 			} ${getIntensityColor(
-				regency.intensity
+				Math.round(regency.intensity)
 			)} hover:scale-110 transform transition-all duration-300 ease-in-out">
-				${regency.intensity}
+				${Math.round(regency.intensity)}
 			</div>
 			`;
 			el.innerHTML = innerEl;
@@ -307,7 +322,28 @@ class EEWSMap implements IMap {
 			this.sWaveAffectedMarker.set(regency.id.toString(), marker);
 		});
 	}
-	
-	addEarthquakePredictionLocations(earthquake: IEarthquakePrediction[]) {}
+
+	addEarthquakePredictionLocations(earthquake: IEarthquakePrediction[]) {
+		// add area affected
+		earthquake.forEach((eq) => {
+			const el = document.createElement("div");
+			const bgColor = getIntensityColor(eq.mag);
+			const innerEl = `
+			<div class="font-bold text-lg w-[32px] h-[32px] flex justify-center items-center rounded-full ${bgColor} hover:scale-110 transform transition-all duration-300 ease-in-out">
+				${eq.mag?.toFixed(1)}
+			</div>
+			`;
+			el.innerHTML = innerEl;
+			const marker = new MapLibreGL.Marker({
+				draggable: false,
+				scale: 0.5,
+				element: el,
+			})
+				.setLngLat([eq.long, eq.lat])
+				.addTo(this.map);
+
+			this.earthquakePredictionMarker.set(eq.time_stamp.toString(), marker);
+		});
+	}
 }
 export default EEWSMap;

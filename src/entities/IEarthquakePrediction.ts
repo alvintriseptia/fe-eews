@@ -3,10 +3,11 @@ export interface IEarthquakePrediction {
     description: string;
     prediction: string;
     station: string;
-    creation_date: number;
+    time_stamp: number;
     depth: number;
     lat: number;
     long: number;
     mag: number;
     countdown: number;
+    location?: string;
 }

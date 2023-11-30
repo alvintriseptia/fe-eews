@@ -2,19 +2,19 @@ import { CoordinateType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
 let sWaveRadius = 0;
-let intervalId: NodeJS.Timeout;
+let sWaveInterval: NodeJS.Timeout;
 const updateFrequency = 500;
 
 const onmessage = (event: MessageEvent) => {
 	const { command, earthquakeEpicenter } = event.data;
 	if (command === "stop") {
-		clearInterval(intervalId);
+		clearInterval(sWaveInterval);
 		return;
 	}
 
 	if (command === "start") {
 		sWaveRadius = 0;
-		intervalId = setInterval(() => {
+		sWaveInterval = setInterval(() => {
 			runSWave(earthquakeEpicenter);
 		}, updateFrequency);
 	}

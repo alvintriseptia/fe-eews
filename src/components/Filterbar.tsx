@@ -19,6 +19,9 @@ class Filterbar extends React.Component {
 					<option className="bg-eews-dark text-white" value="last_month">
 						Bulan Lalu
 					</option>
+					<option className="bg-eews-dark text-white" value="this_year">
+						Tahun ini``
+					</option>
 				</select>
 				<FunnelIcon className="text-white ml-2 w-6 h-6" />
 			</section>

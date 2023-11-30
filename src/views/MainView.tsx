@@ -16,6 +16,7 @@ import {
 } from "@/entities/_index";
 import {
 	EarthquakeHistorySidebar,
+	LegendMap,
 	MMIScale,
 	Navbar,
 	Seismogram,
@@ -135,6 +136,8 @@ class MainView extends React.Component<Props> {
 					<EarthquakeHistorySidebar
 						weeklyEarthquake={this.state.weeklyEarthquake}
 					/>
+
+					<LegendMap />
 
 					<div className="flex flex-col w-full">
 						<div className="relative h-full">

@@ -121,7 +121,7 @@ class EarthquakeRealtimeCard extends React.Component<EarthquakeRealtimeProps> {
 				break;
 		}
 
-		const date = new Date(earthquake.creation_date);
+		const date = new Date(earthquake.time_stamp);
 		let newTime = "";
 		if (date !== undefined) {
 			const timezone = -(date.getTimezoneOffset() / 60);
@@ -222,7 +222,7 @@ class EarthquakeRealtimeCard extends React.Component<EarthquakeRealtimeProps> {
 						<div className="flex justify-between items-center gap-x-3">
 							<span className="text-eews-silver">Kedalaman</span>
 							<h4 className="text-white font-semibold">
-								{this.state.earthquake.depth} km
+								{this.state.earthquake.depth?.toFixed(2) || "-"} Km
 							</h4>
 						</div>
 					)}
@@ -234,7 +234,7 @@ class EarthquakeRealtimeCard extends React.Component<EarthquakeRealtimeProps> {
 						<div className="flex justify-between items-center gap-x-3">
 							<span className="text-eews-silver">Latitude</span>
 							<h4 className="text-white font-semibold">
-								{this.state.earthquake.lat}
+								{this.state.earthquake.lat?.toFixed(2) || "-"}
 							</h4>
 						</div>
 					)}
@@ -246,7 +246,7 @@ class EarthquakeRealtimeCard extends React.Component<EarthquakeRealtimeProps> {
 						<div className="flex justify-between items-center gap-x-3">
 							<span className="text-eews-silver">Longitude</span>
 							<h4 className="text-white font-semibold">
-								{this.state.earthquake.long}
+								{this.state.earthquake.long?.toFixed(2) || "-"}
 							</h4>
 						</div>
 					)}
@@ -339,7 +339,7 @@ class Sidebar extends React.Component<SidebarProps> {
 
 						<div className="mt-auto">
 							{this.state.earthquakePrediction &&
-								this.state.earthquakePrediction.earthquake.creation_date && (
+								this.state.earthquakePrediction.earthquake.time_stamp && (
 									<EarthquakeRealtimeCard
 										{...this.state.earthquakePrediction}
 									/>

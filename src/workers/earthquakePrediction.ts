@@ -1,5 +1,11 @@
 import { IEarthquakePrediction } from "@/entities/_index";
+import { SeismogramPlotType } from "@/types/_index";
 import { io } from "socket.io-client";
+import STATIONS_DATA from "@/assets/data/stations.json";
+
+export const pWavesData = new Map<string, SeismogramPlotType[]>(
+	STATIONS_DATA.map((s) => [s.code, [] as SeismogramPlotType[]])
+);
 
 const onmessage = (event: MessageEvent) => {
 	const { data } = event;
@@ -9,7 +15,7 @@ const onmessage = (event: MessageEvent) => {
 		const earthquakePrediction: IEarthquakePrediction = {
 			title: "Terdeteksi Gelombang P",
 			description: "A magnitude 5.0 earthquake is predicted to occur cuy",
-			creation_date: Date.now(),
+			time_stamp: Date.now(),
 			depth: 5,
 			lat: -6.1751,
 			long: 106.826,
@@ -19,25 +25,55 @@ const onmessage = (event: MessageEvent) => {
 			station: "BBJI",
 		};
 
+		addPWave("BBJI", Date.now());
+
 		postMessage(earthquakePrediction);
 
 		setInterval(() => {
 			earthquakePrediction.lat = Math.random() * 10 - 5;
 			earthquakePrediction.long = Math.random() * 10 - 5;
-			earthquakePrediction.prediction = typePrediction[Math.floor(Math.random() * 3)];
-			earthquakePrediction.station = "UGM"
+			earthquakePrediction.prediction =
+				typePrediction[Math.floor(Math.random() * 3)];
+			earthquakePrediction.station = "BBJI";
+			addPWave("BBJI", Date.now());
 
 			postMessage(earthquakePrediction);
-		}, 15000);
+		}, 60000);
 	} else {
-		console.log("earthquake prediction worker")
+		console.log("earthquake prediction worker");
 		const socket = io("http://localhost:3333", {
 			transports: ["websocket"],
 		});
 
 		socket.on("prediction-data-all", (message: any) => {
 			postMessage(message);
+
+			addPWave(message.station, message.time_stamp);
 		});
+	}
+
+	function addPWave(station: string, creation_date: number) {
+		const pWaveTemp = {
+			x: [] as Array<number>,
+			y: [] as Array<number>,
+			line: {
+				color: "#FF0000",
+				width: 2,
+			},
+			showlegend: false,
+			xaxis: "x",
+		};
+
+		const date = new Date(creation_date);
+		pWaveTemp.x.push(date.getTime());
+		pWaveTemp.y.push(0);
+		pWaveTemp.x.push(date.getTime());
+		pWaveTemp.y.push(6000);
+
+		const data = pWavesData.get(station);
+
+		data.push(pWaveTemp);
+
 	}
 };
 
