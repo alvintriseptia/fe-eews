@@ -181,6 +181,7 @@ export default class MainController {
 					);
 					regency.distance = distance;
 				});
+				
 				//sort by distance
 				this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
 				this.affectedPWavesWorker = new Worker(
@@ -365,12 +366,16 @@ export default class MainController {
 	 * Stops the simulation.
 	 */
 	stopSimulation() {
-		this.pWavesWorker.postMessage({
-			command: "stop",
-		});
-		this.sWavesWorker.postMessage({
-			command: "stop",
-		});
+		if(this.pWavesWorker) {
+			this.pWavesWorker.postMessage({
+				command: "stop",
+			});
+		}else if(this.sWavesWorker) {
+			this.sWavesWorker.postMessage({
+				command: "stop",
+			});
+		}
+
 		this.map.stopSimulation();
 	}
 }
