@@ -133,7 +133,7 @@ const onmessage = (event: MessageEvent) => {
 				pWaves: [],
 			};
 
-			if (currentLength < seismogramTempData[station].channelZ.x.length) {
+			if (currentLength < tempData.channelZ.x.length) {
 				const tempData = seismogramData.get(station);
 				const data = seismogramTempData.get(station);
 
