@@ -225,7 +225,6 @@ const onmessage = (event: MessageEvent) => {
 				}
 
 				seismogramData.set(station, data);
-				seismogramTempData.set(station, newData);
 
 				postMessage({
 					station: station,
@@ -340,6 +339,8 @@ const onmessage = (event: MessageEvent) => {
 				data.channelE.x.splice(0, 100000);
 				data.channelE.y.splice(0, 100000);
 			}
+
+			seismogramData.set(station, data);
 
 			postMessage({
 				station: station,
