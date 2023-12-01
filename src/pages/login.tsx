@@ -8,7 +8,7 @@ export default class Login extends React.Component {
 		const controller = new UserController();
 		return <>
 			<Head>
-				<title>InaEEWS</title>
+				<title>InaTEWS</title>
 			</Head>
 			<LoginView controller={controller}/>
 		</>

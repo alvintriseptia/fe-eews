@@ -222,7 +222,7 @@ class Navbar extends React.Component<NavbarProps> {
 				<section className="flex gap-x-10">
 					<div className="flex gap-x-3">
 						<Image src={BMKGLogo} alt="BMKG Logo" width={40} height={40} />
-						<h1 className="text-4xl font-semibold text-white">InaEEWS</h1>
+						<h1 className="text-4xl font-semibold text-white">InaTEWS</h1>
 					</div>
 
 					<div className="flex bg-eews-mirage rounded-lg">
