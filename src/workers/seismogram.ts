@@ -75,7 +75,7 @@ const onmessage = (event: MessageEvent) => {
 		} else if (stationData && message === "lastData") {
 			postMessage({
 				station: stationData.code,
-				data: seismogramData[stationData.code],
+				data: seismogramData.get(stationData.code),
 			});
 		}
 	}
