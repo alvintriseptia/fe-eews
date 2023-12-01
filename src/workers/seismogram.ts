@@ -2,9 +2,6 @@ import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
 import { io } from "socket.io-client";
 import { pWavesData } from "./earthquakePrediction";
-const socket = io("http://localhost:3333", {
-	transports: ["websocket"],
-});
 const stations = STATIONS_DATA;
 const seismogramSockets = {
 	...stations.map((s) => [s.code, null]),
@@ -92,6 +89,9 @@ const onmessage = (event: MessageEvent) => {
 		// 	});
 		// }
 
+		const socket = io("http://localhost:3333", {
+			transports: ["websocket"],
+		});
 		seismogramSockets[station] = socket;
 		seismogramSockets[station].on(`waves-data-${station}`, (data: any) => {
 			// loop object data
@@ -224,7 +224,17 @@ const onmessage = (event: MessageEvent) => {
 					data.channelE.y.splice(0, BUFFER / 2);
 				}
 
+				if(tempData.channelZ.x.length > BUFFER) {
+					tempData.channelZ.x.splice(0, BUFFER / 2);
+					tempData.channelZ.y.splice(0, BUFFER / 2);
+					tempData.channelN.x.splice(0, BUFFER / 2);
+					tempData.channelN.y.splice(0, BUFFER / 2);
+					tempData.channelE.x.splice(0, BUFFER / 2);
+					tempData.channelE.y.splice(0, BUFFER / 2);
+				}
+
 				seismogramData.set(station, data);
+				seismogramTempData.set(station, tempData);
 
 				postMessage({
 					station: station,
