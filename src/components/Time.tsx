@@ -10,7 +10,7 @@ class Time extends React.Component {
 	componentDidMount() {
 		this.interval = setInterval(() => {
 			const date = new Date();
-			const timezone = -(date.getTimezoneOffset() / 60);
+			const timezone = -(new Date().getTimezoneOffset() / 60);
 			let newTime =
 				date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
 			//add timezone WIB, WITA, OR WIT

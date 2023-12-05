@@ -49,20 +49,24 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 	}
 
 	async fetchHistoryEarthquakePrediction(start_date: number, end_date: number) {
-		const test_url =
-			"http://localhost:3333/history?start_date=1701354000&end_date=1701355500";
+		try {
+			const test_url =
+				"http://localhost:3333/history?start_date=1701354000&end_date=1701355500";
 
-		// to unix
-		start_date = Math.floor(start_date / 1000);
-		end_date = Math.floor(end_date / 1000);
-		const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}`;
+			// to unix
+			start_date = Math.floor(start_date / 1000);
+			end_date = Math.floor(end_date / 1000);
+			const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}`;
 
-		const response = await fetch(url);
-		const data = await response.json();
+			const response = await fetch(url);
+			const data = await response.json();
 
-		if (data.error) throw new Error(data.error);
+			if (data.error) throw new Error(data.error);
 
-		return Object.values(data) as IEarthquakePrediction[];
+			return Object.values(data) as IEarthquakePrediction[];
+		} catch (error) {
+			throw error;
+		}
 	}
 
 	async fetchSeismogramEarthquakePrediction(
@@ -70,36 +74,40 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 		start_date: number,
 		end_date: number
 	) {
-		const test_url =
-			"http://localhost:3333/waves?station=BBJI&start_date=1701370806&end_date=1701458526";
+		try {
+			const test_url =
+				"http://localhost:3333/waves?station=BBJI&start_date=1701370806&end_date=1701458526";
 
-		// to unix
-		start_date = Math.floor(start_date / 1000);
-		end_date = Math.floor(end_date / 1000);
-		const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
+			// to unix
+			start_date = Math.floor(start_date / 1000);
+			end_date = Math.floor(end_date / 1000);
+			const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
-		// test url karena data seismogram tidak ada
-		let response = await fetch(test_url);
+			// test url karena data seismogram tidak ada
+			let response = await fetch(url);
 
-		let data = await response.json();
+			let data = await response.json();
 
-		if (data.error) throw new Error(data.error);
+			if (data.error) throw new Error(data.error);
 
-        const seismogram = [] as ISeismogram[];
+			const seismogram = [] as ISeismogram[];
 
-		for (const obj of Object.entries(data) as any) {
-			const key = obj[0];
-			const dataValue = obj[1];
-			const seismogramData = {
-				creation_date: new Date(key * 1000).getTime(),
-				z_channel: dataValue.Z,
-				n_channel: dataValue.N,
-				e_channel: dataValue.E,
-			} as ISeismogram;
+			for (const obj of Object.entries(data) as any) {
+				const key = obj[0];
+				const dataValue = obj[1];
+				const seismogramData = {
+					creation_date: new Date(key * 1000).getTime(),
+					z_channel: dataValue.Z,
+					n_channel: dataValue.N,
+					e_channel: dataValue.E,
+				} as ISeismogram;
 
-			seismogram.push(seismogramData);
-		}
+				seismogram.push(seismogramData);
+			}
 
-		return seismogram;
+			return seismogram;
+		} catch (error) {
+			throw error;
+		} 
 	}
 }

@@ -127,7 +127,7 @@ export default class Simulation extends React.Component<Props> {
 		return (
 			<>
 				<Head>
-					<title>InaTEWS</title>
+					<title>InaEEWS</title>
 				</Head>
 				<SeismogramContext.Provider value={this.state.seismogramWorker}>
 					<MainView

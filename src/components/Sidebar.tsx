@@ -11,6 +11,26 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 
 	render() {
 		const backgroundColor = getIntensityColor(parseFloat(this.props.magnitude));
+		let time = "";
+		let date = "";
+		if(typeof this.props.date === 'number') {
+			const dateObj = new Date(this.props.date);
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			dateObj.setTime(dateObj.getTime() - offset);
+			const timezone = -(new Date().getTimezoneOffset() / 60);
+			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : "WIT";
+			time = dateObj.toLocaleTimeString() + " " + timezoneText;
+			
+			//date dd/mm/yyyy	
+			date = dateObj.toLocaleDateString("id-ID", {
+				day: "2-digit",
+				month: "2-digit",
+				year: "numeric",
+			});
+		}else{
+			time = this.props.time.toString();
+			date = this.props.date;
+		}
 
 		return (
 			<div className="flex flex-col gap-y-4">
@@ -37,7 +57,7 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 					<div className="flex flex-col gap-y-3">
 						<div>
 							<span className="text-gray-400 text-xs mb-1">Tanggal</span>
-							<h4 className="text-white text-sm">{this.props.date}</h4>
+							<h4 className="text-white text-sm">{date}</h4>
 						</div>
 
 						<div>
@@ -49,7 +69,7 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 					<div className="flex flex-col gap-y-3">
 						<div>
 							<span className="text-gray-400 text-xs mb-1">Waktu</span>
-							<h4 className="text-white text-sm">{this.props.time}</h4>
+							<h4 className="text-white text-sm">{time}</h4>
 						</div>
 
 						<div>
@@ -75,201 +95,10 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 	}
 }
 
-export interface EarthquakeRealtimeProps {
-	earthquake: IEarthquakePrediction;
-}
-
-class EarthquakeRealtimeCard extends React.Component<EarthquakeRealtimeProps> {
-	state = {
-		earthquake: {} as IEarthquakePrediction,
-		borderColor: "",
-		backgroundColor: "",
-		intervalId: 0,
-		countdown: 0,
-		formattedDate: "",
-	};
-
-	constructor(props: EarthquakeRealtimeProps) {
-		super(props);
-
-		const { formattedDate, borderColor, backgroundColor } = this.setFormattedDateAndColors(props.earthquake);
-		this.state = {
-			earthquake: props.earthquake,
-			countdown: props.earthquake.countdown as number,
-			formattedDate: formattedDate,
-			borderColor: borderColor,
-			backgroundColor: backgroundColor,
-			intervalId: 0,
-		};
-	}
-
-	setFormattedDateAndColors(earthquake: IEarthquakePrediction) {
-		let borderColor = "border-eews-mmi-II";
-		let backgroundColor = "bg-eews-mmi-II";
-		switch (earthquake.prediction.toLocaleLowerCase()) {
-			case "warning":
-				borderColor = "border-eews-swamp-green";
-				backgroundColor= "bg-eews-swamp-green";
-				break;
-			case "earthquake":
-				borderColor = "border-eews-mmi-V";
-				backgroundColor= "bg-eews-mmi-V";
-				break;
-			case "cancelled":
-				borderColor = "border-eews-mmi-X";
-				backgroundColor= "bg-eews-mmi-X";
-				break;
-		}
-
-		const date = new Date(earthquake.time_stamp);
-		let newTime = "";
-		if (date !== undefined) {
-			const timezone = -(date.getTimezoneOffset() / 60);
-			newTime =
-				date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
-			if (timezone === 7) {
-				newTime += " WIB";
-			} else if (timezone === 8) {
-				newTime += " WITA";
-			} else if (timezone === 9) {
-				newTime += " WIT";
-			}
-		}
-
-		return {
-			formattedDate: newTime,
-			borderColor: borderColor,
-			backgroundColor: backgroundColor,
-		}
-	}
-
-	componentDidMount() {
-		this.countdownInterval();
-	}
-
-	componentDidUpdate(prevProps: EarthquakeRealtimeProps) {
-		if (prevProps.earthquake !== this.props.earthquake) {
-			const { formattedDate, borderColor, backgroundColor } = this.setFormattedDateAndColors(this.props.earthquake);
-			this.setState({
-				earthquake: this.props.earthquake,
-				countdown: this.props.earthquake.countdown as number,
-				formattedDate: formattedDate,
-				borderColor: borderColor,
-				backgroundColor: backgroundColor,
-			});
-		}
-
-		else if (this.state.countdown <= 0) {
-			this.handleCountdownFinish();
-		}
-	}
-
-	countdownInterval() {
-		const interval = setInterval(() => {
-			this.setState((prevState: any) => ({
-				countdown: prevState.countdown - 1,
-			}));
-		}, 1000);
-		this.setState({ intervalId: interval });
-	}
-
-	handleCountdownFinish() {
-		clearInterval(this.state.intervalId);
-	}
-
-	componentWillUnmount() {
-		clearInterval(this.state.intervalId);
-	}
-
-	render() {
-		return (
-			<div
-				className={`flex flex-col gap-y-1 border-4 ${this.state.borderColor}`}
-			>
-				<h2
-					className={`${this.state.backgroundColor} w-full font-semibold text-white`}
-				>
-					{this.state.earthquake.title}
-				</h2>
-				<div className="px-2 pb-2 flex flex-col gap-y-2 text-xs">
-					<p className="text-white mb-2 max-w-[400px]">
-						{this.state.earthquake.description}
-					</p>
-
-					<div className="flex justify-between items-center gap-x-3">
-						<span className="text-eews-silver">Tanggal</span>
-						<h4 className="text-white font-semibold">
-							{this.state.formattedDate}
-						</h4>
-					</div>
-
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
-						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
-							"earthquake") && (
-						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Magnitude</span>
-							<h4 className="text-white font-semibold">
-								M {this.state.earthquake.mag}
-							</h4>
-						</div>
-					)}
-
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
-						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
-							"earthquake") && (
-						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Kedalaman</span>
-							<h4 className="text-white font-semibold">
-								{this.state.earthquake.depth?.toFixed(2) || "-"} Km
-							</h4>
-						</div>
-					)}
-
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
-						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
-							"earthquake") && (
-						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Latitude</span>
-							<h4 className="text-white font-semibold">
-								{this.state.earthquake.lat?.toFixed(2) || "-"}
-							</h4>
-						</div>
-					)}
-
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
-						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
-							"earthquake") && (
-						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Longitude</span>
-							<h4 className="text-white font-semibold">
-								{this.state.earthquake.long?.toFixed(2) || "-"}
-							</h4>
-						</div>
-					)}
-
-					{this.state.earthquake.prediction.toLocaleLowerCase() === "warning" &&
-						this.state.countdown > 0 && (
-							<div className="flex justify-between items-center gap-x-3">
-								<span className="text-eews-silver">Countdown</span>
-								<h4 className="text-white font-semibold">
-									{this.state.countdown} s
-								</h4>
-							</div>
-						)}
-				</div>
-			</div>
-		);
-	}
-}
-
 export interface SidebarProps {
 	latestFeltEarthquake: IExternalSource;
 	latestEarthquake: IExternalSource;
-	earthquakePrediction: EarthquakeRealtimeProps;
+	latestPrediction: IEarthquakePrediction | null;
 }
 
 class Sidebar extends React.Component<SidebarProps> {
@@ -277,7 +106,7 @@ class Sidebar extends React.Component<SidebarProps> {
 		open: true,
 		latestFeltEarthquake: {} as IExternalSource,
 		latestEarthquake: {} as IExternalSource,
-		earthquakePrediction: {} as EarthquakeRealtimeProps,
+		latestPrediction: {} as IEarthquakePrediction,
 	};
 
 	constructor(props: SidebarProps) {
@@ -301,8 +130,9 @@ class Sidebar extends React.Component<SidebarProps> {
 			this.setState({ latestEarthquake: this.props.latestEarthquake });
 		}
 
-		if (this.props.earthquakePrediction?.earthquake !== prevProps.earthquakePrediction?.earthquake) {
-			this.setState({ earthquakePrediction: this.props.earthquakePrediction });
+		if (this.props.latestPrediction !== prevProps.latestPrediction) {
+			if(this.props.latestPrediction.prediction !== "warning") return;
+			this.setState({ latestPrediction: this.props.latestPrediction });
 		}
 	}
 
@@ -335,15 +165,24 @@ class Sidebar extends React.Component<SidebarProps> {
 							{this.state.latestEarthquake?.title && (
 								<EarthquakeInfo {...this.state.latestEarthquake} />
 							)}
-						</div>
 
-						<div className="mt-auto">
-							{this.state.earthquakePrediction &&
-								this.state.earthquakePrediction.earthquake.time_stamp && (
-									<EarthquakeRealtimeCard
-										{...this.state.earthquakePrediction}
+							{this.state.latestPrediction?.time_stamp && (
+								<>
+									<div className="w-full h-0.5 bg-purple-950 my-4" />
+									<EarthquakeInfo 
+										id={'latest-prediction'}
+										date={this.state.latestPrediction.time_stamp}
+										title={'Prediksi Gempa Bumi Terakhir'}
+										depth={this.state.latestPrediction.depth.toFixed(2)}
+										latitude={this.state.latestPrediction.lat.toFixed(2)}
+										longitude={this.state.latestPrediction.long.toFixed(2)}
+										location={this.state.latestPrediction.location}
+										magnitude={this.state.latestPrediction.mag.toFixed(1)}
+										time={this.state.latestPrediction.time_stamp}
+										station={this.state.latestPrediction.station || "inatews"}
 									/>
-								)}
+								</>
+							)}
 						</div>
 					</aside>
 				</div>

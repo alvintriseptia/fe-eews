@@ -30,75 +30,87 @@ class EEWSMap implements IMap {
 		});
 
 		this.map.on("load", () => {
-			this.map.addSource("pWaveAffected", {
-				type: "geojson",
-				data: {
-					type: "FeatureCollection",
-					features: [],
-				},
-			});
+			if (!this.map.getSource("pWaveAffected")) {
+				this.map.addSource("pWaveAffected", {
+					type: "geojson",
+					data: {
+						type: "FeatureCollection",
+						features: [],
+					},
+				});
+			}
 
-			this.map.addSource("pWave", {
-				type: "geojson",
-				data: {
-					type: "FeatureCollection",
-					features: [
-						{
-							type: "Feature",
-							geometry: {
-								type: "Point",
-								coordinates: [],
+			if (!this.map.getSource("pWave")) {
+				this.map.addSource("pWave", {
+					type: "geojson",
+					data: {
+						type: "FeatureCollection",
+						features: [
+							{
+								type: "Feature",
+								geometry: {
+									type: "Point",
+									coordinates: [],
+								},
 							},
-						},
-					],
-				},
-			});
+						],
+					},
+				});
+			}
 
-			this.map.addSource("sWave", {
-				type: "geojson",
-				data: {
-					type: "FeatureCollection",
-					features: [
-						{
-							type: "Feature",
-							geometry: {
-								type: "Point",
-								coordinates: [],
+			if (!this.map.getSource("sWave")) {
+				this.map.addSource("sWave", {
+					type: "geojson",
+					data: {
+						type: "FeatureCollection",
+						features: [
+							{
+								type: "Feature",
+								geometry: {
+									type: "Point",
+									coordinates: [],
+								},
 							},
-						},
-					],
-				},
-			});
+						],
+					},
+				});
+			}
 
-			this.map.addLayer({
-				id: "pWave",
-				source: "pWave",
-				type: "fill",
-				paint: {
-					"fill-outline-color": "#0000ff",
-					"fill-color": "transparent",
-				},
-			});
+			if (!this.map.getLayer("pWave")) {
+				this.map.addLayer({
+					id: "pWave",
+					source: "pWave",
+					type: "fill",
+					paint: {
+						"fill-outline-color": "#0000ff",
+						"fill-color": "transparent",
+					},
+				});
+			}
 
-			this.map.addLayer({
-				id: "sWave",
-				source: "sWave",
-				type: "fill",
-				paint: {
-					"fill-outline-color": "#ff0000",
-					"fill-color": "transparent",
-				},
-			});
+			if (!this.map.getLayer("sWave")) {
+				this.map.addLayer({
+					id: "sWave",
+					source: "sWave",
+					type: "fill",
+					paint: {
+						"fill-outline-color": "#ff0000",
+						"fill-color": "transparent",
+					},
+				});
+			}
 
-			this.map.addLayer({
-				id: "pWaveAffected",
-				source: "pWaveAffected",
-				type: "fill",
-				paint: {
-					"fill-color": "#ff0000",
-					"fill-opacity": 0.2,
-				},
-			});
+			if (!this.map.getLayer("pWaveAffected")) {
+				this.map.addLayer({
+					id: "pWaveAffected",
+					source: "pWaveAffected",
+					type: "fill",
+					paint: {
+						"fill-color": "#ff0000",
+						"fill-opacity": 0.2,
+					},
+				});
+			}
 		});
 	}
 
@@ -150,9 +162,10 @@ class EEWSMap implements IMap {
 
 			let address = "";
 
-			if(data.locality) address += data.locality;
-			if(data.principalSubdivision) address += `, ${data.principalSubdivision}`;
-			
+			if (data.locality) address += data.locality;
+			if (data.principalSubdivision)
+				address += `, ${data.principalSubdivision}`;
+
 			return address;
 		} catch (error) {
 			console.error(error);
@@ -329,10 +342,23 @@ class EEWSMap implements IMap {
 			const el = document.createElement("div");
 			const bgColor = getIntensityColor(eq.mag);
 			const innerEl = `
-			<div class="font-bold text-lg w-[32px] h-[32px] flex justify-center items-center rounded-full ${bgColor} hover:scale-110 transform transition-all duration-300 ease-in-out">
+			<div class="font-bold text-sm w-[24px] h-[24px] flex justify-center items-center rounded-full ${bgColor} hover:scale-110 transform transition-all duration-300 ease-in-out relative" style="z-index: ${Math.round(eq.mag)}">
 				${eq.mag?.toFixed(1)}
 			</div>
 			`;
+
+			const date = new Date(eq.time_stamp);
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			date.setTime(date.getTime() - offset);
+
+			const popupInnerEl = `
+			<div class="text-xs">
+				<div>Magnitude: ${eq.mag?.toFixed(1)}</div>
+				<div>${new Date(eq.time_stamp).toLocaleString()}</div>
+				<div>${eq.location || ""}</div>	
+			</div>
+			`;
+
 			el.innerHTML = innerEl;
 			const marker = new MapLibreGL.Marker({
 				draggable: false,
@@ -340,7 +366,13 @@ class EEWSMap implements IMap {
 				element: el,
 			})
 				.setLngLat([eq.long, eq.lat])
-				.addTo(this.map);
+				.addTo(this.map)
+				.setPopup(
+					new MapLibreGL.Popup({
+						closeButton: false,
+						closeOnClick: false,
+					}).setHTML(popupInnerEl)
+				);
 
 			this.earthquakePredictionMarker.set(eq.time_stamp.toString(), marker);
 		});

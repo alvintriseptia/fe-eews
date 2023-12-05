@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { Layout } from "plotly.js";
 import React, { Component } from "react";
+import { config } from '../middleware';
 
 const Plot = dynamic(
 	() => import("react-plotly.js").then((mod) => mod.default),
@@ -93,10 +94,11 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 			subplots: ["xy", "xy2", "xy3"],
 			roworder: "top to bottom",
 			xgap: 0.05,
-			ygap: 10,
+			ygap: 20,
 			xside: "bottom plot",
 			yside: "left plot",
 		},
+		showlegend: false,
 	} as Partial<Layout>;
 
 	constructor(props: PredictionRecapContentProps) {
@@ -155,7 +157,7 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 					</div>
 				</div>
 
-				<div className="w-full relative -top-10 right-0">
+				<div className="w-full relative -top-24 right-0">
 					<Plot
 						data={[
 							this.state.z_channel,
@@ -165,6 +167,9 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 						]}
 						layout={this.layout}
 						style={{ width: "100%", height: "100%" }}
+						config={{
+							displayModeBar: false,
+						}}
 					/>
 				</div>
 			</section>

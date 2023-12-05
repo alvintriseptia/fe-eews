@@ -5,10 +5,10 @@ import BMKGLogo from "@/assets/images/bmkg-logo.png";
 import Image from "next/image";
 import {
 	ArrowLeftOnRectangleIcon,
-	ArrowRightOnRectangleIcon,
 	BookOpenIcon,
 	HomeIcon,
 } from "@heroicons/react/24/outline";
+import { UserController } from "@/controllers/_index";
 
 interface NavlinkProps {
 	icon:
@@ -119,13 +119,7 @@ class Navbar extends React.Component<NavbarProps> {
 			{ total: 0, title: "Maksimum \nMagnitude" },
 			{ total: 0, title: "Minimum \nMagnitude" },
 		] as HeaderInfoProps[],
-		btnAuth: {
-			icon: <ArrowLeftOnRectangleIcon className="w-6 h-6" />,
-			label: "Keluar",
-			link: "/logout",
-			backgroundColor: "bg-eews-mmi-X",
-			fontStyle: "text-white font-semibold",
-		} as NavlinkProps,
+		userController: {} as UserController,
 	};
 
 	constructor(props: NavbarProps) {
@@ -141,8 +135,10 @@ class Navbar extends React.Component<NavbarProps> {
 			...props,
 			navLinks: this.state.navLinks,
 			headerInfos: this.state.headerInfos,
-			btnAuth: this.state.btnAuth,
+			userController: new UserController(),
 		};
+
+		this.logout.bind(this);
 	}
 
 	componentDidMount(): void {
@@ -159,7 +155,7 @@ class Navbar extends React.Component<NavbarProps> {
 			currentHeaderInfos[2].total = this.props.minimumMagnitude;
 		}
 
-		this.setState({ headerInfos: currentHeaderInfos});
+		this.setState({ headerInfos: currentHeaderInfos });
 	}
 
 	componentDidUpdate(prevProps: Readonly<NavbarProps>): void {
@@ -216,13 +212,17 @@ class Navbar extends React.Component<NavbarProps> {
 		}
 	}
 
+	logout = () => {
+		this.state.userController.logout();
+	};
+
 	render() {
 		return (
 			<nav className="flex justify-between gap-x-4 py-3 px-10 pl-20 bg-eews-black-russian">
 				<section className="flex gap-x-10">
 					<div className="flex gap-x-3">
 						<Image src={BMKGLogo} alt="BMKG Logo" width={40} height={40} />
-						<h1 className="text-4xl font-semibold text-white">InaTEWS</h1>
+						<h1 className="text-4xl font-semibold text-white">InaEEWS</h1>
 					</div>
 
 					<div className="flex bg-eews-mirage rounded-lg">
@@ -238,7 +238,13 @@ class Navbar extends React.Component<NavbarProps> {
 							headerInfo.total > 0 && <HeaderInfo {...headerInfo} key={index} />
 					)}
 
-					<Navlink {...this.state.btnAuth} />
+					<button
+						className={`px-3 py-2 flex gap-x-2  text-base rounded-lg items-center bg-eews-mmi-X text-white font-semibold hover:bg-eews-boulder transition-all`}
+						onClick={this.logout}
+					>
+						<ArrowLeftOnRectangleIcon className="w-6 h-6" />
+						<span>Keluar</span>
+					</button>
 				</section>
 			</nav>
 		);

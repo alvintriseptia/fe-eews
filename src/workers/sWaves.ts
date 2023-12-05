@@ -8,6 +8,7 @@ const updateFrequency = 500;
 const onmessage = (event: MessageEvent) => {
 	const { command, earthquakeEpicenter } = event.data;
 	if (command === "stop") {
+		sWaveRadius = 0;
 		clearInterval(sWaveInterval);
 		return;
 	}

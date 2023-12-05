@@ -8,8 +8,6 @@ import {
 	PredictionCard,
 	PredictionRecapContent,
 } from "@/components/_index";
-// import { PredictionCardProps } from "@/components/PredictionCard";
-// import sampleWaves from "@/assets/data/sampleWaves.json";
 import {
 	PredictionRecapContentProps,
 	WaveChannel,
@@ -25,7 +23,6 @@ class PredictionView extends React.Component<Props> {
 	state = {
 		controller: {} as PredictionController,
 		earthquakePrediction: {} as IEarthquakePrediction,
-		map: {} as IMap,
 		seismogram: {} as ISeismogram,
 		navbar: {
 			isLoggedIn: true,
@@ -38,28 +35,79 @@ class PredictionView extends React.Component<Props> {
 		},
 		recapPrediction: {} as PredictionRecapContentProps,
 		historyPedictions: [] as IEarthquakePrediction[],
+		rerender: 0,
 	};
 	constructor(props: Props) {
 		super(props);
 		this.state.controller = props.controller;
 		this.state.historyPedictions = props.historyPedictions;
+
+		this.handleFilter.bind(this);
+		this.detailEarthquakePrediction.bind(this);
 	}
 
 	componentDidMount(): void {
 		if (!this.state.controller.addEarthquakePredictionLocations) return;
 
-		console.log(this.state.historyPedictions, "historyPedictions");
-		console.log(this.state.controller, "controller");
-		this.state.controller.addEarthquakePredictionLocations(
-			this.state.historyPedictions
-		);
+		this.state.controller
+			.addEarthquakePredictionLocations(this.state.historyPedictions)
+			.then((result) => {
+				if (result) {
+					this.setState({ historyPedictions: [...result] });
+				}
+			});
+	}
+
+	componentDidUpdate(
+		prevProps: Readonly<Props>,
+		prevState: Readonly<{}>,
+		snapshot?: any
+	): void {
+		if (prevState.rerender !== this.state.rerender) {
+			this.state.controller.addEarthquakePredictionLocations(
+				this.state.historyPedictions
+			);
+		}
+	}
+
+	async handleFilter(filter: string) {
+		let start_date = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+		let end_date = new Date().getTime();
+		if (filter === "current_week") {
+			start_date = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+			end_date = new Date().getTime();
+		} else if (filter === "current_month") {
+			start_date = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
+			end_date = new Date().getTime();
+		} else if (filter === "last_month") {
+			start_date = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
+			end_date = new Date().getTime();
+		} else if (filter === "this_year") {
+			start_date = new Date().getTime() - 365 * 24 * 60 * 60 * 1000;
+			end_date = new Date().getTime();
+		}
+
+		const newHistoryPedictions =
+			await this.state.controller.filterHistoryEarthquakePrediction(
+				start_date,
+				end_date
+			);
+
+		this.setState({
+			historyPedictions: [...newHistoryPedictions],
+			rerender: this.state.rerender + 1,
+		});
 	}
 
 	async detailEarthquakePrediction(earthquake: IEarthquakePrediction) {
 		const seismogram =
-			await this.state.controller.getSeismogramEarthquakePrediction(
+			await this.state.controller.getDetailEarthquakePrediction(
 				earthquake.station,
-				earthquake.time_stamp
+				earthquake.time_stamp,
+				{
+					latitude: earthquake.lat,
+					longitude: earthquake.long,
+				}
 			);
 
 		const z_channel = {
@@ -98,7 +146,6 @@ class PredictionView extends React.Component<Props> {
 		const pwaves = [];
 
 		seismogram.forEach((wave: ISeismogram) => {
-
 			z_channel.x.push(wave.creation_date);
 			z_channel.y.push(wave.z_channel);
 			n_channel.x.push(wave.creation_date);
@@ -107,7 +154,6 @@ class PredictionView extends React.Component<Props> {
 			e_channel.y.push(wave.e_channel);
 		});
 
-		
 		let date = new Date(earthquake.time_stamp);
 		const offset = new Date().getTimezoneOffset() * 60 * 1000;
 		date.setTime(date.getTime() - offset);
@@ -154,45 +200,59 @@ class PredictionView extends React.Component<Props> {
 	}
 
 	download() {}
+
 	render() {
+		console.log(this.state.historyPedictions, "history pediction view");
 		return (
 			<main className="h-screen flex flex-col overflow-hidden">
 				<Navbar {...this.state.navbar} />
-				<Filterbar />
+				<Filterbar onFilter={(filter) => this.handleFilter(filter)} />
 
 				<section className="h-full grid grid-cols-12">
 					<div className="h-full overflow-y-auto overflow-x-hidden col-span-5">
 						<div className="flex flex-col p-4">
-							<div className="flex justify-between">
-								{/* <PredictionSummary {...predictionSummaryEntity} /> */}
+							{this.state.historyPedictions && (
+								<div className="text-white mb-5">
+									<h6 className="text-xs mb-1">JUMLAH PREDIKSI</h6>
+									<h4 className="text-3xl font-semibold">
+										{this.state.historyPedictions.length}
+									</h4>
+								</div>
+							)}
 
-								{/* <MagnitudeSummary /> */}
-							</div>
-
-							{this.state.historyPedictions &&
-								this.state.historyPedictions.map((prediction, index) => (
-									<RenderIfVisible key={index}>
-										<PredictionCard
-											location={prediction.location || ""}
-											magnitude={prediction.mag || 0}
-											latitude={prediction.lat || 0}
-											longitude={prediction.long || 0}
-											time={prediction.time_stamp || 0}
-											depth={prediction.depth || 0}
-											key={index}
-											onClick={() =>
-												this.detailEarthquakePrediction(prediction)
-											}
-										/>
-									</RenderIfVisible>
-								))}
+							{!this.state.historyPedictions ||
+							this.state.historyPedictions.length === 0 ? (
+								<div className="flex justify-center items-center h-full">
+									<h5 className="text-sm text-gray-500">Tidak ada data</h5>
+								</div>
+							) : (
+								this.state.historyPedictions &&
+								this.state.historyPedictions.map((prediction, index) => {
+									return (
+										<RenderIfVisible key={index}>
+											<PredictionCard
+												location={prediction.location || ""}
+												magnitude={prediction.mag || 0}
+												latitude={prediction.lat || 0}
+												longitude={prediction.long || 0}
+												time={prediction.time_stamp || 0}
+												depth={prediction.depth || 0}
+												key={index}
+												onClick={() =>
+													this.detailEarthquakePrediction(prediction)
+												}
+											/>
+										</RenderIfVisible>
+									);
+								})
+							)}
 						</div>
 					</div>
 
 					<div className="col-span-7">
 						<div
 							id="eews-history-map"
-							className="w-full h-[48%] relative -z-10"
+							className={`w-full h-[48%]`}
 						></div>
 						<div className="w-full">
 							{this.state.recapPrediction &&

@@ -1,13 +1,14 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { StyleSpecification } from "maplibre-gl";
-import mapStyle from "@/assets/data/dataviz_dark.json";
+import mapStyle from "@/assets/data/inaeews_dark.json";
 import {
 	MainController,
 	SimulationController,
 	StationController,
 } from "@/controllers/_index";
 import {
+	IEarthquakePrediction,
 	IExternalSource,
 	IMap,
 	INotification,
@@ -22,10 +23,11 @@ import {
 	Seismogram,
 	Sidebar,
 	Time,
+	EarthquakeRealtimeCard,
 } from "@/components/_index";
 import { NavbarProps } from "@/components/Navbar";
 import { observe } from "mobx";
-import { EarthquakeRealtimeProps } from "@/components/Sidebar";
+import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
 
@@ -38,7 +40,7 @@ interface Props {
 	sidebarProps: {
 		latestFeltEarthquake: IExternalSource;
 		latestEarthquake: IExternalSource;
-		earthquakePrediction: EarthquakeRealtimeProps;
+		latestPrediction: IEarthquakePrediction;
 	};
 }
 
@@ -64,8 +66,9 @@ class MainView extends React.Component<Props> {
 		sidebarProps: {
 			latestFeltEarthquake: {} as IExternalSource,
 			latestEarthquake: {} as IExternalSource,
-			earthquakePrediction: {} as EarthquakeRealtimeProps,
+			latestPrediction: {} as IEarthquakePrediction,
 		},
+		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		countdown: 0,
 		stations: STATIONS_DATA as IStation[],
 	};
@@ -106,11 +109,12 @@ class MainView extends React.Component<Props> {
 		observe(this.state.controller, "earthquakePrediction", (change) => {
 			if (change.newValue) {
 				this.setState({
+					earthquakeRealtimeInformation: {
+						earthquake: change.newValue,
+					},
 					sidebarProps: {
 						...this.state.sidebarProps,
-						earthquakePrediction: {
-							earthquake: change.newValue,
-						},
+						latestPrediction: change.newValue,
 					},
 				});
 			}
@@ -143,17 +147,26 @@ class MainView extends React.Component<Props> {
 						<div className="relative h-full">
 							<div className="w-full h-full" id="eews-map"></div>
 
+							<section className="absolute bottom-3 left-2 z-20">
+								{this.state.earthquakeRealtimeInformation &&
+									this.state.earthquakeRealtimeInformation.earthquake?.time_stamp && (
+										<EarthquakeRealtimeCard
+											{...this.state.earthquakeRealtimeInformation}
+										/>
+									)}
+							</section>
+
 							<section className="absolute bottom-4 left-0 right-4 z-20 text-right">
 								<Time />
 							</section>
 
-							<section className="absolute bottom-3 left-2 z-20">
+							<section className="absolute bottom-20 right-4 z-20 text-right">
 								<MMIScale />
 							</section>
 						</div>
 
 						<EarthquakePredictionContext.Provider
-							value={this.state.sidebarProps.earthquakePrediction?.earthquake}
+							value={this.state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<Seismogram
 								seismogramStations={this.state.stations.map((s) => s.code)}

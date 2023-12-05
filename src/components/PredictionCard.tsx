@@ -18,7 +18,7 @@ class PredictionCard extends React.Component<PredictionCardProps> {
 		const offset = new Date().getTimezoneOffset() * 60 * 1000;
 		date.setTime(date.getTime() - offset);
 		const time = date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
-
+		console.log(this.props.location, "component")
 		return (
 			<div className="flex w-full border-b border-b-eews-mmi-II" onClick={this.props.onClick}>
 				<div className={`${intensityColor} w-16 flex items-center justify-center text-2xl font-semibold`}>{this.props.magnitude?.toFixed(2) || ""}</div>

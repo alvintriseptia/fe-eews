@@ -2,8 +2,8 @@ export interface IExternalSource {
 	id: string | number;
 	title: string;
 	location: string;
-	date: string;
-	time: string;
+	date: string | number;
+	time: string | number;
 	station: string;
 	magnitude: string;
 	depth: string;

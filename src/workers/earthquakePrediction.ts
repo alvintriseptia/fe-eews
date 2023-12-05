@@ -1,7 +1,7 @@
 import { IEarthquakePrediction } from "@/entities/_index";
 import { SeismogramPlotType } from "@/types/_index";
-import { io } from "socket.io-client";
 import STATIONS_DATA from "@/assets/data/stations.json";
+import { socket } from "./_index";
 
 export const pWavesData = new Map<string, SeismogramPlotType[]>(
 	STATIONS_DATA.map((s) => [s.code, [] as SeismogramPlotType[]])
@@ -41,9 +41,6 @@ const onmessage = (event: MessageEvent) => {
 		}, 60000);
 	} else {
 		console.log("earthquake prediction worker");
-		const socket = io("http://localhost:3333", {
-			transports: ["websocket"],
-		});
 
 		socket.on("prediction-data-all", (message: any) => {
 			postMessage(message);

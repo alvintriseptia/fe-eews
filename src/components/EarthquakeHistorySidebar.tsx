@@ -11,16 +11,16 @@ class HistoryCard extends React.Component<IExternalSource> {
 	render() {
 		const backgroundColor = getIntensityColor(Number(this.props.magnitude));
 		const time = new Date(this.props.time);
-		const timezone = -(time.getTimezoneOffset() / 60);
-		time.setHours(time.getHours() + timezone);
+		const offset = new Date().getTimezoneOffset() * 60 * 1000;
+		time.setTime(time.getTime() - offset);
 		let timeString =
 			time.toLocaleDateString("id-ID") + " " + time.toLocaleTimeString();
 		// Add timezone WIB, WITA, or WIT
-		if (timezone === 7) {
+		if (offset === 7) {
 			timeString += " WIB";
-		} else if (timezone === 8) {
+		} else if (offset === 8) {
 			timeString += " WITA";
-		} else if (timezone === 9) {
+		} else if (offset === 9) {
 			timeString += " WIT";
 		}
 

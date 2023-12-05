@@ -1,22 +1,24 @@
 import React from "react";
 import MainView from "@/views/MainView";
-import { MainController, StationController } from "@/controllers/_index";
+import { MainController, PredictionController, StationController } from "@/controllers/_index";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
-import { IExternalSource } from "@/entities/IExternalSource";
 import { NavbarProps } from "@/components/Navbar";
-import { EarthquakeRealtimeProps } from "@/components/Sidebar";
 import SeismogramContext from "@/stores/SeismogramContext";
+import { IEarthquakePrediction, IExternalSource } from "@/entities/_index";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
 		const controller = new MainController();
+		const predictionController = new PredictionController();
 		const latestEarthquake =
 			(await controller.getLatestEarthquake()) as IExternalSource;
 		const latestFeltEarthquake =
 			(await controller.getLatestFeltEarthquake()) as IExternalSource;
 		const weeklyEarthquake =
 			(await controller.getEarthquakeWeekly()) as IExternalSource[];
+		const latestPrediction =
+			(await predictionController.getLatestEarthquakePrediction()) as IEarthquakePrediction;
 
 		let newNavbar = {
 			totalEarthquakes: 0,
@@ -48,6 +50,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			sidebarProps: {
 				latestFeltEarthquake,
 				latestEarthquake,
+				latestPrediction
 			},
 			weeklyEarthquake,
 		};
@@ -77,6 +80,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 				sidebarProps: {
 					latestFeltEarthquake: {} as IExternalSource,
 					latestEarthquake: {} as IExternalSource,
+					latestPrediction: {} as IEarthquakePrediction,
 				},
 				weeklyEarthquake: [] as IExternalSource[],
 			},
@@ -90,7 +94,7 @@ interface Props {
 	sidebarProps: {
 		latestFeltEarthquake: IExternalSource;
 		latestEarthquake: IExternalSource;
-		earthquakePrediction: EarthquakeRealtimeProps;
+		latestPrediction: IEarthquakePrediction;
 	};
 }
 
@@ -127,7 +131,7 @@ export default class Main extends React.Component<Props> {
 		return (
 			<>
 				<Head>
-					<title>InaTEWS</title>
+					<title>InaEEWS</title>
 				</Head>
 				<SeismogramContext.Provider value={this.state.seismogramWorker}>
 					<MainView

@@ -52,8 +52,10 @@ export default class ExternalSource implements IExternalSource {
 			);
 			const data = (await response.json()) as ResponseLatestEarthquake;
 			const time = new Date(data.sent.replace("WIB", "+07:00"));
-			const zoneOffset = time.getTimezoneOffset() / 60;
-			time.setHours(time.getHours() - zoneOffset);
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			const timezone = -(new Date().getTimezoneOffset() / 60);
+			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : "WIT";
+			time.setTime(time.getTime() - offset);
 			const earthquake = {
 				title: "Gempa Terakhir\nDirasakan",
 				location: data.info.area,
@@ -62,11 +64,7 @@ export default class ExternalSource implements IExternalSource {
 					month: "2-digit",
 					day: "2-digit",
 				}),
-				time: time.toLocaleTimeString("id-ID", {
-					hour: "2-digit",
-					minute: "2-digit",
-					second: "2-digit",
-				}),
+				time: time.toLocaleTimeString() + " " + timezoneText,
 				magnitude: parseFloat(data.info.magnitude).toFixed(2),
 				depth: parseFloat(data.info.depth).toFixed(2),
 				latitude: parseFloat(data.info.latitude).toFixed(2),
@@ -92,8 +90,10 @@ export default class ExternalSource implements IExternalSource {
 
 			const [long, lat, elevation] = earthquake.geometry.coordinates;
 			const time = new Date(earthquake.properties.time);
-			const zoneOffset = time.getTimezoneOffset() / 60;
-			time.setHours(time.getHours() - zoneOffset);
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			const timezone = -(new Date().getTimezoneOffset() / 60);
+			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : "WIT";
+			time.setTime(time.getTime() - offset);
 			return {
 				title: "Gempa Terakhir\nRealtime M > 2",
 				location: earthquake.properties.place,
@@ -102,11 +102,7 @@ export default class ExternalSource implements IExternalSource {
 					month: "2-digit",
 					day: "2-digit",
 				}),
-				time: time.toLocaleTimeString("id-ID", {
-					hour: "2-digit",
-					minute: "2-digit",
-					second: "2-digit",
-				}),
+				time: time.toLocaleTimeString() + " " + timezoneText,
 				magnitude: parseFloat(earthquake.properties.mag).toFixed(2),
 				depth: parseFloat(earthquake.properties.depth).toFixed(2),
 				latitude: parseFloat(lat).toFixed(2),

@@ -159,7 +159,7 @@ export default class MainController {
 				mag: data.mag,
 				prediction: "warning",
 				countdown: 10,
-				station: "BBJI",
+				station: data.station,
 			};
 
 			if (earthquakePrediction.prediction === "warning") {
@@ -218,7 +218,7 @@ export default class MainController {
 							title: "Terjadi Gempa Bumi",
 							prediction: "earthquake",
 							description: `Perhatian! telah terjadi gempa bumi di wilayah ${address}, segera lakukan tindakan mitigasi!`,
-							time_stamp: Date.now(),
+							time_stamp: date.getTime() + 10000,
 							depth: this.earthquakePrediction.depth,
 							lat: this.earthquakePrediction.lat,
 							long: this.earthquakePrediction.long,
@@ -378,7 +378,9 @@ export default class MainController {
 			this.pWavesWorker.postMessage({
 				command: "stop",
 			});
-		} else if (this.sWavesWorker) {
+		} 
+		
+		if (this.sWavesWorker) {
 			this.sWavesWorker.postMessage({
 				command: "stop",
 			});

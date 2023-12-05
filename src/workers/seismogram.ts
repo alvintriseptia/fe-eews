@@ -1,7 +1,7 @@
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
-import { io } from "socket.io-client";
 import { pWavesData } from "./earthquakePrediction";
+import { socket } from "./_index";
 const stations = STATIONS_DATA;
 const seismogramSockets = {
 	...stations.map((s) => [s.code, null]),
@@ -88,10 +88,6 @@ const onmessage = (event: MessageEvent) => {
 		// 		data: seismogramData[station],
 		// 	});
 		// }
-
-		const socket = io("http://localhost:3333", {
-			transports: ["websocket"],
-		});
 		seismogramSockets[station] = socket;
 		seismogramSockets[station].on(`waves-data-${station}`, (data: any) => {
 			// loop object data

@@ -48,7 +48,7 @@ export default class Prediksi extends React.Component<Props> {
 		return (
 			<>
 				<Head>
-					<title>InaTEWS | Prediksi</title>
+					<title>InaEEWS | Prediksi</title>
 				</Head>
 
 				{this.state.predictions.length === 0 && (
