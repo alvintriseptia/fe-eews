@@ -1,7 +1,7 @@
 ## About
 InaEEWS adalah sebuah aplikasi web untuk menampilkan peringatan dini gempa bumi di Indonesia. Aplikasi ini dibuat untuk memenuhi tugas akhir. Aplikasi InaEEWS dikembangkan menggunakan framework Next.js dengan bereksperimen menggunakan arsitektur MVC. 
 
-~Note: Penggunaan MVC masih belum menerapkan OOP dengan baik, source code ini terbuka untuk feedback dan saran untuk pengembangan InaEEWS yang lebih baik.~ 
+**Note: Penggunaan MVC masih belum menerapkan OOP dengan baik, source code ini terbuka untuk feedback dan saran untuk pengembangan InaEEWS yang lebih baik.**
 
 ## Getting Started
 
