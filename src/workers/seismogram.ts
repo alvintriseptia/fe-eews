@@ -98,12 +98,15 @@ const onmessage = (event: MessageEvent) => {
 	}
 
 	async function streamStationSeismogram(station: string) {
+		console.log("streaming seismogram data from station", station);
 		seismogramSockets[station] = socket;
 		seismogramSockets[station].on(`waves-data-${station}`, async (data: any) => {
 			// loop object data
 			for (const key in data) {
 				const value = data[key];
-				const time = parseInt(key.split("/")[1]);
+				const time = new Date(parseInt(key.split("/")[1]) * 1000);
+				const offset = new Date().getTimezoneOffset() * 60 * 1000;
+				time.setTime(time.getTime() - offset);
 
 				// get data from indexedDB
 				let tempData = {
@@ -128,11 +131,11 @@ const onmessage = (event: MessageEvent) => {
 					tempData = tempDataFromIndexedDB;
 				}
 
-				tempData.channelZ.x.push(time);
+				tempData.channelZ.x.push(time.getTime());
 				tempData.channelZ.y.push(value.Z);
-				tempData.channelN.x.push(time);
+				tempData.channelN.x.push(time.getTime());
 				tempData.channelN.y.push(value.N);
-				tempData.channelE.x.push(time);
+				tempData.channelE.x.push(time.getTime());
 				tempData.channelE.y.push(value.E);
 
 				// save data to indexedDB
