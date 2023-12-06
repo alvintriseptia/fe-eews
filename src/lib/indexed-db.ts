@@ -1,4 +1,7 @@
-import { SeismogramDataType, SeismogramTempDataType } from "@/workers/seismogram";
+import {
+	SeismogramDataType,
+	SeismogramTempDataType,
+} from "@/workers/seismogram";
 
 interface SeismogramDBEntry {
 	station: string;
@@ -9,7 +12,9 @@ let db: IDBDatabase | null = null;
 
 function openIndexedDB(): Promise<IDBDatabase> {
 	return new Promise((resolve, reject) => {
+		indexedDB.deleteDatabase("SeismogramDB");
 		const request = indexedDB.open("SeismogramDB", 1);
+
 
 		request.onerror = (event: Event) => {
 			console.error("IndexedDB error:", (event.target as IDBRequest).error);
@@ -45,7 +50,9 @@ function writeToIndexedDB(station: string, data: SeismogramTempDataType): void {
 	};
 }
 
-function readFromIndexedDB(station: string): Promise<SeismogramTempDataType | null> {
+function readFromIndexedDB(
+	station: string
+): Promise<SeismogramTempDataType | null> {
 	return new Promise((resolve, reject) => {
 		const transaction = db.transaction(["seismogramTempData"]);
 		const store = transaction.objectStore("seismogramTempData");
@@ -72,4 +79,4 @@ function readFromIndexedDB(station: string): Promise<SeismogramTempDataType | nu
 	});
 }
 
-export {db, openIndexedDB, writeToIndexedDB, readFromIndexedDB}
+export { db, openIndexedDB, writeToIndexedDB, readFromIndexedDB };
