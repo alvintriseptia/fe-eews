@@ -27,7 +27,13 @@ class EEWSMap implements IMap {
 			style: this.mapStyle,
 			center: [this.initialViewState.longitude, this.initialViewState.latitude],
 			zoom: this.zoom,
+			attributionControl: true,
 		});
+
+		// add fullscreen control
+		this.map.addControl(new MapLibreGL.FullscreenControl(), "top-left");
+		// add navigation control
+		this.map.addControl(new MapLibreGL.NavigationControl(), "top-left");
 
 		this.map.on("load", () => {
 			if (!this.map.getSource("pWaveAffected")) {
@@ -342,7 +348,9 @@ class EEWSMap implements IMap {
 			const el = document.createElement("div");
 			const bgColor = getIntensityColor(eq.mag);
 			const innerEl = `
-			<div class="font-bold text-sm w-[24px] h-[24px] flex justify-center items-center rounded-full ${bgColor} hover:scale-110 transform transition-all duration-300 ease-in-out relative" style="z-index: ${Math.round(eq.mag)}">
+			<div class="font-bold text-sm w-[24px] h-[24px] flex justify-center items-center rounded-full ${bgColor} hover:scale-110 transform transition-all duration-300 ease-in-out relative" style="z-index: ${Math.round(
+				eq.mag
+			)}">
 				${eq.mag?.toFixed(1)}
 			</div>
 			`;

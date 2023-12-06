@@ -52,14 +52,15 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 		let newTime = "";
 		if (date !== undefined) {
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			const timezone = -(date.getTimezoneOffset() / 60);
 			date.setTime(date.getTime() - offset);
 			newTime =
 				date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
-			if (offset === 7) {
+			if (timezone === 7) {
 				newTime += " WIB";
-			} else if (offset === 8) {
+			} else if (timezone === 8) {
 				newTime += " WITA";
-			} else if (offset === 9) {
+			} else if (timezone === 9) {
 				newTime += " WIT";
 			}
 		}
