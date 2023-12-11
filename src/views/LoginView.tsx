@@ -1,7 +1,9 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { UserController } from "@/controllers/_index";
-import { observe } from "mobx";
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import BMKGLogo from "@/assets/images/bmkg-logo.png";
+import Image from "next/image";
 
 interface Props {
 	controller: UserController;
@@ -39,42 +41,45 @@ class LoginView extends React.Component<Props> {
 	render() {
 		return (
 			<section className="flex justify-center items-center h-screen">
-				<div className="bg-white p-8 rounded shadow">
+				<div className="bg-[#222531] px-6 py-8 rounded-3xl shadow w-[412px]">
+					<div className="flex justify-center mb-8 gap-x-4">
+						<Image src={BMKGLogo} alt="BMKG Logo" width={40} height={40} />
+						<h1 className="text-4xl text-white font-semibold">InaEEWS</h1>
+					</div>
 					<div className="mb-4">
 						<label
 							htmlFor="email"
-							className="block text-gray-700 font-bold mb-2"
+							className="block text-white font-bold mb-2"
 						>
 							Email
 						</label>
 						<input
 							type="email"
 							id="email"
-							className="w-full border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-500"
-							placeholder="Enter your email"
+							className="w-full border border-gray-300 rounded-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:border-blue-500"
 							onChange={(e) => this.onChangeEmail(e.target.value)}
 						/>
 					</div>
 					<div className="mb-4">
 						<label
 							htmlFor="password"
-							className="block text-gray-700 font-bold mb-2"
+							className="block text-white font-bold mb-2"
 						>
 							Password
 						</label>
 						<input
 							type="password"
 							id="password"
-							className="w-full border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:border-blue-500"
-							placeholder="Enter your password"
+							className="w-full border border-gray-300 rounded-full py-2 px-3 text-gray-900 leading-tight focus:outline-none focus:border-blue-500"
 							onChange={(e) => this.onChangePassword(e.target.value)}
 						/>
 					</div>
 					<button
-						className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+						className="bg-[#184130] hover:bg-eews-mmi-V transition-all text-white font-bold py-2 px-4 w-full rounded-full focus:outline-none focus:shadow-outline"
 						onClick={this.login}
 					>
-						Sign In
+						<ArrowRightOnRectangleIcon className="w-5 h-5 inline-block mr-2" />
+						Masuk
 					</button>
 				</div>
 			</section>
