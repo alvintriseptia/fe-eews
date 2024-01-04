@@ -172,7 +172,7 @@ class Sidebar extends React.Component<SidebarProps> {
 									<EarthquakeInfo 
 										id={'latest-prediction'}
 										date={this.state.latestPrediction.time_stamp}
-										title={'Prediksi Gempa Bumi Terakhir'}
+										title={'Deteksi Terakhir'}
 										depth={this.state.latestPrediction.depth.toFixed(2)}
 										latitude={this.state.latestPrediction.lat.toFixed(2)}
 										longitude={this.state.latestPrediction.long.toFixed(2)}

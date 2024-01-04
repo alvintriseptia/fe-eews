@@ -50,10 +50,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 
 	async fetchHistoryEarthquakePrediction(start_date: number, end_date: number) {
 		try {
-			const test_url =
-				"http://localhost:3333/history?start_date=1701354000&end_date=1701355500";
-
-			// to unix
+			// ubah milliseconds menjadi format unix
 			start_date = Math.floor(start_date / 1000);
 			end_date = Math.floor(end_date / 1000);
 			const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}`;
@@ -75,16 +72,13 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 		end_date: number
 	) {
 		try {
-			const test_url =
-				"http://localhost:3333/waves?station=BBJI&start_date=1701370806&end_date=1701458526";
-
 			// to unix
 			start_date = Math.floor(start_date / 1000);
 			end_date = Math.floor(end_date / 1000);
+			console.log(start_date, end_date)
 			const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
-			// test url karena data seismogram tidak ada
-			let response = await fetch(url);
+			const response = await fetch(url);
 
 			let data = await response.json();
 

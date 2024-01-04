@@ -38,11 +38,17 @@ const onmessage = (event: MessageEvent) => {
 			addPWave("BBJI", Date.now());
 
 			postMessage(earthquakePrediction);
-		}, 60000);
+		}, 30000);
 	} else {
 		console.log("earthquake prediction worker");
 
 		socket.on("prediction-data-all", (message: any) => {
+			// check timestamp, jika lebih dari 5 menit, maka diskip
+			const date = new Date(message.time_stamp);
+			const now = new Date();
+			const diff = now.getTime() - date.getTime();
+			if (diff > 300000) return;
+
 			postMessage(message);
 
 			addPWave(message.station, message.time_stamp);
@@ -70,7 +76,6 @@ const onmessage = (event: MessageEvent) => {
 		const data = pWavesData.get(station);
 
 		data.push(pWaveTemp);
-
 	}
 };
 

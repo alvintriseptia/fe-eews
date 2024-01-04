@@ -3,13 +3,16 @@ import {
 	SeismogramTempDataType,
 } from "@/workers/seismogram";
 
+// Struktur data yang disimpan di IndexedDB
 interface SeismogramDBEntry {
 	station: string;
 	data: SeismogramTempDataType;
 }
 
+// Variabel database
 let db: IDBDatabase | null = null;
 
+// Fungsi untuk membuka database
 function openIndexedDB(): Promise<IDBDatabase> {
 	return new Promise((resolve, reject) => {
 		indexedDB.deleteDatabase("SeismogramDB");
@@ -33,6 +36,7 @@ function openIndexedDB(): Promise<IDBDatabase> {
 	});
 }
 
+// Fungsi untuk menulis data ke IndexedDB
 function writeToIndexedDB(station: string, data: SeismogramTempDataType): void {
 	const transaction = db.transaction(["seismogramTempData"], "readwrite");
 	const store = transaction.objectStore("seismogramTempData");
@@ -50,6 +54,7 @@ function writeToIndexedDB(station: string, data: SeismogramTempDataType): void {
 	};
 }
 
+// Fungsi untuk membaca data dari IndexedDB
 function readFromIndexedDB(
 	station: string
 ): Promise<SeismogramTempDataType | null> {

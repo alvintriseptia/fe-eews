@@ -33,27 +33,6 @@ const seismogramData = new Map<string, SeismogramDataType>(
 	])
 );
 
-// const seismogramTempData = new Map<string, SeismogramTempDataType>(
-// 	stations.map((s) => [
-// 		s.code,
-// 		{
-// 			channelZ: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			channelN: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			channelE: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			pWaves: [],
-// 		},
-// 	])
-// );
-
 const SAMPLING_RATE = 20;
 const BUFFER = 20000;
 
@@ -342,14 +321,14 @@ const onmessage = (event: MessageEvent) => {
 				pWavesData.set(station, pWave);
 			}
 
-			// if the current length waves is more than 200.000, then remove the first 100.000
-			if (data.channelZ.x.length > 200000) {
-				data.channelZ.x.splice(0, 100000);
-				data.channelZ.y.splice(0, 100000);
-				data.channelN.x.splice(0, 100000);
-				data.channelN.y.splice(0, 100000);
-				data.channelE.x.splice(0, 100000);
-				data.channelE.y.splice(0, 100000);
+			// if the current length waves is more than 20.000, then remove the first 100.000
+			if (data.channelZ.x.length > 20000) {
+				data.channelZ.x.splice(0, 10000);
+				data.channelZ.y.splice(0, 10000);
+				data.channelN.x.splice(0, 10000);
+				data.channelN.y.splice(0, 10000);
+				data.channelE.x.splice(0, 10000);
+				data.channelE.y.splice(0, 10000);
 			}
 
 			seismogramData.set(station, data);
@@ -358,7 +337,7 @@ const onmessage = (event: MessageEvent) => {
 				station: station,
 				data: data,
 			});
-		}, 5000);
+		}, 1000);
 	}
 };
 addEventListener("message", onmessage);

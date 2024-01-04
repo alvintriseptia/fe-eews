@@ -51,11 +51,9 @@ export default class Seismogram extends Component<SeismogramProps> {
 					<aside className="flex flex-col h-full overflow-y-auto">
 						{this.state.seismogramStations.map((station, index) => {
 							return (
-								// <RenderIfVisible
-								// 	defaultHeight={ESTIMATED_ITEM_HEIGHT}
-								// >
-									<DynamicLineChart station={station} key={index} />
-								// </RenderIfVisible>
+								<RenderIfVisible defaultHeight={ESTIMATED_ITEM_HEIGHT} key={index}>
+									<DynamicLineChart station={station} />
+								</RenderIfVisible>
 							);
 						})}
 					</aside>
