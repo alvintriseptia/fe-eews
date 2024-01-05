@@ -83,9 +83,7 @@ const onmessage = (event: MessageEvent) => {
 			// loop object data
 			for (const key in data) {
 				const value = data[key];
-				const time = new Date(parseInt(key.split("/")[1]) * 1000);
-				const offset = new Date().getTimezoneOffset() * 60 * 1000;
-				time.setTime(time.getTime() - offset);
+				const time = new Date(parseInt(key.split("/")[1]) * 1000)
 
 				// get data from indexedDB
 				let tempData = {

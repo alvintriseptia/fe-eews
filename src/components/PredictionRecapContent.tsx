@@ -111,10 +111,7 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 
 	
 	render() {
-		// console.log(this.state.z_channel, "z_channel")
 		let date = new Date(this.props.time_stamp);
-		const offset = new Date().getTimezoneOffset() * 60 * 1000;
-		date.setTime(date.getTime() - offset);
 		const time = date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
 
 		return (

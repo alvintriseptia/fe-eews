@@ -146,8 +146,6 @@ export default class SimulationController {
 		this.earthquakePredictionWorker.onmessage = async (event: MessageEvent) => {
 			const { data } = event;
 			const date = new Date(data.creation_date);
-			const offset = new Date().getTimezoneOffset() * 60 * 1000;
-			date.setTime(date.getTime() - offset);
 
 			const earthquakePrediction: IEarthquakePrediction = {
 				title: "Terdeteksi Gelombang P",

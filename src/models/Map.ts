@@ -355,10 +355,6 @@ class EEWSMap implements IMap {
 			</div>
 			`;
 
-			const date = new Date(eq.time_stamp);
-			const offset = new Date().getTimezoneOffset() * 60 * 1000;
-			date.setTime(date.getTime() - offset);
-
 			const popupInnerEl = `
 			<div class="text-xs">
 				<div>Magnitude: ${eq.mag?.toFixed(1)}</div>
