@@ -75,7 +75,6 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 			// to unix
 			start_date = Math.floor(start_date / 1000);
 			end_date = Math.floor(end_date / 1000);
-			console.log(start_date, end_date);
 			const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
@@ -89,8 +88,11 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 			for (const obj of Object.entries(data) as any) {
 				const key = obj[0];
 				const dataValue = obj[1];
+				const offset =  - (new Date().getTimezoneOffset() * 60 * 1000);
+				const date = new Date(key * 1000);
+				date.setTime(date.getTime() - offset);
 				const seismogramData = {
-					creation_date: new Date(key * 1000).getTime(),
+					creation_date: date.getTime(),
 					z_channel: dataValue.Z,
 					n_channel: dataValue.N,
 					e_channel: dataValue.E,

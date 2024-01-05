@@ -94,11 +94,11 @@ export default class PredictionController {
 				let result = [] as IEarthquakePrediction[];
 
 				for (const prediction of earthquakePredictions) {
-					const address = await this.map.getAreaName({
-						latitude: prediction.lat,
-						longitude: prediction.long,
-					});
-					prediction.location = address;
+					// const address = await this.map.getAreaName({
+					// 	latitude: prediction.lat,
+					// 	longitude: prediction.long,
+					// });
+					prediction.location = 'address';
 					result.push(prediction);
 				}
 
@@ -129,11 +129,11 @@ export default class PredictionController {
 			let result = [] as IEarthquakePrediction[];
 
 			for (const prediction of predictions) {
-				const address = await this.map.getAreaName({
-					latitude: prediction.lat,
-					longitude: prediction.long,
-				});
-				prediction.location = address;
+				// const address = await this.map.getAreaName({
+				// 	latitude: prediction.lat,
+				// 	longitude: prediction.long,
+				// });
+				prediction.location = 'random';
 				result.push(prediction);
 			}
 			document.querySelector("#loading_overlay").className = "hidden";
@@ -157,15 +157,20 @@ export default class PredictionController {
 		try {
 			document.querySelector("#loading_overlay").className = "block";
 			this.map.setOnViewCenter(coordinate, 10);
-			const start_date = new Date(time_stamp).getTime() - 120;
-			const end_date = new Date(time_stamp).getTime() + 120;
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			const date = new Date(time_stamp);
+			date.setTime(date.getTime() - offset);
+			// 1 minute before
+			const start_date = date.getTime() - 1 * 60 * 1000;
+			// 1 minute after
+			const end_date = date.getTime() + 1 * 60 * 1000;
+			
 			const response =
 				await this.earthquakePrediction.fetchSeismogramEarthquakePrediction(
 					station,
 					start_date,
 					end_date
 				);
-
 			if (!response) {
 				return;
 			}
