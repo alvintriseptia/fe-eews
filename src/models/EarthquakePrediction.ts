@@ -75,7 +75,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 			// to unix
 			start_date = Math.floor(start_date / 1000);
 			end_date = Math.floor(end_date / 1000);
-			console.log(start_date, end_date)
+			console.log(start_date, end_date);
 			const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
@@ -102,6 +102,36 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 			return seismogram;
 		} catch (error) {
 			throw error;
-		} 
+		}
+	}
+
+	async exportHistoryEarthquakePrediction(
+		start_date: number,
+		end_date: number
+	) {
+		try {
+			// ubah milliseconds menjadi format unix
+			start_date = Math.floor(start_date / 1000);
+			end_date = Math.floor(end_date / 1000);
+			const url = `http://localhost:3333/export?start_date=${start_date}&end_date=${end_date}`;
+
+			const response = await fetch(url);
+
+			// status
+			if (!response.ok) {
+				throw new Error("Terjadi kesalahan ketika mengunduh file");
+			}
+			
+			// text/csv
+			const data = await response.blob();
+			const urlBlob = URL.createObjectURL(data);
+			const link = document.createElement("a");
+			link.href = urlBlob;
+			let date = new Date();
+			link.download = `history-eews-${date.getTime()}.csv`;
+			link.click();
+		} catch (error) {
+			throw error;
+		}
 	}
 }

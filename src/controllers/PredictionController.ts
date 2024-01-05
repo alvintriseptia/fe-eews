@@ -65,7 +65,7 @@ export default class PredictionController {
 			const earthquakePrediction = response;
 
 			if (earthquakePrediction) {
-				return earthquakePrediction
+				return earthquakePrediction;
 			} else {
 				return null;
 			}
@@ -147,11 +147,6 @@ export default class PredictionController {
 	}
 
 	/**
-	 * Exports the history of earthquake predictions to a file.
-	 */
-	exportHistoryEarthquakePrediction() {}
-
-	/**
 	 * Retrieves the detailed information of an earthquake prediction.
 	 */
 	async getDetailEarthquakePrediction(
@@ -178,6 +173,26 @@ export default class PredictionController {
 			return response;
 		} catch (error) {
 			return [];
+		} finally {
+			document.querySelector("#loading_overlay").className = "hidden";
+		}
+	}
+
+	/**
+	 * Exports the history of earthquake predictions to a file.
+	 */
+	async exportHistoryEarthquakePrediction(
+		start_date: number,
+		end_date: number
+	) {
+		try {
+			document.querySelector("#loading_overlay").className = "block";
+			await this.earthquakePrediction.exportHistoryEarthquakePrediction(
+				start_date,
+				end_date
+			);
+		} catch (error) {
+			this.displayError(error.message);
 		} finally {
 			document.querySelector("#loading_overlay").className = "hidden";
 		}

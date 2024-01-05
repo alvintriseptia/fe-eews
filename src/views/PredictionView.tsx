@@ -13,6 +13,7 @@ import {
 	WaveChannel,
 } from "@/components/PredictionRecapContent";
 import RenderIfVisible from "react-render-if-visible";
+import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
 interface Props {
 	controller: PredictionController;
@@ -36,6 +37,8 @@ class PredictionView extends React.Component<Props> {
 		recapPrediction: {} as PredictionRecapContentProps,
 		historyPedictions: [] as IEarthquakePrediction[],
 		rerender: 0,
+		currentFilterStartDate: new Date().getTime() - 7 * 24 * 60 * 60 * 1000,
+		currentFilterEndDate: new Date().getTime(),
 	};
 	constructor(props: Props) {
 		super(props);
@@ -96,6 +99,8 @@ class PredictionView extends React.Component<Props> {
 		this.setState({
 			historyPedictions: [...newHistoryPedictions],
 			rerender: this.state.rerender + 1,
+			currentFilterStartDate: start_date,
+			currentFilterEndDate: end_date,
 		});
 	}
 
@@ -155,8 +160,6 @@ class PredictionView extends React.Component<Props> {
 		});
 
 		let date = new Date(earthquake.time_stamp);
-		const offset = new Date().getTimezoneOffset() * 60 * 1000;
-		date.setTime(date.getTime() - offset);
 		const pWaveTemp = {
 			x: [date.getTime(), date.getTime()],
 			y: [0, 5000],
@@ -199,24 +202,38 @@ class PredictionView extends React.Component<Props> {
 		this.setState({ recapPrediction: data });
 	}
 
-	download() {}
+	download() {
+		this.state.controller.exportHistoryEarthquakePrediction(
+			this.state.currentFilterStartDate,
+			this.state.currentFilterEndDate
+		);
+	}
 
 	render() {
-		console.log(this.state.historyPedictions, "history pediction view");
 		return (
 			<main className="h-screen flex flex-col overflow-hidden">
 				<Navbar {...this.state.navbar} />
 				<Filterbar onFilter={(filter) => this.handleFilter(filter)} />
 
 				<section className="h-full grid grid-cols-12">
-					<div className="h-full overflow-y-auto overflow-x-hidden col-span-5">
+					<div className="h-full overflow-y-auto overflow-x-hidden col-span-5 pb-32">
 						<div className="flex flex-col p-4">
 							{this.state.historyPedictions && (
-								<div className="text-white mb-5">
-									<h6 className="text-xs mb-1">JUMLAH PREDIKSI</h6>
-									<h4 className="text-3xl font-semibold">
-										{this.state.historyPedictions.length}
-									</h4>
+								<div className="text-white mb-5 flex justify-between items-center">
+									<div>
+										<h6 className="text-xs mb-1">JUMLAH PREDIKSI</h6>
+										<h4 className="text-3xl font-semibold">
+											{this.state.historyPedictions.length}
+										</h4>
+									</div>
+
+									<button
+										className="flex justify-center items-center bg-eews-dark hover:bg-eews-dark/70 transition-all duration-200 ease-in-out px-3 py-2 rounded-md font-semibold"
+										onClick={() => this.download()}
+									>
+										<ArrowUpTrayIcon className="w-5 h-5 mr-2 font-bold" />
+										Ekspor
+									</button>
 								</div>
 							)}
 
@@ -225,35 +242,31 @@ class PredictionView extends React.Component<Props> {
 								<div className="flex justify-center items-center h-full">
 									<h5 className="text-sm text-gray-500">Tidak ada data</h5>
 								</div>
-							) : (
-								this.state.historyPedictions &&
-								this.state.historyPedictions.map((prediction, index) => {
-									return (
-										<RenderIfVisible key={index}>
-											<PredictionCard
-												location={prediction.location || ""}
-												magnitude={prediction.mag || 0}
-												latitude={prediction.lat || 0}
-												longitude={prediction.long || 0}
-												time={prediction.time_stamp || 0}
-												depth={prediction.depth || 0}
-												key={index}
-												onClick={() =>
-													this.detailEarthquakePrediction(prediction)
-												}
-											/>
-										</RenderIfVisible>
-									);
-								})
-							)}
+							) : (this.state.historyPedictions &&
+										this.state.historyPedictions.map((prediction, index) => {
+											return (
+												<RenderIfVisible key={index}>
+													<PredictionCard
+														location={prediction.location || ""}
+														magnitude={prediction.mag || 0}
+														latitude={prediction.lat || 0}
+														longitude={prediction.long || 0}
+														time={prediction.time_stamp || 0}
+														depth={prediction.depth || 0}
+														key={index}
+														onClick={() =>
+															this.detailEarthquakePrediction(prediction)
+														}
+													/>
+												</RenderIfVisible>
+											);
+										}
+									))}
 						</div>
 					</div>
 
 					<div className="col-span-7">
-						<div
-							id="eews-history-map"
-							className={`w-full h-[48%]`}
-						></div>
+						<div id="eews-history-map" className={`w-full h-[48%]`}></div>
 						<div className="w-full">
 							{this.state.recapPrediction &&
 								this.state.recapPrediction.station && (
