@@ -94,11 +94,11 @@ export default class PredictionController {
 				let result = [] as IEarthquakePrediction[];
 
 				for (const prediction of earthquakePredictions) {
-					// const address = await this.map.getAreaName({
-					// 	latitude: prediction.lat,
-					// 	longitude: prediction.long,
-					// });
-					prediction.location = 'address';
+					const address = await this.map.getAreaName({
+						latitude: prediction.lat,
+						longitude: prediction.long,
+					});
+					prediction.location = address;
 					result.push(prediction);
 				}
 
@@ -129,11 +129,11 @@ export default class PredictionController {
 			let result = [] as IEarthquakePrediction[];
 
 			for (const prediction of predictions) {
-				// const address = await this.map.getAreaName({
-				// 	latitude: prediction.lat,
-				// 	longitude: prediction.long,
-				// });
-				prediction.location = 'random';
+				const address = await this.map.getAreaName({
+					latitude: prediction.lat,
+					longitude: prediction.long,
+				});
+				prediction.location = address;
 				result.push(prediction);
 			}
 			document.querySelector("#loading_overlay").className = "hidden";
