@@ -36,70 +36,70 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 		n_channel: {} as WaveChannel,
 		e_channel: {} as WaveChannel,
 		pwaves: [] as WaveChannel[],
+		revision: 0,
+		layout:{
+			datarevision: 0,
+			xaxis: {
+				type: "date",
+				color: "#fff",
+				range: [this.props.z_channel.x[0], this.props.z_channel.x[this.props.z_channel.x.length - 1]],
+			},
+			yaxis: {
+				type: "linear",
+				color: "#fff",
+				range: [-1500, 3000],
+				fixedrange: true,
+			},
+			yaxis2: {
+				type: "linear",
+				color: "#fff",
+				range: [-1500, 3000],
+				fixedrange: true,
+			},
+			yaxis3: {
+				type: "linear",
+				color: "#fff",
+				range: [-1500, 3000],
+				fixedrange: true,
+			},
+			yaxis4: {
+				type: "linear",
+				color: "#fff",
+				range: [-1500, 3000],
+				fixedrange: true,
+				overlaying: "y",
+			},
+			yaxis5: {
+				type: "linear",
+				color: "#fff",
+				range: [-1500, 3000],
+				fixedrange: true,
+				overlaying: "y2",
+			},
+			yaxis6: {
+				type: "linear",
+				color: "#fff",
+				range: [-1500, 3000],
+				fixedrange: true,
+				overlaying: "y3",
+			},
+			height: 350,
+			width: 1000,
+			paper_bgcolor: "#0D121C",
+			plot_bgcolor: "transparent",
+			grid: {
+				rows: 3,
+				columns: 1,
+				subplots: ["xy", "xy2", "xy3"],
+				roworder: "top to bottom",
+				xgap: 0.05,
+				ygap: 20,
+				xside: "bottom plot",
+				yside: "left plot",
+			},
+			showlegend: false,
+		} as Partial<Layout>
 	};
-	
-	layout = {
-		datarevision: 0,
-		xaxis: {
-			type: "date",
-			color: "#fff",
-			range: [this.props.z_channel.x[0], this.props.z_channel.x[this.props.z_channel.x.length - 1]],
-		},
-		yaxis: {
-			type: "linear",
-			color: "#fff",
-			range: [-1500, 3000],
-			fixedrange: true,
-		},
-		yaxis2: {
-			type: "linear",
-			color: "#fff",
-			range: [-1500, 3000],
-			fixedrange: true,
-		},
-		yaxis3: {
-			type: "linear",
-			color: "#fff",
-			range: [-1500, 3000],
-			fixedrange: true,
-		},
-		yaxis4: {
-			type: "linear",
-			color: "#fff",
-			range: [-1500, 3000],
-			fixedrange: true,
-			overlaying: "y",
-		},
-		yaxis5: {
-			type: "linear",
-			color: "#fff",
-			range: [-1500, 3000],
-			fixedrange: true,
-			overlaying: "y2",
-		},
-		yaxis6: {
-			type: "linear",
-			color: "#fff",
-			range: [-1500, 3000],
-			fixedrange: true,
-			overlaying: "y3",
-		},
-		height: 350,
-		width: 1000,
-		paper_bgcolor: "#0D121C",
-		plot_bgcolor: "transparent",
-		grid: {
-			rows: 3,
-			columns: 1,
-			subplots: ["xy", "xy2", "xy3"],
-			roworder: "top to bottom",
-			xgap: 0.05,
-			ygap: 20,
-			xside: "bottom plot",
-			yside: "left plot",
-		},
-		showlegend: false,
-	} as Partial<Layout>;
 
 	constructor(props: PredictionRecapContentProps) {
 		super(props);
@@ -109,7 +109,25 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 		this.state.pwaves = props.pwaves;
 	}
 
-	
+	componentDidUpdate(prevProps: PredictionRecapContentProps) {
+		if (prevProps !== this.props) {
+			const { layout } = this.state;
+			this.setState({
+				z_channel: this.props.z_channel,
+				n_channel: this.props.n_channel,
+				e_channel: this.props.e_channel,
+				pwaves: this.props.pwaves,
+				revision: this.state.revision + 1,
+			});
+			layout.datarevision = this.state.revision + 1;
+			layout.xaxis = {
+				type: "date",
+				color: "#fff",
+				range: [this.props.z_channel.x[0], this.props.z_channel.x[this.props.z_channel.x.length - 1]],
+			};
+		}
+	}
+
 	render() {
 		let date = new Date(this.props.time_stamp);
 		const time = date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
@@ -162,8 +180,9 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 							this.state.e_channel,
 							...this.state.pwaves,
 						]}
-						layout={this.layout}
+						layout={this.state.layout}
 						style={{ width: "100%", height: "100%" }}
+						revision={this.state.revision}
 						config={{
 							displayModeBar: false,
 						}}
