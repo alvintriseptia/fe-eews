@@ -1,6 +1,6 @@
 import { EarthquakePrediction, Map } from "@/models/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
-import mapStyle from "@/assets/data/inaeews_dark.json";
+import mapStyle from "@/assets/data/dataviz_dark.json";
 import { StyleSpecification } from "maplibre-gl";
 import { IEarthquakePrediction } from "@/entities/_index";
 import toast from "react-hot-toast";

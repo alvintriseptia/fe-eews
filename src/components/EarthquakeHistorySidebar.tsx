@@ -1,9 +1,8 @@
 import React from "react";
 import { getIntensityColor } from "../utils/map-style";
-import { MapPinIcon } from "@heroicons/react/24/outline";
+import { ClockIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import {
 	ChevronDoubleRightIcon,
-	ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import { IExternalSource } from "@/entities/IExternalSource";
 
@@ -93,7 +92,7 @@ class EarthquakeHistorySidebar extends React.Component<EarthquakeHistorySidebarP
 						className="bg-white hover:bg-gray-300 transition-all duration-200 ease-in-out rounded-md p-1"
 						onClick={() => this.setOpen(true)}
 					>
-						<ListBulletIcon className="w-6 h-6" />
+						<ClockIcon className="w-6 h-6" />
 					</button>
 				</section>
 				<section
