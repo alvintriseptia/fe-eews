@@ -52,9 +52,10 @@ export default class ExternalSource implements IExternalSource {
 			);
 			const data = (await response.json()) as ResponseLatestEarthquake;
 			const time = new Date(data.sent.replace("WIB", "+07:00"));
+			time.setHours(time.getHours() - 7);
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
 			const timezone = -(new Date().getTimezoneOffset() / 60);
-			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : "WIT";
+			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : timezone === 9 ? "WIT" : "";
 			time.setTime(time.getTime() - offset);
 			const earthquake = {
 				title: "Gempa Terakhir\nDirasakan",
