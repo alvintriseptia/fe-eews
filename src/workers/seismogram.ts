@@ -51,6 +51,10 @@ export type SeismogramTempDataType = {
 	pWaves: any[];
 };
 
+(async () => {
+	await indexedDB.openIndexedDB();
+})();
+
 const onmessage = (event: MessageEvent) => {
 	const { station, message, creation_date, mode } = event.data;
 	const stationData = stations.find((s) => s.code === station);
@@ -60,9 +64,7 @@ const onmessage = (event: MessageEvent) => {
 	} else {
 		if (stationData && message === "stream") {
 			if(indexedDB.db === null){
-				indexedDB.openIndexedDB().then(() => {
-					streamStationSeismogram(stationData.code);
-				});
+				streamStationSeismogram(stationData.code);
 			}else{
 				streamStationSeismogram(stationData.code);
 			}
@@ -83,7 +85,7 @@ const onmessage = (event: MessageEvent) => {
 			// loop object data
 			for (const key in data) {
 				const value = data[key];
-				const time = new Date(parseInt(key.split("/")[1]) * 1000);
+				const time = new Date(key.split("/")[1]);
 
 				// get data from indexedDB
 				let tempData = {

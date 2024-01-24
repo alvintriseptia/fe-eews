@@ -35,8 +35,8 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 		let end_date = time_stamp;
 
 		// to unix
-		start_date = Math.floor(start_date / 1000);
-		end_date = Math.floor(end_date / 1000);
+		start_date = Math.floor(start_date);
+		end_date = Math.floor(end_date);
 
 		const response = await this.fetchHistoryEarthquakePrediction(
 			start_date,
@@ -51,8 +51,8 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 	async fetchHistoryEarthquakePrediction(start_date: number, end_date: number) {
 		try {
 			// ubah milliseconds menjadi format unix
-			start_date = Math.floor(start_date / 1000);
-			end_date = Math.floor(end_date / 1000);
+			start_date = Math.floor(start_date);
+			end_date = Math.floor(end_date);
 			const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
@@ -73,8 +73,8 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 	) {
 		try {
 			// to unix
-			start_date = Math.floor(start_date / 1000);
-			end_date = Math.floor(end_date / 1000);
+			start_date = Math.floor(start_date);
+			end_date = Math.floor(end_date);
 			const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
@@ -113,8 +113,8 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 	) {
 		try {
 			// ubah milliseconds menjadi format unix
-			start_date = Math.floor(start_date / 1000);
-			end_date = Math.floor(end_date / 1000);
+			start_date = Math.floor(start_date);
+			end_date = Math.floor(end_date);
 			const url = `http://localhost:3333/export?start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
