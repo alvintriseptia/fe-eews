@@ -2,7 +2,7 @@ import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
 import { pWavesData } from "./earthquakePrediction";
 import { socket } from "./_index";
-import * as indexedDB from "@/lib/indexed-db"
+import * as indexedDB from "@/lib/indexed-db";
 
 const stations = STATIONS_DATA;
 const seismogramSockets = {
@@ -51,22 +51,26 @@ export type SeismogramTempDataType = {
 	pWaves: any[];
 };
 
-(async () => {
-	await indexedDB.openIndexedDB();
-})();
-
 const onmessage = (event: MessageEvent) => {
 	const { station, message, creation_date, mode } = event.data;
 	const stationData = stations.find((s) => s.code === station);
 
 	if (mode === "simulation") {
-		simulateStationSeismogram(stationData.code);
+		if (indexedDB.db == null) {
+			indexedDB.openIndexedDB().then(() => {
+				simulateStationSeismogram(station);
+			});
+		} else {
+			simulateStationSeismogram(station);
+		}
 	} else {
 		if (stationData && message === "stream") {
-			if(indexedDB.db === null){
-				streamStationSeismogram(stationData.code);
-			}else{
-				streamStationSeismogram(stationData.code);
+			if (indexedDB.db == null) {
+				indexedDB.openIndexedDB().then(() => {
+					streamStationSeismogram(station);
+				});
+			} else {
+				streamStationSeismogram(station);
 			}
 		} else if (stationData && message === "stop") {
 			stopStationSeismogram(stationData.code);
@@ -79,14 +83,10 @@ const onmessage = (event: MessageEvent) => {
 	}
 
 	async function streamStationSeismogram(station: string) {
-		console.log("streaming seismogram data from station", station);
 		seismogramSockets[station] = socket;
-		seismogramSockets[station].on(`waves-data-${station}`, async (data: any) => {
-			// loop object data
-			for (const key in data) {
-				const value = data[key];
-				const time = new Date(key.split("/")[1]);
-
+		seismogramSockets[station].on(
+			`waves-data-${station}`,
+			async (data: any) => {
 				// get data from indexedDB
 				let tempData = {
 					channelZ: {
@@ -104,29 +104,37 @@ const onmessage = (event: MessageEvent) => {
 					pWaves: [],
 				};
 
-				const tempDataFromIndexedDB = await indexedDB.readFromIndexedDB(station);
+				const tempDataFromIndexedDB = await indexedDB.readFromIndexedDB(
+					station
+				);
 
-				if(tempDataFromIndexedDB !== null){
+				if (tempDataFromIndexedDB !== null) {
 					tempData = tempDataFromIndexedDB;
 				}
 
-				tempData.channelZ.x.push(time.getTime());
-				tempData.channelZ.y.push(value.Z);
-				tempData.channelN.x.push(time.getTime());
-				tempData.channelN.y.push(value.N);
-				tempData.channelE.x.push(time.getTime());
-				tempData.channelE.y.push(value.E);
+				// loop object data
+				for (const key in data) {
+					const value = data[key];
+					const time = new Date(parseInt(key.split("/")[1]));
+					tempData.channelZ.x.push(time.getTime());
+					tempData.channelZ.y.push(value.Z);
+					tempData.channelN.x.push(time.getTime());
+					tempData.channelN.y.push(value.N);
+					tempData.channelE.x.push(time.getTime());
+					tempData.channelE.y.push(value.E);
+				}
 
 				// save data to indexedDB
 				indexedDB.writeToIndexedDB(station, tempData);
 			}
-		});
+		);
 
 		seismogramInterval[station] = setInterval(async () => {
 			const tempData = await indexedDB.readFromIndexedDB(station);
+			console.log(tempData);
 			const data = seismogramData.get(station);
 			if (!tempData || tempData.channelZ.x.length === 0) return;
-			const currentLength = data.currentIndex
+			const currentLength = data.currentIndex;
 
 			const newData = {
 				channelZ: {
@@ -181,7 +189,7 @@ const onmessage = (event: MessageEvent) => {
 						currentLength + SAMPLING_RATE
 					)
 				);
-				
+
 				data.channelZ.x.push(...newData.channelZ.x);
 				data.channelZ.y.push(...newData.channelZ.y);
 				data.channelN.x.push(...newData.channelN.x);
@@ -234,7 +242,7 @@ const onmessage = (event: MessageEvent) => {
 					data.currentIndex -= BUFFER / 2;
 				}
 
-				if(tempData.channelZ.x.length > BUFFER) {
+				if (tempData.channelZ.x.length > BUFFER) {
 					tempData.channelZ.x.splice(0, BUFFER / 2);
 					tempData.channelZ.y.splice(0, BUFFER / 2);
 					tempData.channelN.x.splice(0, BUFFER / 2);

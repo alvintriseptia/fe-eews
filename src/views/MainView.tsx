@@ -30,6 +30,7 @@ import { observe } from "mobx";
 import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
+import * as indexedDB from "@/lib/indexed-db";
 
 interface Props {
 	mode: "simulation" | "realtime";
@@ -120,7 +121,9 @@ class MainView extends React.Component<Props> {
 			}
 		});
 
-		this.state.stationController.connectSeismogram(this.props.mode);
+		indexedDB.createIndexedDB().then(() => {
+			this.state.stationController.connectSeismogram(this.props.mode);
+		});
 	}
 
 	componentWillUnmount(): void {

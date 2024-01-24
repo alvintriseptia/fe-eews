@@ -131,7 +131,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 	componentDidMount() {
 		let isMounted = true;
-		const seismogramWorker = (this.context as any) as Worker | null;
+		const seismogramWorker = this.context as any as Worker | null;
 
 		const handleSeismogramWorker = (event: MessageEvent) => {
 			const { station, data } = event.data;
@@ -141,8 +141,45 @@ export default class DynamicLineChart extends React.Component<Props> {
 			if (!isMounted || !data) {
 				return; // Ignore messages if component is unmounted
 			}
+			
+			const { channelZ, channelN, channelE, layout, userDefinedRange } =
+				this.state;
+			if (userDefinedRange) {
+				layout.xaxis.range = userDefinedRange;
+			} else {
+				const now = Date.now();
+				const last = channelZ.x[channelZ.x.length - 1];
+				const first = channelZ.x[0];
+				const diff = last - first;
+				if (diff > 30000) {
+					layout.xaxis.range = [now - 30000, now];
+				} else {
+					layout.xaxis.range = [first, last];
+				}
+			}
 
-			this.simulateSeismogram(data);
+			this.setState({
+				revision: this.state.revision + 1,
+				// currentIndex: length,
+				// waveData: waveData.slice(length),
+				channelZ: {
+					...channelZ,
+					x: data.channelZ.x,
+					y: data.channelZ.y,
+				},
+				channelN: {
+					...channelN,
+					x: data.channelN.x,
+					y: data.channelN.y,
+				},
+				channelE: {
+					...channelE,
+					x: data.channelE.x,
+					y: data.channelE.y,
+				},
+				pWaves: data.pWaves,
+			});
+			layout.datarevision = this.state.revision + 1;
 		};
 
 		if (this.state.channelZ.x.length === 0) {
@@ -213,138 +250,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 	// 		}));
 	// 	}
 	// }
-	simulateSeismogram = (seismogram: SeismogramDataType) => {
-		const { channelZ, channelN, channelE, layout, userDefinedRange } =
-			this.state;
-		// if (!waveData || waveData.length === 0) {
-		// 	return;
-		// }
-
-		// const length =
-		// 	samplingRate > waveData.length ? waveData.length : samplingRate;
-		// const newData = waveData.slice(0, length);
-
-		// const tempZ: number[] = [];
-		// const tempN: number[] = [];
-		// const tempE: number[] = [];
-		// const tempX: number[] = [];
-		// const removedEarthquakePredictions: number[] = [];
-		// for (let i = 0; i < length; i++) {
-		// 	const data = newData[i];
-		// 	//if data.creation_date < last channelZ.x or data.creation_date
-		// 	if (
-		// 		data.creation_date < channelZ.x[channelZ.x.length - 1] ||
-		// 		isNaN(data.creation_date)
-		// 	) {
-		// 		continue;
-		// 	}
-
-		// 	tempX.push(data.creation_date);
-		// 	tempZ.push(data.z_channel);
-		// 	tempN.push(data.n_channel);
-		// 	tempE.push(data.e_channel);
-
-		// 	// Check if earthquake prediction is available, and the time is same as the current data
-		// 	const earthquakePredictionIndex = earthquakePredictions.findIndex(
-		// 		(prediction) => prediction.creation_date <= data.creation_date
-		// 	);
-
-		// 	if (earthquakePredictionIndex !== -1) {
-		// 		const earthquakePrediction =
-		// 			earthquakePredictions[earthquakePredictionIndex];
-		// 		removedEarthquakePredictions.push(earthquakePredictionIndex);
-		// 		const pWaveTemp = {
-		// 			x: [] as Array<number>,
-		// 			y: [] as Array<number>,
-		// 			line: {
-		// 				color: "#FF0000",
-		// 				width: 2,
-		// 			},
-		// 			showlegend: false,
-		// 			xaxis: "x",
-		// 		};
-
-		// 		const date = new Date(earthquakePrediction.creation_date);
-		// 		pWaveTemp.x.push(date.getTime());
-		// 		pWaveTemp.y.push(0);
-		// 		pWaveTemp.x.push(date.getTime());
-		// 		pWaveTemp.y.push(6000);
-
-		// 		pWaves.push(
-		// 			{
-		// 				...pWaveTemp,
-		// 				yaxis: "y4",
-		// 			},
-		// 			{
-		// 				...pWaveTemp,
-		// 				yaxis: "y5",
-		// 			},
-		// 			{
-		// 				...pWaveTemp,
-		// 				yaxis: "y6",
-		// 			}
-		// 		);
-		// 	}
-		// // }
-
-		// channelZ.x = [...channelZ.x, seismogram.creation_date];
-		// channelZ.y = [...channelZ.y, seismogram.z_channel];
-		// channelN.x = [...channelN.x, seismogram.creation_date];
-		// channelN.y = [...channelN.y, seismogram.n_channel];
-		// channelE.x = [...channelE.x, seismogram.creation_date];
-		// channelE.y = [...channelE.y, seismogram.e_channel];
-
-		// // if the current length waves is more than 200.000, then remove the first 100.000
-		// if (channelZ.x.length > 200000) {
-		// 	channelZ.x = channelZ.x.slice(100000);
-		// 	channelZ.y = channelZ.y.slice(100000);
-		// 	channelN.x = channelN.x.slice(100000);
-		// 	channelN.y = channelN.y.slice(100000);
-		// 	channelE.x = channelE.x.slice(100000);
-		// 	channelE.y = channelE.y.slice(100000);
-		// }
-
-		// Use user-defined range if available, otherwise calculate a new range
-		if (userDefinedRange) {
-			layout.xaxis.range = userDefinedRange;
-		} else {
-			const now = Date.now();
-			const last = channelZ.x[channelZ.x.length - 1];
-			const first = channelZ.x[0];
-			const diff = last - first;
-			if (diff > 30000) {
-				layout.xaxis.range = [now - 30000, now];
-			} else {
-				layout.xaxis.range = [first, last];
-			}
-		}
-
-		this.setState({
-			revision: this.state.revision + 1,
-			// currentIndex: length,
-			// waveData: waveData.slice(length),
-			channelZ: {
-				...channelZ,
-				x: seismogram.channelZ.x,
-				y: seismogram.channelZ.y,
-			},
-			channelN: {
-				...channelN,
-				x: seismogram.channelN.x,
-				y: seismogram.channelN.y,
-			},
-			channelE: {
-				...channelE,
-				x: seismogram.channelE.x,
-				y: seismogram.channelE.y,
-			},
-			pWaves: seismogram.pWaves,
-			// earthquakePredictions: earthquakePredictions.filter(
-			// (_, index) => !removedEarthquakePredictions.includes(index)
-			// ),
-		});
-		layout.datarevision = this.state.revision + 1;
-	};
 
 	handleRelayout = (event: PlotRelayoutEvent) => {
 		if (event["xaxis.showspikes"] === false) {
