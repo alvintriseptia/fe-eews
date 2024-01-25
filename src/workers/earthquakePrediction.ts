@@ -45,6 +45,9 @@ const onmessage = (event: MessageEvent) => {
 		socket.on("prediction-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip
 			const date = new Date(message.time_stamp);
+			// timezone in local
+			const timezoneOffset = - (new Date().getTimezoneOffset() * 60000);
+			date.setTime(date.getTime() - timezoneOffset);
 			const now = new Date();
 			const diff = now.getTime() - date.getTime();
 			if (diff > 300000) return;
