@@ -44,7 +44,7 @@ class LoginView extends React.Component<Props> {
 				<div className="bg-[#222531] px-6 py-8 rounded-3xl shadow w-[412px]">
 					<div className="flex justify-center mb-8 gap-x-4">
 						<Image src={BMKGLogo} alt="BMKG Logo" width={40} height={40} />
-						<h1 className="text-4xl text-white font-semibold">InaEEWS</h1>
+						<h1 className="text-4xl text-white font-semibold">TEWS</h1>
 					</div>
 					<div className="mb-4">
 						<label
@@ -75,7 +75,7 @@ class LoginView extends React.Component<Props> {
 						/>
 					</div>
 					<button
-						className="bg-[#184130] hover:bg-eews-mmi-V transition-all text-white font-bold py-2 px-4 w-full rounded-full focus:outline-none focus:shadow-outline"
+						className="bg-[#184130] hover:bg-tews-mmi-V transition-all text-white font-bold py-2 px-4 w-full rounded-full focus:outline-none focus:shadow-outline"
 						onClick={this.login}
 					>
 						<ArrowRightOnRectangleIcon className="w-5 h-5 inline-block mr-2" />

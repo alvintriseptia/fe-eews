@@ -131,7 +131,7 @@ export default class Main extends React.Component<Props> {
 		return (
 			<>
 				<Head>
-					<title>InaEEWS</title>
+					<title>TEWS</title>
 				</Head>
 				<SeismogramContext.Provider value={this.state.seismogramWorker}>
 					<MainView

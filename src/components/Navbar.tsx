@@ -38,7 +38,7 @@ class Navlink extends React.Component<NavlinkProps> {
 		return (
 			<Link href={this.state.link}>
 				<button
-					className={`px-3 py-2 flex gap-x-2  text-base rounded-lg items-center ${this.state.backgroundColor} ${this.state.fontStyle} hover:bg-eews-boulder transition-all`}
+					className={`px-3 py-2 flex gap-x-2  text-base rounded-lg items-center ${this.state.backgroundColor} ${this.state.fontStyle} hover:bg-tews-boulder transition-all`}
 				>
 					{this.state.icon}
 					<span>{this.state.label}</span>
@@ -70,7 +70,7 @@ class HeaderInfo extends React.Component<HeaderInfoProps> {
 	render() {
 		return (
 			<div className="flex gap-x-1 items-center">
-				<span className="text-2xl font-semibold text-eews-golden-fizz">
+				<span className="text-2xl font-semibold text-tews-golden-fizz">
 					{this.state.title.includes("Magnitude")
 						? this.state.total.toFixed(1)
 						: this.state.total.toFixed(0)}
@@ -100,14 +100,14 @@ class Navbar extends React.Component<NavbarProps> {
 				icon: <HomeIcon className="w-6 h-6" />,
 				label: "Beranda",
 				link: "/",
-				backgroundColor: "bg-eews-dark",
+				backgroundColor: "bg-tews-dark",
 				fontStyle: "text-white font-semibold",
 			},
 			{
 				icon: <BookOpenIcon className="w-6 h-6" />,
 				label: "Prediksi",
 				link: "/prediksi",
-				backgroundColor: "bg-eews-dark",
+				backgroundColor: "bg-tews-dark",
 				fontStyle: "text-white font-semibold",
 			},
 		] as NavlinkProps[],
@@ -218,14 +218,14 @@ class Navbar extends React.Component<NavbarProps> {
 
 	render() {
 		return (
-			<nav className="flex justify-between gap-x-4 py-3 px-10 pl-20 bg-eews-black-russian">
+			<nav className="flex justify-between gap-x-4 py-3 px-10 pl-20 bg-tews-black-russian">
 				<section className="flex gap-x-10">
 					<div className="flex gap-x-3">
 						<Image src={BMKGLogo} alt="BMKG Logo" width={40} height={40} />
-						<h1 className="text-4xl font-semibold text-white">InaEEWS</h1>
+						<h1 className="text-4xl font-semibold text-white">TEWS</h1>
 					</div>
 
-					<div className="flex bg-eews-mirage rounded-lg">
+					<div className="flex bg-tews-mirage rounded-lg">
 						{this.state.navLinks.map((navLink, index) => (
 							<Navlink {...navLink} key={index} />
 						))}
@@ -239,7 +239,7 @@ class Navbar extends React.Component<NavbarProps> {
 					)}
 
 					<button
-						className={`px-3 py-2 flex gap-x-2  text-base rounded-lg items-center bg-eews-mmi-X text-white font-semibold hover:bg-eews-boulder transition-all`}
+						className={`px-3 py-2 flex gap-x-2  text-base rounded-lg items-center bg-tews-mmi-X text-white font-semibold hover:bg-tews-boulder transition-all`}
 						onClick={this.logout}
 					>
 						<ArrowLeftOnRectangleIcon className="w-6 h-6" />

@@ -38,7 +38,7 @@ export default class Seismogram extends Component<SeismogramProps> {
 					</button>
 				</section>
 				<section
-					className={`absolute bg-eews-cinder right-0 w-[550px] h-screen z-50 transition-all duration-200 ease-in-ou
+					className={`absolute bg-tews-cinder right-0 w-[550px] h-screen z-50 transition-all duration-200 ease-in-ou
 										${this.state.open ? "translate-x-0" : "translate-x-full"}
 										`}
 				>

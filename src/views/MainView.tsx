@@ -1,7 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { StyleSpecification } from "maplibre-gl";
-import mapStyle from "@/assets/data/inaeews_dark.json";
+import mapStyle from "@/assets/data/inatews_dark.json";
 import {
 	MainController,
 	SimulationController,
@@ -91,7 +91,7 @@ class MainView extends React.Component<Props> {
 	componentDidMount(): void {
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
-			id: "eews-map",
+			id: "tews-map",
 			mapStyle: style,
 			zoom: 5,
 			initialViewState: {
@@ -148,7 +148,7 @@ class MainView extends React.Component<Props> {
 
 					<div className="flex flex-col w-full">
 						<div className="relative h-full">
-							<div className="w-full h-full" id="eews-map"></div>
+							<div className="w-full h-full" id="tews-map"></div>
 
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&

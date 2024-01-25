@@ -25,7 +25,7 @@ class HistoryCard extends React.Component<IExternalSource> {
 
 		return (
 			<div
-				className={`flex p-1 ${backgroundColor} gap-x-2 items-center border-y border-eews-black-russian`}
+				className={`flex p-1 ${backgroundColor} gap-x-2 items-center border-y border-tews-black-russian`}
 			>
 				<h4
 					className={`font-semibold text-white ${
@@ -106,7 +106,7 @@ class EarthquakeHistorySidebar extends React.Component<EarthquakeHistorySidebarP
 					>
 						<ChevronDoubleRightIcon className="w-6 h-6" />
 					</button>
-					<aside className="flex flex-col bg-eews-cinder h-full overflow-y-auto">
+					<aside className="flex flex-col bg-tews-cinder h-full overflow-y-auto">
 						{this.state.weeklyEarthquake.length > 0 ? (
 							this.state.weeklyEarthquake.map((feature, index) => {
 								feature.id = index + 1;

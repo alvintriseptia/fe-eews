@@ -21,22 +21,22 @@ class Filterbar extends React.Component<FilterbarProps> {
 
 	render() {
 		return (
-			<section className="p-4 border-b border-b-eews-dark-slate-grey flex items-center">
-				<span className="text-eews-boulder mr-1">Filter:</span>
+			<section className="p-4 border-b border-b-tews-dark-slate-grey flex items-center">
+				<span className="text-tews-boulder mr-1">Filter:</span>
 				<select
 					className="rounded-md bg-transparent text-white cursor-pointer"
 					onChange={this.handleFilter}
 				>
-					<option className="bg-eews-dark text-white" value="current_week">
+					<option className="bg-tews-dark text-white" value="current_week">
 						Minggu Ini
 					</option>
-					<option className="bg-eews-dark text-white" value="current_month">
+					<option className="bg-tews-dark text-white" value="current_month">
 						Bulan Ini
 					</option>
-					<option className="bg-eews-dark text-white" value="last_month">
+					<option className="bg-tews-dark text-white" value="last_month">
 						Bulan Lalu
 					</option>
-					<option className="bg-eews-dark text-white" value="this_year">
+					<option className="bg-tews-dark text-white" value="this_year">
 						Tahun ini
 					</option>
 				</select>

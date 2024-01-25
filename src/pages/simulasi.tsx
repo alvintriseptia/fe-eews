@@ -5,8 +5,8 @@ import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { IExternalSource } from "@/entities/IExternalSource";
 import { NavbarProps } from "@/components/Navbar";
-import { EarthquakeRealtimeProps } from "@/components/Sidebar";
 import SeismogramContext from "@/stores/SeismogramContext";
+import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
@@ -41,7 +41,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			}
 		});
 
-		if (newNavbar.minimumMagnitude === 100) newNavbar.minimumMagnitude = 0;
+		if (newNavbar.minimumMagnitude == 100) newNavbar.minimumMagnitude = 0;
 
 		const props = {
 			navbar: newNavbar,
@@ -90,7 +90,7 @@ interface Props {
 	sidebarProps: {
 		latestFeltEarthquake: IExternalSource;
 		latestEarthquake: IExternalSource;
-		earthquakePrediction: EarthquakeRealtimeProps;
+		latestPrediction: IEarthquakePrediction;
 	};
 }
 
@@ -127,7 +127,7 @@ export default class Simulation extends React.Component<Props> {
 		return (
 			<>
 				<Head>
-					<title>InaEEWS</title>
+					<title>TEWS</title>
 				</Head>
 				<SeismogramContext.Provider value={this.state.seismogramWorker}>
 					<MainView

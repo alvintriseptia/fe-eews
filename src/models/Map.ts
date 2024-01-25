@@ -5,7 +5,7 @@ import { Map as MapLibre } from "maplibre-gl";
 import BallMarker from "@/assets/images/ball-marker.ico";
 import { getIntensityColor } from "@/utils/map-style";
 
-class EEWSMap implements IMap {
+class TEWSMap implements IMap {
 	id: string;
 	zoom: number;
 	initialViewState: CoordinateType;
@@ -197,7 +197,7 @@ class EEWSMap implements IMap {
 
 		// add pulse circle at station
 		const pulseCircle = document.createElement("div");
-		pulseCircle.innerHTML = `<div class="animate-pulse bg-eews-mmi-X/40 rounded-full relative -z-10 w-12 h-12"></div>`;
+		pulseCircle.innerHTML = `<div class="animate-pulse bg-tews-mmi-X/40 rounded-full relative -z-10 w-12 h-12"></div>`;
 
 		this.stationMarker = new MapLibreGL.Marker({
 			draggable: false,
@@ -382,4 +382,4 @@ class EEWSMap implements IMap {
 		});
 	}
 }
-export default EEWSMap;
+export default TEWSMap;

@@ -136,38 +136,38 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 			<section className="flex flex-col p-4 border-b">
 				<div className="flex justify-between mb-4 relative z-10">
 					<div>
-						<h6 className="text-eews-boulder text-xs">Lokasi</h6>
+						<h6 className="text-tews-boulder text-xs">Lokasi</h6>
 						<p className="text-white max-width-[200px]">
 							{this.props.location}
 						</p>
 					</div>
 
 					<div>
-						<h6 className="text-eews-boulder text-xs">Waktu</h6>
+						<h6 className="text-tews-boulder text-xs">Waktu</h6>
 						<p className="text-white">{time}</p>
 					</div>
 
 					<div>
-						<h6 className="text-eews-boulder text-xs">Magnitude</h6>
+						<h6 className="text-tews-boulder text-xs">Magnitude</h6>
 						<p className="text-white">{this.props.magnitude?.toFixed(2) || ""}</p>
 					</div>
 
 					<div>
-						<h6 className="text-eews-boulder text-xs">Kedalaman</h6>
+						<h6 className="text-tews-boulder text-xs">Kedalaman</h6>
 						<p className="text-white">{this.props.depth?.toFixed(2) || ""}Km</p>
 					</div>
 
 					<div>
-						<h6 className="text-eews-boulder text-xs">Latitude</h6>
+						<h6 className="text-tews-boulder text-xs">Latitude</h6>
 						<p className="text-white">{this.props.latitude?.toFixed(2) || ""}</p>
 					</div>
 
 					<div>
-						<h6 className="text-eews-boulder text-xs">Longitude</h6>
+						<h6 className="text-tews-boulder text-xs">Longitude</h6>
 						<p className="text-white">{this.props.longitude?.toFixed(2) || ""}</p>
 					</div>
 					<div>
-						<h6 className="text-eews-boulder text-xs">Stasiun</h6>
+						<h6 className="text-tews-boulder text-xs">Stasiun</h6>
 						<p className="text-white">{this.props.station}</p>
 					</div>
 				</div>

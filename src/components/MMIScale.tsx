@@ -19,25 +19,25 @@ class MMIScale extends React.Component {
 	getBackgroundColor(mmi: string) {
 		switch (mmi) {
 			case "I":
-				return "bg-eews-mmi-I";
+				return "bg-tews-mmi-I";
 			case "II":
-				return "bg-eews-mmi-II";
+				return "bg-tews-mmi-II";
 			case "III":
-				return "bg-eews-mmi-III";
+				return "bg-tews-mmi-III";
 			case "IV":
-				return "bg-eews-mmi-IV";
+				return "bg-tews-mmi-IV";
 			case "V":
-				return "bg-eews-mmi-V";
+				return "bg-tews-mmi-V";
 			case "VI":
-				return "bg-eews-mmi-VI";
+				return "bg-tews-mmi-VI";
 			case "VII":
-				return "bg-eews-mmi-VII";
+				return "bg-tews-mmi-VII";
 			case "VIII":
-				return "bg-eews-mmi-VIII";
+				return "bg-tews-mmi-VIII";
 			case "IX":
-				return "bg-eews-mmi-IX";
+				return "bg-tews-mmi-IX";
 			case "X":
-				return "bg-eews-mmi-X";
+				return "bg-tews-mmi-X";
 		}
 	}
 

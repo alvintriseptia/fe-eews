@@ -228,7 +228,7 @@ class PredictionView extends React.Component<Props> {
 									</div>
 
 									<button
-										className="flex justify-center items-center bg-eews-dark hover:bg-eews-dark/70 transition-all duration-200 ease-in-out px-3 py-2 rounded-md font-semibold"
+										className="flex justify-center items-center bg-tews-dark hover:bg-tews-dark/70 transition-all duration-200 ease-in-out px-3 py-2 rounded-md font-semibold"
 										onClick={() => this.download()}
 									>
 										<ArrowUpTrayIcon className="w-5 h-5 mr-2 font-bold" />
@@ -266,7 +266,7 @@ class PredictionView extends React.Component<Props> {
 					</div>
 
 					<div className="col-span-7">
-						<div id="eews-history-map" className={`w-full h-[48%]`}></div>
+						<div id="tews-history-map" className={`w-full h-[48%]`}></div>
 						<div className="w-full">
 							{this.state.recapPrediction &&
 								this.state.recapPrediction.station && (

@@ -31,20 +31,20 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 	}
 
 	setFormattedDateAndColors(earthquake: IEarthquakePrediction) {
-		let borderColor = "border-eews-mmi-II";
-		let backgroundColor = "bg-eews-mmi-II";
+		let borderColor = "border-tews-mmi-II";
+		let backgroundColor = "bg-tews-mmi-II";
 		switch (earthquake.prediction.toLocaleLowerCase()) {
 			case "warning":
-				borderColor = "border-eews-swamp-green";
-				backgroundColor= "bg-eews-swamp-green";
+				borderColor = "border-tews-swamp-green";
+				backgroundColor= "bg-tews-swamp-green";
 				break;
 			case "earthquake":
-				borderColor = "border-eews-mmi-V";
-				backgroundColor= "bg-eews-mmi-V";
+				borderColor = "border-tews-mmi-V";
+				backgroundColor= "bg-tews-mmi-V";
 				break;
 			case "cancelled":
-				borderColor = "border-eews-mmi-X";
-				backgroundColor= "bg-eews-mmi-X";
+				borderColor = "border-tews-mmi-X";
+				backgroundColor= "bg-tews-mmi-X";
 				break;
 		}
 
@@ -113,7 +113,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 	render() {
 		return (
 			<div
-				className={`flex flex-col gap-y-1 border-4 bg-eews-cinder max-w-[350px] ${this.state.borderColor}`}
+				className={`flex flex-col gap-y-1 border-4 bg-tews-cinder max-w-[350px] ${this.state.borderColor}`}
 			>
 				<h2
 					className={`${this.state.backgroundColor} w-full font-semibold text-white`}
@@ -126,7 +126,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 					</p>
 
 					<div className="flex justify-between items-center gap-x-3">
-						<span className="text-eews-silver">Tanggal</span>
+						<span className="text-tews-silver">Tanggal</span>
 						<h4 className="text-white font-semibold">
 							{this.state.formattedDate}
 						</h4>
@@ -137,7 +137,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						this.state.earthquake.prediction.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Magnitude</span>
+							<span className="text-tews-silver">Magnitude</span>
 							<h4 className="text-white font-semibold">
 								M {this.state.earthquake.mag}
 							</h4>
@@ -149,7 +149,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						this.state.earthquake.prediction.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Kedalaman</span>
+							<span className="text-tews-silver">Kedalaman</span>
 							<h4 className="text-white font-semibold">
 								{this.state.earthquake.depth?.toFixed(2) || "-"} Km
 							</h4>
@@ -161,7 +161,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						this.state.earthquake.prediction.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Latitude</span>
+							<span className="text-tews-silver">Latitude</span>
 							<h4 className="text-white font-semibold">
 								{this.state.earthquake.lat?.toFixed(2) || "-"}
 							</h4>
@@ -173,7 +173,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						this.state.earthquake.prediction.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
-							<span className="text-eews-silver">Longitude</span>
+							<span className="text-tews-silver">Longitude</span>
 							<h4 className="text-white font-semibold">
 								{this.state.earthquake.long?.toFixed(2) || "-"}
 							</h4>
@@ -183,7 +183,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 					{this.state.earthquake.prediction.toLocaleLowerCase() === "warning" &&
 						this.state.countdown > 0 && (
 							<div className="flex justify-between items-center gap-x-3">
-								<span className="text-eews-silver">Countdown</span>
+								<span className="text-tews-silver">Countdown</span>
 								<h4 className="text-white font-semibold">
 									{this.state.countdown} s
 								</h4>

@@ -6,7 +6,7 @@ module.exports = {
 	theme: {
 		extend: {
 			colors: {
-				eews: {
+				tews: {
 					"mmi-I": "#FDFFFF",
 					"mmi-II": "#50526F",
 					"mmi-III": "#406772",

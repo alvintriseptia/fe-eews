@@ -140,7 +140,7 @@ class Sidebar extends React.Component<SidebarProps> {
 		return (
 			<>
 				<button
-					className={`px-3 py-2 text-base rounded-lg items-center bg-eews-dark text-white font-semibold hover:bg-eews-boulder transition-all fixed top top-3 left-2`}
+					className={`px-3 py-2 text-base rounded-lg items-center bg-tews-dark text-white font-semibold hover:bg-tews-boulder transition-all fixed top top-3 left-2`}
 					onClick={this.toggleSidebar}
 				>
 					<Bars4Icon className="w-6 h-6" />

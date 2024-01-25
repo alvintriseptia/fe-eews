@@ -116,7 +116,7 @@ export default class PredictionController {
 	async addEarthquakePredictionLocations(predictions: IEarthquakePrediction[]) {
 		document.querySelector("#loading_overlay").className = "block";
 		this.map.initMap({
-			id: "eews-history-map",
+			id: "tews-history-map",
 			mapStyle: this.style,
 			zoom: 5,
 			initialViewState: {

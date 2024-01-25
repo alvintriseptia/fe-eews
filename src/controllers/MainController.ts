@@ -3,7 +3,7 @@ import { IEarthquakePrediction, IStation } from "@/entities/_index";
 import {
 	EarthquakePrediction,
 	ExternalSource,
-	Map as EEWSMap,
+	Map as TEWSMap,
 	Notification,
 	Seismogram,
 } from "@/models/_index";
@@ -21,7 +21,7 @@ export default class MainController {
 	private notificationEarthquakePrediction = new Notification();
 	private notificationEarthquake = new Notification();
 	private notificationSWaveAffected = new Notification();
-	private map = new EEWSMap();
+	private map = new TEWSMap();
 	private earthquakePredictionInterval: NodeJS.Timeout;
 	private earthquakePredictionWorker: Worker;
 	private countdown: number = 0;

@@ -20,7 +20,7 @@
 // 		if(!this.state.seismogramWorker) return (<></>)
 // 		return <>
 // 			<Head>
-// 				<title>InaTEWS</title>
+// 				<title>TEWS</title>
 // 			</Head>
 // 			<StationView controller={controller}/>
 // 		</>

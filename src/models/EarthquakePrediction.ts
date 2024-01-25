@@ -130,7 +130,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 			const link = document.createElement("a");
 			link.href = urlBlob;
 			let date = new Date();
-			link.download = `history-eews-${date.getTime()}.csv`;
+			link.download = `history-tews-${date.getTime()}.csv`;
 			link.click();
 		} catch (error) {
 			throw error;
