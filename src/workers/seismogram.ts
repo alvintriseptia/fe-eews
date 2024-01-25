@@ -131,7 +131,6 @@ const onmessage = (event: MessageEvent) => {
 
 		seismogramInterval[station] = setInterval(async () => {
 			const tempData = await indexedDB.readFromIndexedDB(station);
-			console.log(tempData);
 			const data = seismogramData.get(station);
 			if (!tempData || tempData.channelZ.x.length === 0) return;
 			const currentLength = data.currentIndex;

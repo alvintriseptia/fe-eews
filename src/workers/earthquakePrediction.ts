@@ -40,13 +40,11 @@ const onmessage = (event: MessageEvent) => {
 			postMessage(earthquakePrediction);
 		}, 30000);
 	} else {
-		console.log("earthquake prediction worker");
-
 		socket.on("prediction-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip
 			const date = new Date(message.time_stamp);
 			// timezone in local
-			const timezoneOffset = - (new Date().getTimezoneOffset() * 60000);
+			const timezoneOffset = new Date().getTimezoneOffset() * 60000;
 			date.setTime(date.getTime() - timezoneOffset);
 			const now = new Date();
 			const diff = now.getTime() - date.getTime();
