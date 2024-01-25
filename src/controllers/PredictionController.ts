@@ -128,18 +128,18 @@ export default class PredictionController {
 		if (!predictions[0].location) {
 			let result = [] as IEarthquakePrediction[];
 
-			for (const prediction of predictions) {
-				const address = await this.map.getAreaName({
-					latitude: prediction.lat,
-					longitude: prediction.long,
-				});
-				prediction.location = address;
-				result.push(prediction);
-			}
+			// for (const prediction of predictions) {
+			// 	const address = await this.map.getAreaName({
+			// 		latitude: prediction.lat,
+			// 		longitude: prediction.long,
+			// 	});
+			// 	prediction.location = address;
+			// 	result.push(prediction);
+			// }
 			document.querySelector("#loading_overlay").className = "hidden";
 
-			this.map.addEarthquakePredictionLocations(result);
-			return result;
+			this.map.addEarthquakePredictionLocations(predictions);
+			return predictions;
 		}
 
 		this.map.addEarthquakePredictionLocations(predictions);
@@ -164,7 +164,7 @@ export default class PredictionController {
 			const start_date = date.getTime() - 1 * 60 * 1000;
 			// 1 minute after
 			const end_date = date.getTime() + 1 * 60 * 1000;
-			
+
 			const response =
 				await this.earthquakePrediction.fetchSeismogramEarthquakePrediction(
 					station,

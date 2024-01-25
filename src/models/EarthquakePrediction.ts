@@ -88,8 +88,8 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 			for (const obj of Object.entries(data) as any) {
 				const key = obj[0];
 				const dataValue = obj[1];
-				const offset =  - (new Date().getTimezoneOffset() * 60 * 1000);
-				const date = new Date(key * 1000);
+				const offset = - (new Date().getTimezoneOffset() * 60 * 1000);
+				const date = new Date(parseInt(key));
 				date.setTime(date.getTime() - offset);
 				const seismogramData = {
 					creation_date: date.getTime(),
@@ -100,6 +100,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 
 				seismogram.push(seismogramData);
 			}
+
 
 			return seismogram;
 		} catch (error) {
@@ -123,7 +124,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 			if (!response.ok) {
 				throw new Error("Terjadi kesalahan ketika mengunduh file");
 			}
-			
+
 			// text/csv
 			const data = await response.blob();
 			const urlBlob = URL.createObjectURL(data);
