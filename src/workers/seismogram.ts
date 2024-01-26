@@ -34,7 +34,7 @@ const seismogramData = new Map<string, SeismogramDataType>(
 );
 
 const SAMPLING_RATE = 20;
-const BUFFER = 20000;
+const BUFFER = 5000;
 
 export type SeismogramDataType = {
 	channelZ: SeismogramPlotType;
@@ -238,16 +238,14 @@ const onmessage = (event: MessageEvent) => {
 					data.channelN.y.splice(0, BUFFER / 2);
 					data.channelE.x.splice(0, BUFFER / 2);
 					data.channelE.y.splice(0, BUFFER / 2);
-					data.currentIndex -= BUFFER / 2;
-				}
 
-				if (tempData.channelZ.x.length > BUFFER) {
 					tempData.channelZ.x.splice(0, BUFFER / 2);
 					tempData.channelZ.y.splice(0, BUFFER / 2);
 					tempData.channelN.x.splice(0, BUFFER / 2);
 					tempData.channelN.y.splice(0, BUFFER / 2);
 					tempData.channelE.x.splice(0, BUFFER / 2);
 					tempData.channelE.y.splice(0, BUFFER / 2);
+					data.currentIndex = 0;
 				}
 
 				seismogramData.set(station, data);
