@@ -109,7 +109,7 @@ export default class MainController {
 	/**
 	 * Retrieves the latest earthquake prediction.
 	 */
-	getLatestEarthquakePrediction() {}
+	getLatestEarthquakePrediction() { }
 
 	/**
 	 * Connects to the earthquake prediction service.
@@ -138,7 +138,7 @@ export default class MainController {
 		this.affectedSWavesWorker = new Worker(
 			new URL("../workers/affectedSWaves.ts", import.meta.url)
 		);
-		
+
 		this.earthquakePredictionWorker.postMessage({
 			mode: "realtime",
 		});
@@ -146,9 +146,6 @@ export default class MainController {
 		this.earthquakePredictionWorker.onmessage = async (event: MessageEvent) => {
 			const { data } = event;
 			const date = new Date(data.time_stamp);
-			const offset = new Date().getTimezoneOffset() * 60 * 1000;
-			date.setTime(date.getTime() - offset);
-
 			const earthquakePrediction: IEarthquakePrediction = {
 				title: "Terdeteksi Gelombang P",
 				description: `Harap perhatian, muncul deteksi gelombang P di stasiun ${data.station}`,
@@ -378,8 +375,8 @@ export default class MainController {
 			this.pWavesWorker.postMessage({
 				command: "stop",
 			});
-		} 
-		
+		}
+
 		if (this.sWavesWorker) {
 			this.sWavesWorker.postMessage({
 				command: "stop",
