@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 // Init the Firebase SDK every time the server is called
 customInitApp();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse){
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 	if (req.method !== "POST") {
 		return NextResponse.next();
 	}
