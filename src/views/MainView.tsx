@@ -52,7 +52,6 @@ class MainView extends React.Component<Props> {
 		earthquakePrediction: {} as EarthquakeRealtimeProps,
 		map: {} as IMap,
 		notification: {} as INotification,
-		seismogram: [] as ISeismogram[],
 		last5MEartquake: {} as IExternalSource,
 		lastFeltEarthquake: {} as IExternalSource,
 		weeklyEarthquake: [] as IExternalSource[],
@@ -61,7 +60,7 @@ class MainView extends React.Component<Props> {
 			navLinks: [],
 			totalEarthquakes: 0,
 			maximumMagnitude: 0,
-			minimumMagnitude: 100,
+			minimumMagnitude: 0,
 			headerInfos: [],
 		},
 		sidebarProps: {
@@ -71,6 +70,7 @@ class MainView extends React.Component<Props> {
 		},
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		countdown: 0,
+		seismogramStations: [] as IStation[],
 		stations: STATIONS_DATA as IStation[],
 	};
 	constructor(props: Props) {
@@ -91,7 +91,7 @@ class MainView extends React.Component<Props> {
 	componentDidMount(): void {
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
-			id: "tews-map",
+			id: "eews-map",
 			mapStyle: style,
 			zoom: 5,
 			initialViewState: {
@@ -121,8 +121,18 @@ class MainView extends React.Component<Props> {
 			}
 		});
 
-		indexedDB.createIndexedDB().then(() => {
-			this.state.stationController.connectSeismogram(this.props.mode);
+		observe(this.state.stationController, "seismograms", (change) => {
+			if (change.newValue) {
+				this.setState({
+					seismogramStations: STATIONS_DATA.filter((station) => {
+						return change.newValue.has(station.code);
+					}),
+				});
+			}
+		});
+
+		indexedDB.createIndexedDB().then(async () => {
+			await this.state.stationController.connectAllSeismogram(this.props.mode);
 		});
 	}
 
@@ -148,7 +158,7 @@ class MainView extends React.Component<Props> {
 
 					<div className="flex flex-col w-full">
 						<div className="relative h-full">
-							<div className="w-full h-full" id="tews-map"></div>
+							<div className="w-full h-full" id="eews-map"></div>
 
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&
@@ -172,7 +182,7 @@ class MainView extends React.Component<Props> {
 							value={this.state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<Seismogram
-								seismogramStations={this.state.stations.map((s) => s.code)}
+								seismogramStations={this.state.seismogramStations.map(e => e.code)}
 							/>
 						</EarthquakePredictionContext.Provider>
 					</div>

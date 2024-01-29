@@ -63,7 +63,7 @@ function performance(): JSX.Element {
 
 		state.stationController = new StationController(seismogramWorker);
 
-		state.stationController.connectSeismogram("simulation");
+		state.stationController.connectAllSeismogram("simulation");
 	}, []);
 
     if(!seismogramWorker) return (<></>)

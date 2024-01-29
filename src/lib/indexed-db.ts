@@ -1,4 +1,5 @@
 import { SeismogramTempDataType } from "@/workers/seismogram";
+import toast from "react-hot-toast";
 
 // Struktur data yang disimpan di IndexedDB
 interface SeismogramDBEntry {
@@ -12,7 +13,6 @@ let db: IDBDatabase | null = null;
 // Fungsi untuk membuka database
 function createIndexedDB(): Promise<IDBDatabase> {
 	return new Promise((resolve, reject) => {
-		indexedDB.deleteDatabase("SeismogramDB");
 		const request = indexedDB.open("SeismogramDB", 1);
 
 		request.onerror = (event: Event) => {
@@ -23,11 +23,17 @@ function createIndexedDB(): Promise<IDBDatabase> {
 			const res = (event.target as IDBOpenDBRequest).result;
 			db = res;
 			resolve(res);
+
+			// clean temp data
+			const transaction = db.transaction(["seismogramTempData"], "readwrite");
+			const store = transaction.objectStore("seismogramTempData");
+			store.clear();
 		};
 
 		request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
 			const db = (event.target as IDBOpenDBRequest).result;
 			db.createObjectStore("seismogramTempData", { keyPath: "station" });
+			db.createObjectStore("seismograms", { keyPath: "type" });
 		};
 	});
 }
@@ -49,31 +55,35 @@ function openIndexedDB(): Promise<IDBDatabase> {
 }
 
 // Fungsi untuk menulis data ke IndexedDB
-function writeToIndexedDB(station: string, data: SeismogramTempDataType): void {
-	const transaction = db.transaction(["seismogramTempData"], "readwrite");
-	const store = transaction.objectStore("seismogramTempData");
-	const request = store.put({ station, data });
+function writeToIndexedDB({ objectStore, keyPath, key, data }): Promise<any> {
+	return new Promise((resolve, reject) => {
+		const transaction = db.transaction([objectStore], "readwrite");
+		const store = transaction.objectStore(objectStore);
+		const request = store.put({ [`${keyPath}`]: key, data });
 
-	request.onerror = (event: Event) => {
-		console.error(
-			"Error writing to IndexedDB:",
-			(event.target as IDBRequest).error
-		);
-	};
+		request.onerror = (event: Event) => {
+			console.error(
+				"Error writing to IndexedDB:",
+				(event.target as IDBRequest).error
+			);
+			reject((event.target as IDBRequest).error);
+		};
 
-	request.onsuccess = (event: Event) => {
-		console.log("Data written to IndexedDB for station:", station);
-	};
+		request.onsuccess = (event: Event) => {
+			resolve((event.target as IDBRequest).result);
+		};
+	}) as Promise<any>;
 }
 
 // Fungsi untuk membaca data dari IndexedDB
 function readFromIndexedDB(
-	station: string
-): Promise<SeismogramTempDataType | null> {
+	objectStore: string,
+	key: string
+): Promise<any | null> {
 	return new Promise((resolve, reject) => {
-		const transaction = db.transaction(["seismogramTempData"]);
-		const store = transaction.objectStore("seismogramTempData");
-		const request = store.get(station);
+		const transaction = db.transaction([objectStore]);
+		const store = transaction.objectStore(objectStore);
+		const request = store.get(key);
 
 		request.onerror = (event: Event) => {
 			console.error(
@@ -84,9 +94,7 @@ function readFromIndexedDB(
 		};
 
 		request.onsuccess = (event: Event) => {
-			const result = (event.target as IDBRequest).result as
-				| SeismogramDBEntry
-				| undefined;
+			const result = (event.target as IDBRequest).result as any;
 			if (result) {
 				resolve(result.data);
 			} else {

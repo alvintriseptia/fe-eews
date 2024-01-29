@@ -305,7 +305,7 @@ export default class MainController {
 	}
 
 	disconnectEarthquakePrediction() {
-		this.earthquakePredictionWorker.terminate();
+		this.earthquakePredictionWorker?.terminate();
 		this.earthquakePredictionWorker = null;
 		clearInterval(this.earthquakePredictionInterval);
 	}

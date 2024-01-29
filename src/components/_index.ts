@@ -11,3 +11,4 @@ export {default as PredictionCard} from "./PredictionCard";
 export {default as PredictionRecapContent} from "./PredictionRecapContent";
 export {default as Time} from "./Time";
 export {default as LoadingOverlay} from "./LoadingOverlay";
+export {default as ModalDialog} from "./ModalDialog";

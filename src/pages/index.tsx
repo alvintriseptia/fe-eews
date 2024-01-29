@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			(await controller.getEarthquakeWeekly()) as IExternalSource[];
 		const latestPrediction =
 			(await predictionController.getLatestEarthquakePrediction()) as IEarthquakePrediction;
-
+		
 		let newNavbar = {
 			totalEarthquakes: 0,
 			maximumMagnitude: 0,

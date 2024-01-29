@@ -72,7 +72,7 @@ const onmessage = (event: MessageEvent) => {
 		pWaveTemp.x.push(date.getTime());
 		pWaveTemp.y.push(0);
 		pWaveTemp.x.push(date.getTime());
-		pWaveTemp.y.push(6000);
+		pWaveTemp.y.push(20000);
 
 		const data = pWavesData.get(station);
 

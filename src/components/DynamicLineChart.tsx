@@ -14,6 +14,11 @@ const Plot = dynamic(
 
 interface Props {
 	station?: string;
+	width?: number | string;
+	height?: number | string;
+	startRange?: number;
+	endRange?: number;
+	showTitle?: boolean;
 }
 
 export default class DynamicLineChart extends React.Component<Props> {
@@ -21,6 +26,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 	state = {
 		station: "",
+		showTitle: true,
 		prevContextValue: null,
 		waveData: [] as ISeismogram[],
 		samplingRate: 80,
@@ -127,6 +133,33 @@ export default class DynamicLineChart extends React.Component<Props> {
 	constructor(props: Props) {
 		super(props);
 		this.state.station = props.station;
+
+		if (props.showTitle !== undefined && props.showTitle !== null) {
+			this.state.showTitle = props.showTitle;
+		}
+
+		if (props.width) {
+			if (typeof props.width === "number") {
+				this.state.layout.width = props.width;
+			} else if (props.width == "100%") {
+				this.state.layout.width = window.innerWidth - 100;
+			}
+		}
+		if (props.height) {
+			if (typeof props.height === "number") {
+				this.state.layout.height = props.height;
+			} else if (props.height == "100%") {
+				this.state.layout.height = window.innerHeight - 100;
+			}
+		}
+		if (props.startRange && props.endRange) {
+			this.state.layout.yaxis.range = [props.startRange, props.endRange];
+			this.state.layout.yaxis2.range = [props.startRange, props.endRange];
+			this.state.layout.yaxis3.range = [props.startRange, props.endRange];
+			this.state.layout.yaxis4.range = [props.startRange, props.endRange];
+			this.state.layout.yaxis5.range = [props.startRange, props.endRange];
+			this.state.layout.yaxis6.range = [props.startRange, props.endRange];
+		}
 	}
 
 	componentDidMount() {
@@ -141,45 +174,47 @@ export default class DynamicLineChart extends React.Component<Props> {
 			if (!isMounted || !data) {
 				return; // Ignore messages if component is unmounted
 			}
-			
-			const { channelZ, channelN, channelE, layout, userDefinedRange } =
-				this.state;
-			if (userDefinedRange) {
-				layout.xaxis.range = userDefinedRange;
-			} else {
-				const now = Date.now();
-				const last = channelZ.x[channelZ.x.length - 1];
-				const first = channelZ.x[0];
-				const diff = last - first;
-				if (diff > 30000) {
-					layout.xaxis.range = [now - 30000, now];
-				} else {
-					layout.xaxis.range = [first, last];
-				}
-			}
 
-			this.setState({
-				revision: this.state.revision + 1,
-				// currentIndex: length,
-				// waveData: waveData.slice(length),
-				channelZ: {
-					...channelZ,
-					x: data.channelZ.x,
-					y: data.channelZ.y,
-				},
-				channelN: {
-					...channelN,
-					x: data.channelN.x,
-					y: data.channelN.y,
-				},
-				channelE: {
-					...channelE,
-					x: data.channelE.x,
-					y: data.channelE.y,
-				},
-				pWaves: data.pWaves,
-			});
-			layout.datarevision = this.state.revision + 1;
+			if (isMounted) {
+				const { channelZ, channelN, channelE, layout, userDefinedRange } =
+					this.state;
+				if (userDefinedRange) {
+					layout.xaxis.range = userDefinedRange;
+				} else {
+					const now = Date.now();
+					const last = channelZ.x[channelZ.x.length - 1];
+					const first = channelZ.x[0];
+					const diff = last - first;
+					if (diff > 30000) {
+						layout.xaxis.range = [now - 30000, now];
+					} else {
+						layout.xaxis.range = [first, last];
+					}
+				}
+
+				this.setState({
+					revision: this.state.revision + 1,
+					// currentIndex: length,
+					// waveData: waveData.slice(length),
+					channelZ: {
+						...channelZ,
+						x: data.channelZ.x,
+						y: data.channelZ.y,
+					},
+					channelN: {
+						...channelN,
+						x: data.channelN.x,
+						y: data.channelN.y,
+					},
+					channelE: {
+						...channelE,
+						x: data.channelE.x,
+						y: data.channelE.y,
+					},
+					pWaves: data.pWaves,
+				});
+				layout.datarevision = this.state.revision + 1;
+			}
 		};
 
 		if (this.state.channelZ.x.length === 0) {
@@ -193,6 +228,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 		return () => {
 			seismogramWorker?.removeEventListener("message", handleSeismogramWorker);
+			isMounted = false;
 		};
 	}
 	// componentDidUpdate(prevProps: Props) {
@@ -279,11 +315,17 @@ export default class DynamicLineChart extends React.Component<Props> {
 	render() {
 		return (
 			<div
-				className={`p-4 pt-0 relative h-[500px] transition-all duration-200 ease-in-out -translate-y-20`}
+				className={`p-4 pt-0 relative transition-all duration-200 ease-in-out -translate-y-20`}
+				style={{
+					height: this.state.layout.height,
+					width: this.state.layout.width,
+				}}
 			>
-				<h3 className="text-white text-lg font-semibold mb-2 text-center relative translate-y-20 z-10">
-					Sensor {this.state.station}
-				</h3>
+				{this.state.showTitle && (
+					<h3 className="text-white text-lg font-semibold mb-2 text-center relative translate-y-20 z-10">
+						Sensor {this.state.station}
+					</h3>
+				)}
 				<div>
 					<Plot
 						data={[

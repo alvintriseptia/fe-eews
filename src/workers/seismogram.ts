@@ -105,6 +105,7 @@ const onmessage = (event: MessageEvent) => {
 				};
 
 				const tempDataFromIndexedDB = await indexedDB.readFromIndexedDB(
+					"seismogramTempData",
 					station
 				);
 
@@ -125,12 +126,20 @@ const onmessage = (event: MessageEvent) => {
 				}
 
 				// save data to indexedDB
-				indexedDB.writeToIndexedDB(station, tempData);
+				await indexedDB.writeToIndexedDB({
+					objectStore: "seismogramTempData",
+					keyPath: "station",
+					key: station, 
+					data: tempData
+				});
 			}
 		);
 
 		seismogramInterval[station] = setInterval(async () => {
-			const tempData = await indexedDB.readFromIndexedDB(station);
+			const tempData = await indexedDB.readFromIndexedDB(
+				"seismogramTempData",
+				station
+			);
 			const data = seismogramData.get(station);
 			if (!tempData || tempData.channelZ.x.length === 0) return;
 			const currentLength = data.currentIndex;
@@ -251,7 +260,12 @@ const onmessage = (event: MessageEvent) => {
 				}
 
 				seismogramData.set(station, data);
-				indexedDB.writeToIndexedDB(station, tempData);
+				await indexedDB.writeToIndexedDB({
+					objectStore: "seismogramTempData",
+					keyPath: "station",
+					key: station, 
+					data: tempData
+				});
 
 				postMessage({
 					station: station,

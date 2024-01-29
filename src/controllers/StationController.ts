@@ -1,46 +1,33 @@
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 import { Seismogram, Station } from "@/models/_index";
 import { ISeismogram, IStation } from "@/entities/_index";
+import STATIONS_DATA from "@/assets/data/stations.json";
+import * as indexedDB from "@/lib/indexed-db";
+
+const stations = STATIONS_DATA as IStation[];
 
 /**
  * The StationController class handles the logic for managing stations.
  */
 class StationController {
 	private station = new Station();
-	private seismogramBBJI = new Seismogram("BBJI");
-	private seismogramSMRI = new Seismogram("SMRI");
-	private seismogramJAGI = new Seismogram("JAGI");
-	private seismogramUGM = new Seismogram("UGM");
-	private seismogramBKB = new Seismogram("BKB");
-	private seismogramCISI = new Seismogram("CISI");
-	private seismogramGSI = new Seismogram("GSI");
-	private seismogramBKNI = new Seismogram("BKNI");
-	private seismogramPMBI = new Seismogram("PMBI");
-	private seismogramLHMI = new Seismogram("LHMI");
-	private seismogramMNAI = new Seismogram("MNAI");
-	private seismogramPLAI = new Seismogram("PLAI");
-	private seismogramMMRI = new Seismogram("MMRI");
-	private seismogramSOEI = new Seismogram("SOEI");
-	private seismogramLUWI = new Seismogram("LUWI");
-	private seismogramSAUI = new Seismogram("SAUI");
-	private seismogramTOLI = new Seismogram("TOLI");
-	private seismogramSANI = new Seismogram("SANI");
-	private seismogramBNDI = new Seismogram("BNDI");
-	private seismogramFAKI = new Seismogram("FAKI");
-	private seismogramGENI = new Seismogram("GENI");
-	private seismogramTNTI = new Seismogram("TNTI");
 	private seismogramWorker: Worker;
+	seismograms: Map<string, Seismogram> = new Map([]);
 
-	constructor(seismogramWorker: Worker) {
+	constructor(seismogramWorker?: Worker) {
 		makeObservable(this, {
 			station: observable,
+			seismograms: observable,
 			getStations: action,
 			getStationByCode: action,
-			connectSeismogram: action,
-			disconnectSeismogram: action,
+			initSeismogram: action,
+			connectAllSeismogram: action,
+			disconnectAllSeismogram: action,
 		} as AnnotationsMap<this, any>);
 
-		this.seismogramWorker = seismogramWorker;
+		if (seismogramWorker) {
+			this.seismogramWorker = seismogramWorker;
+		}
 	}
 
 	/**
@@ -60,61 +47,119 @@ class StationController {
 		return this.station.fetchStationByCode(code);
 	}
 
+	async initSeismogram() {
+		let newSeismograms = this.seismograms;
+		const enabled_seismograms = (await indexedDB.readFromIndexedDB(
+			"seismograms",
+			"enabled_seismograms"
+		)) as string[] | null;
+
+		// if both enabled_seismograms and disabled_seismograms are null,
+		// then save the default stations to indexedDB enabled_seismograms
+		if (!enabled_seismograms) {
+			indexedDB.writeToIndexedDB({
+				objectStore: "seismograms",
+				keyPath: "type",
+				key: "enabled_seismograms",
+				data: stations.map((s) => s.code),
+			});
+		}
+
+		if (enabled_seismograms) {
+			for (let station of enabled_seismograms) {
+				newSeismograms.set(station, new Seismogram(station));
+			}
+
+			this.seismograms = new Map(newSeismograms);
+		}
+	}
+
+	async enableSeismogram(station: string) {
+		let newSeismograms = this.seismograms;
+		// add to indexedDB
+		await indexedDB.writeToIndexedDB({
+			objectStore: "seismograms",
+			keyPath: "type",
+			key: "enabled_seismograms",
+			data: [...this.seismograms.keys(), station],
+		});
+
+		newSeismograms.set(station, new Seismogram(station));
+		this.seismograms = new Map(newSeismograms);
+	}
+
+	async enableAllSeismogram() {
+		let newSeismograms = this.seismograms;
+		// add to indexedDB
+		await indexedDB.writeToIndexedDB({
+			objectStore: "seismograms",
+			keyPath: "type",
+			key: "enabled_seismograms",
+			data: stations.map((s) => s.code),
+		});
+
+		for (let station of stations) {
+			newSeismograms.set(station.code, new Seismogram(station.code));
+		}
+
+		this.seismograms = new Map(newSeismograms);
+	}
+
+	async disableSeismogram(station: string) {
+		let newSeismograms = this.seismograms;
+		// remove from indexedDB
+		await indexedDB.writeToIndexedDB({
+			objectStore: "seismograms",
+			keyPath: "type",
+			key: "enabled_seismograms",
+			data: [...newSeismograms.keys()].filter((s) => s !== station),
+		});
+
+		newSeismograms.delete(station);
+		this.seismograms = new Map(newSeismograms);
+	}
+
 	/**
 	 * Displays the seismogram of a station.
 	 * @param seismogram - The seismogram to display.
 	 */
-	connectSeismogram(mode: string) {
-		this.seismogramBBJI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramSMRI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramJAGI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramUGM.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramBKB.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramCISI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramGSI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramBKNI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramPMBI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramLHMI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramMNAI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramPLAI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramMMRI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramSOEI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramLUWI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramSAUI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramTOLI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramSANI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramBNDI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramFAKI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramGENI.streamSeismogram(this.seismogramWorker, mode);
-		this.seismogramTNTI.streamSeismogram(this.seismogramWorker, mode);
+	async connectAllSeismogram(mode: string) {
+		if (this.seismograms.size === 0) {
+			await this.initSeismogram();
+		}
+		console.log(this.seismograms);
+		for (const seismogram of this.seismograms.values()) {
+			seismogram.streamSeismogram(this.seismogramWorker, mode);
+		}
+	}
+
+	/**
+	 * Displays the seismogram of a station.
+	 * @param seismogram - The seismogram to display.
+	 * @param mode - The mode of the seismogram.
+	 * @param station - The station of the seismogram.
+	 */
+	connectSeismogram(mode: string, station: string) {
+		this.seismograms
+			.get(station)
+			?.streamSeismogram(this.seismogramWorker, mode);
 	}
 
 	/**
 	 * stop the seismogram worker.
 	 */
-	disconnectSeismogram() {
-		this.seismogramBBJI.stopSeismogram(this.seismogramWorker);
-		this.seismogramSMRI.stopSeismogram(this.seismogramWorker);
-		this.seismogramJAGI.stopSeismogram(this.seismogramWorker);
-		this.seismogramUGM.stopSeismogram(this.seismogramWorker);
-		this.seismogramBKB.stopSeismogram(this.seismogramWorker);
-		this.seismogramCISI.stopSeismogram(this.seismogramWorker);
-		this.seismogramGSI.stopSeismogram(this.seismogramWorker);
-		this.seismogramBKNI.stopSeismogram(this.seismogramWorker);
-		this.seismogramPMBI.stopSeismogram(this.seismogramWorker);
-		this.seismogramLHMI.stopSeismogram(this.seismogramWorker);
-		this.seismogramMNAI.stopSeismogram(this.seismogramWorker);
-		this.seismogramPLAI.stopSeismogram(this.seismogramWorker);
-		this.seismogramMMRI.stopSeismogram(this.seismogramWorker);
-		this.seismogramSOEI.stopSeismogram(this.seismogramWorker);
-		this.seismogramLUWI.stopSeismogram(this.seismogramWorker);
-		this.seismogramSAUI.stopSeismogram(this.seismogramWorker);
-		this.seismogramTOLI.stopSeismogram(this.seismogramWorker);
-		this.seismogramSANI.stopSeismogram(this.seismogramWorker);
-		this.seismogramBNDI.stopSeismogram(this.seismogramWorker);
-		this.seismogramFAKI.stopSeismogram(this.seismogramWorker);
-		this.seismogramGENI.stopSeismogram(this.seismogramWorker);
-		this.seismogramTNTI.stopSeismogram(this.seismogramWorker);
+	disconnectAllSeismogram() {
+		for (const seismogram of this.seismograms.values()) {
+			seismogram.stopSeismogram(this.seismogramWorker);
+		}
+	}
+
+	/**
+	 * stop the seismogram worker.
+	 * @param station - The station of the seismogram.
+	 */
+	disconnectSeismogram(station: string) {
+		this.seismograms.get(station)?.stopSeismogram(this.seismogramWorker);
 	}
 }
 
