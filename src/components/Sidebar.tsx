@@ -19,7 +19,11 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 			dateObj.setTime(dateObj.getTime() - offset);
 			const timezone = - (new Date().getTimezoneOffset() / 60);
 			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : timezone === 9 ? "WIT" : "";
-			time = dateObj.toLocaleTimeString() + " " + timezoneText;
+			time = dateObj.toLocaleTimeString("id-ID", {
+				hour: "2-digit",
+				minute: "2-digit",
+				second: "2-digit",
+			}) + " " + timezoneText;
 			
 			//date dd/mm/yyyy	
 			date = dateObj.toLocaleDateString("id-ID", {

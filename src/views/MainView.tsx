@@ -88,7 +88,7 @@ class MainView extends React.Component<Props> {
 		}
 	}
 
-	componentDidMount(): void {
+	async componentDidMount(){
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
 			id: "eews-map",
@@ -101,8 +101,15 @@ class MainView extends React.Component<Props> {
 		});
 
 		// Get saved stations
-		const stations = this.state.stationController.getStations();
+		const stations = await this.state.stationController.getStations();
 		this.state.controller.showStations(stations);
+
+		// setInterval(() => {
+		// 	this.state.stationController.getStations().then((stations) => {
+		// 		this.state.controller.showStations(stations);
+		// 	});
+		// }, 60000);
+
 		setTimeout(() => {
 			this.state.controller.connectEarthquakePrediction();
 		}, 2000);

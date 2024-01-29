@@ -1,4 +1,3 @@
-
 export interface IStation {
 	code: string;
 	network: string;
@@ -7,4 +6,28 @@ export interface IStation {
 	creation_date: string;
 	elevation: number;
 	description: string;
+	ch1: string | null;
+	ch2: string | null;
+	ch3: string | null;
+	ch4: string | null;
+	ch5: string | null;
+	ch6: string | null;
+	timech1: string | null;
+	timech2: string | null;
+	timech3: string | null;
+	timech4: string | null;
+	timech5: string | null;
+	timech6: string | null;
+	latency1: string | null;
+	latency2: string | null;
+	latency3: string | null;
+	latency4: string | null;
+	latency5: string | null;
+	latency6: string | null;
+	color1: string | null;
+	color2: string | null;
+	color3: string | null;
+	color4: string | null;
+	color5: string | null;
+	color6: string | null;
 }

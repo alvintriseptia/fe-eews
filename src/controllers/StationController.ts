@@ -1,10 +1,6 @@
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 import { Seismogram, Station } from "@/models/_index";
-import { ISeismogram, IStation } from "@/entities/_index";
-import STATIONS_DATA from "@/assets/data/stations.json";
-import * as indexedDB from "@/lib/indexed-db";
-
-const stations = STATIONS_DATA as IStation[];
+import { IStation } from "@/entities/_index";
 
 /**
  * The StationController class handles the logic for managing stations.
@@ -34,8 +30,8 @@ class StationController {
 	 * Retrieves all the saved stations.
 	 * @returns An array of IStation objects representing the saved stations.
 	 */
-	getStations(): IStation[] {
-		return this.station.fetchSavedStations();
+	async getStations(): Promise<IStation[]> {
+		return await this.station.fetchSavedStations();
 	}
 
 	/**
@@ -48,74 +44,22 @@ class StationController {
 	}
 
 	async initSeismogram() {
-		let newSeismograms = this.seismograms;
-		const enabled_seismograms = (await indexedDB.readFromIndexedDB(
-			"seismograms",
-			"enabled_seismograms"
-		)) as string[] | null;
-
-		// if both enabled_seismograms and disabled_seismograms are null,
-		// then save the default stations to indexedDB enabled_seismograms
-		if (!enabled_seismograms) {
-			indexedDB.writeToIndexedDB({
-				objectStore: "seismograms",
-				keyPath: "type",
-				key: "enabled_seismograms",
-				data: stations.map((s) => s.code),
-			});
-		}
-
-		if (enabled_seismograms) {
-			for (let station of enabled_seismograms) {
-				newSeismograms.set(station, new Seismogram(station));
-			}
-
-			this.seismograms = new Map(newSeismograms);
-		}
+		const newSeismograms = await this.station.initSeismogram();
+		this.seismograms = new Map(newSeismograms);
 	}
 
 	async enableSeismogram(station: string) {
-		let newSeismograms = this.seismograms;
-		// add to indexedDB
-		await indexedDB.writeToIndexedDB({
-			objectStore: "seismograms",
-			keyPath: "type",
-			key: "enabled_seismograms",
-			data: [...this.seismograms.keys(), station],
-		});
-
-		newSeismograms.set(station, new Seismogram(station));
+		const newSeismograms = await this.station.enableSeismogram(station);
 		this.seismograms = new Map(newSeismograms);
 	}
 
 	async enableAllSeismogram() {
-		let newSeismograms = this.seismograms;
-		// add to indexedDB
-		await indexedDB.writeToIndexedDB({
-			objectStore: "seismograms",
-			keyPath: "type",
-			key: "enabled_seismograms",
-			data: stations.map((s) => s.code),
-		});
-
-		for (let station of stations) {
-			newSeismograms.set(station.code, new Seismogram(station.code));
-		}
-
+		const newSeismograms = await this.station.enableAllSeismogram();
 		this.seismograms = new Map(newSeismograms);
 	}
 
 	async disableSeismogram(station: string) {
-		let newSeismograms = this.seismograms;
-		// remove from indexedDB
-		await indexedDB.writeToIndexedDB({
-			objectStore: "seismograms",
-			keyPath: "type",
-			key: "enabled_seismograms",
-			data: [...newSeismograms.keys()].filter((s) => s !== station),
-		});
-
-		newSeismograms.delete(station);
+		const newSeismograms = await this.station.disableSeismogram(station);
 		this.seismograms = new Map(newSeismograms);
 	}
 
@@ -127,7 +71,6 @@ class StationController {
 		if (this.seismograms.size === 0) {
 			await this.initSeismogram();
 		}
-		console.log(this.seismograms);
 		for (const seismogram of this.seismograms.values()) {
 			seismogram.streamSeismogram(this.seismogramWorker, mode);
 		}

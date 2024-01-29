@@ -1,12 +1,47 @@
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { IStation } from "@/entities/_index";
 import { ResponseStationsStatus } from "./response/_index";
+import * as indexedDB from "@/lib/indexed-db";
+import Seismogram from "./Seismogram";
+
 const stations = STATIONS_DATA as IStation[];
 
 /**
  * Represents a Station.
  */
-class Station {
+class Station implements IStation {
+	ch1: string;
+	ch2: string;
+	ch3: string;
+	ch4: string;
+	ch5: string;
+	ch6: string;
+	timech1: string;
+	timech2: string;
+	timech3: string;
+	timech4: string;
+	timech5: string;
+	timech6: string;
+	latency1: string;
+	latency2: string;
+	latency3: string;
+	latency4: string;
+	latency5: string;
+	latency6: string;
+	color1: string;
+	color2: string;
+	color3: string;
+	color4: string;
+	color5: string;
+	color6: string;
+	code: string;
+	network: string;
+	latitude: number;
+	longitude: number;
+	creation_date: string;
+	elevation: number;
+	description: string;
+	
 	/**
 	 * Saves the station to local storage.
 	 * @param code - The code of the station to be saved.
@@ -54,56 +89,14 @@ class Station {
 	 * Fetches all saved stations from local storage.
 	 * @returns An array of saved stations.
 	 */
-	fetchSavedStations() {
-		// const timestamp = new Date().getTime();
-		// const response = await fetch(
-		// 	`http://202.90.198.40/sismon-slmon/data/slmon.all.laststatus.json?_=${timestamp}`
-		// );
-		// const data = (await response.json()) as ResponseStationsStatus;
+	async fetchSavedStations() {
+		const timestamp = new Date().getTime();
+		const response = await fetch(
+			`/api/station-networks?_=${timestamp}`
+		);
+		const data = (await response.json()) as IStation[];
 
-		// const stationsStatus = data.features;
-
-		// for (const item of stationsStatus) {
-		// 	const station = stations.find((station) => {
-		// 		return station.code === item.properties.sta;
-		// 	});
-
-		// 	if (!station) {
-		// 		continue;
-		// 	}
-
-		// 	station.network = item.properties.net;
-		// 	station.latitude = parseFloat(item.geometry.coordinates[1]);
-		// 	station.longitude = parseFloat(item.geometry.coordinates[0]);
-		// 	station.creation_date = item.properties.time;
-		// 	station.elevation = item.geometry.coordinates[2];
-		// 	station.ch1 = item.properties.ch1;
-		// 	station.ch2 = item.properties.ch2;
-		// 	station.ch3 = item.properties.ch3;
-		// 	station.ch4 = item.properties.ch4;
-		// 	station.ch5 = item.properties.ch5;
-		// 	station.ch6 = item.properties.ch6;
-		// 	station.timech1 = item.properties.timech1;
-		// 	station.timech2 = item.properties.timech2;
-		// 	station.timech3 = item.properties.timech3;
-		// 	station.timech4 = item.properties.timech4;
-		// 	station.timech5 = item.properties.timech5;
-		// 	station.timech6 = item.properties.timech6;
-		// 	station.latency1 = item.properties.latency1;
-		// 	station.latency2 = item.properties.latency2;
-		// 	station.latency3 = item.properties.latency3;
-		// 	station.latency4 = item.properties.latency4;
-		// 	station.latency5 = item.properties.latency5;
-		// 	station.latency6 = item.properties.latency6;
-		// 	station.color1 = item.properties.color1;
-		// 	station.color2 = item.properties.color2;
-		// 	station.color3 = item.properties.color3;
-		// 	station.color4 = item.properties.color4;
-		// 	station.color5 = item.properties.color5;
-		// 	station.color6 = item.properties.color6;
-		// }
-
-		return stations;
+		return data;
 	}
 
 	/**
@@ -131,6 +124,87 @@ class Station {
 
 		// return station
 		return station;
+	}
+
+    async initSeismogram(){
+        const newSeismograms: Map<string, Seismogram> = new Map([]);
+		const enabled_seismograms = (await indexedDB.readFromIndexedDB(
+			"seismograms",
+			"enabled_seismograms"
+		)) as string[] | null;
+
+		// if both enabled_seismograms and disabled_seismograms are null,
+		// then save the default stations to indexedDB enabled_seismograms
+		if (!enabled_seismograms) {
+			indexedDB.writeToIndexedDB({
+				objectStore: "seismograms",
+				keyPath: "type",
+				key: "enabled_seismograms",
+				data: stations.map((s) => s.code),
+			});
+		}
+
+		if (enabled_seismograms) {
+			for (let station of enabled_seismograms) {
+				newSeismograms.set(station, new Seismogram(station));
+			}
+        }
+        
+        return newSeismograms;
+    }
+
+	async enableSeismogram(station: string) {
+        const newSeismograms: Map<string, Seismogram> = new Map([]);
+		const db_enabled_seismograms = (await indexedDB.readFromIndexedDB(
+			"seismograms",
+			"enabled_seismograms"
+		)) as string[] | null;
+
+		const current_enabled_seismograms = db_enabled_seismograms || [];
+
+		// add to indexedDB
+		await indexedDB.writeToIndexedDB({
+			objectStore: "seismograms",
+			keyPath: "type",
+			key: "enabled_seismograms",
+			data: [...current_enabled_seismograms, station],
+		});
+
+		newSeismograms.set(station, new Seismogram(station));
+		
+		return newSeismograms;
+	}
+
+	async enableAllSeismogram() {
+		const newSeismograms: Map<string, Seismogram> = new Map([]);
+		// add to indexedDB
+		await indexedDB.writeToIndexedDB({
+			objectStore: "seismograms",
+			keyPath: "type",
+			key: "enabled_seismograms",
+			data: stations.map((s) => s.code),
+		});
+
+		for (let station of stations) {
+			newSeismograms.set(station.code, new Seismogram(station.code));
+		}
+
+		return newSeismograms;
+	}
+
+	async disableSeismogram(station: string) {
+		const newSeismograms: Map<string, Seismogram> = new Map([]);
+		// remove from indexedDB
+		await indexedDB.writeToIndexedDB({
+			objectStore: "seismograms",
+			keyPath: "type",
+			key: "enabled_seismograms",
+			data: [...newSeismograms.keys()].filter((s) => s !== station),
+		});
+
+		newSeismograms.delete(station);
+		
+		return newSeismograms;
 	}
 }
 
