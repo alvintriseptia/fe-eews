@@ -378,8 +378,8 @@ export default class MainController {
 			this.pWavesWorker.postMessage({
 				command: "stop",
 			});
-		} 
-		
+		}
+
 		if (this.sWavesWorker) {
 			this.sWavesWorker.postMessage({
 				command: "stop",

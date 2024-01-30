@@ -1,19 +1,18 @@
 import dynamic from "next/dynamic";
 import { Layout } from "plotly.js";
 import React, { Component } from "react";
-import { config } from '../middleware';
 
 const Plot = dynamic(
-	() => import("react-plotly.js").then((mod) => mod.default),
-	{
-		ssr: false,
-	}
+  () => import("react-plotly.js").then((mod) => mod.default),
+  {
+    ssr: false,
+  }
 );
 
 export type WaveChannel = {
-	x: number[];
-	y: number[];
-	name: string;
+  x: number[];
+  y: number[];
+  name: string;
 };
 
 export interface DetectionRecapContentProps {
@@ -128,69 +127,76 @@ class DetectionRecapContent extends Component<DetectionRecapContentProps> {
 		}
 	}
 
-	render() {
-		let date = new Date(this.props.time_stamp);
-		const time = date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
+  render() {
+    let date = new Date(this.props.time_stamp);
+    const time =
+      date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
 
-		return (
-			<section className="flex flex-col p-4 border-b">
-				<div className="flex justify-between mb-4 relative z-10">
-					<div>
-						<h6 className="text-tews-boulder text-xs">Lokasi</h6>
-						<p className="text-white max-width-[200px]">
-							{this.props.location}
-						</p>
-					</div>
+    return (
+      <section className="flex flex-col p-4 border-b">
+        <div className="flex justify-between mb-4 relative z-10">
+          <div>
+            <h6 className="text-tews-boulder text-xs">Lokasi</h6>
+            <p className="text-white max-width-[200px]">
+              {this.props.location}
+            </p>
+          </div>
 
-					<div>
-						<h6 className="text-tews-boulder text-xs">Waktu</h6>
-						<p className="text-white">{time}</p>
-					</div>
+          <div>
+            <h6 className="text-tews-boulder text-xs">Waktu</h6>
+            <p className="text-white">{time}</p>
+          </div>
 
-					<div>
-						<h6 className="text-tews-boulder text-xs">Magnitude</h6>
-						<p className="text-white">{this.props.magnitude?.toFixed(2) || ""}</p>
-					</div>
+          <div>
+            <h6 className="text-tews-boulder text-xs">Magnitude</h6>
+            <p className="text-white">
+              {this.props.magnitude?.toFixed(2) || ""}
+            </p>
+          </div>
 
-					<div>
-						<h6 className="text-tews-boulder text-xs">Kedalaman</h6>
-						<p className="text-white">{this.props.depth?.toFixed(2) || ""}Km</p>
-					</div>
+          <div>
+            <h6 className="text-tews-boulder text-xs">Kedalaman</h6>
+            <p className="text-white">{this.props.depth?.toFixed(2) || ""}Km</p>
+          </div>
 
-					<div>
-						<h6 className="text-tews-boulder text-xs">Latitude</h6>
-						<p className="text-white">{this.props.latitude?.toFixed(2) || ""}</p>
-					</div>
+          <div>
+            <h6 className="text-tews-boulder text-xs">Latitude</h6>
+            <p className="text-white">
+              {this.props.latitude?.toFixed(2) || ""}
+            </p>
+          </div>
 
-					<div>
-						<h6 className="text-tews-boulder text-xs">Longitude</h6>
-						<p className="text-white">{this.props.longitude?.toFixed(2) || ""}</p>
-					</div>
-					<div>
-						<h6 className="text-tews-boulder text-xs">Stasiun</h6>
-						<p className="text-white">{this.props.station}</p>
-					</div>
-				</div>
+          <div>
+            <h6 className="text-tews-boulder text-xs">Longitude</h6>
+            <p className="text-white">
+              {this.props.longitude?.toFixed(2) || ""}
+            </p>
+          </div>
+          <div>
+            <h6 className="text-tews-boulder text-xs">Stasiun</h6>
+            <p className="text-white">{this.props.station}</p>
+          </div>
+        </div>
 
-				<div className="w-full relative -top-24 right-0">
-					<Plot
-						data={[
-							this.state.z_channel,
-							this.state.n_channel,
-							this.state.e_channel,
-							...this.state.pwaves,
-						]}
-						layout={this.state.layout}
-						style={{ width: "100%", height: "100%" }}
-						revision={this.state.revision}
-						config={{
-							displayModeBar: false,
-						}}
-					/>
-				</div>
-			</section>
-		);
-	}
+        <div className="w-full relative -top-24 right-0">
+          <Plot
+            data={[
+              this.state.z_channel,
+              this.state.n_channel,
+              this.state.e_channel,
+              ...this.state.pwaves,
+            ]}
+            layout={this.state.layout}
+            style={{ width: "100%", height: "100%" }}
+            revision={this.state.revision}
+            config={{
+              displayModeBar: false,
+            }}
+          />
+        </div>
+      </section>
+    );
+  }
 }
 
 export default DetectionRecapContent;
