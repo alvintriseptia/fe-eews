@@ -105,7 +105,7 @@ class StationView extends React.Component<Props> {
 	}
 
 	async enableAllSeismogram() {
-		await this.state.controller.enableAllStation();
+		await this.state.controller.enableAllStations();
 		this.state.controller.connectAllSeismogram("simulation");
 		this.setState({ dialogOpen: false });
 	}

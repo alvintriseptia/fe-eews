@@ -117,7 +117,7 @@ class Station implements IStation {
 		}
 	}
 
-	async enableAllStation() {
+	async enableAllStations() {
 		try {
 			const newSeismograms: Map<string, Seismogram> = new Map([]);
 			// add to indexedDB

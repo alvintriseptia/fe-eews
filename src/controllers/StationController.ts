@@ -15,10 +15,14 @@ class StationController {
 			station: observable,
 			seismograms: observable,
 			getStations: action,
-			getStationByCode: action,
-			initSeismogram: action,
+			initStations: action,
+			enableStation: action,
+			enableAllStations: action,
+			disableStation: action,
+			connectSeismogram: action,
 			connectAllSeismogram: action,
 			disconnectAllSeismogram: action,
+			disconnectSeismogram: action,
 		} as AnnotationsMap<this, any>);
 
 		if (seismogramWorker) {
@@ -51,8 +55,8 @@ class StationController {
 		}
 	}
 
-	async enableAllStation() {
-		const newSeismograms = await this.station.enableAllStation();
+	async enableAllStations() {
+		const newSeismograms = await this.station.enableAllStations();
 		if (newSeismograms) {
 			this.seismograms = new Map(newSeismograms);
 		}
