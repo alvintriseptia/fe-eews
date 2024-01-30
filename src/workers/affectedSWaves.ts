@@ -4,7 +4,7 @@ import * as turf from "@turf/turf";
 let isOnMessage = false;
 
 const onmessage = async (event: MessageEvent) => {
-	const { nearestRegencies, sWave, sWaveImpacted, earthquakePrediction } = event.data;
+	const { nearestRegencies, sWave, sWaveImpacted, earthquakeDetection } = event.data;
 	if (isOnMessage) {
 		return;
 	}
@@ -53,12 +53,12 @@ const onmessage = async (event: MessageEvent) => {
 				) {
 					// calculate intensity
 					const distance = turf.distance(
-						turf.point([earthquakePrediction.long, earthquakePrediction.lat]),
+						turf.point([earthquakeDetection.long, earthquakeDetection.lat]),
 						turf.point([regency.longitude, regency.latitude])
 					);
 					const intensity =
-						parseFloat(earthquakePrediction.mag) > 0
-							? parseFloat(earthquakePrediction.mag) - Math.round(distance / 100)
+						parseFloat(earthquakeDetection.mag) > 0
+							? parseFloat(earthquakeDetection.mag) - Math.round(distance / 100)
 							: 0;
 					if (intensity < 1) {
 						//stop simulation

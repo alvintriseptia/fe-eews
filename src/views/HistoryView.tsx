@@ -1,29 +1,28 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { PredictionController } from "@/controllers/_index";
-import { IEarthquakePrediction, IMap, ISeismogram } from "@/entities/_index";
+import { DetectionController } from "@/controllers/_index";
+import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import {
 	Filterbar,
 	Navbar,
-	PredictionCard,
-	PredictionRecapContent,
+	DetectionCard,
+	DetectionRecapContent,
 } from "@/components/_index";
 import {
-	PredictionRecapContentProps,
-	WaveChannel,
-} from "@/components/PredictionRecapContent";
+	DetectionRecapContentProps as DetectionRecapContentProps,
+} from "@/components/DetectionRecapContent";
 import RenderIfVisible from "react-render-if-visible";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
 interface Props {
-	controller: PredictionController;
-	historyPedictions: IEarthquakePrediction[];
+	controller: DetectionController;
+	historyDetections: IEarthquakeDetection[];
 }
 
-class PredictionView extends React.Component<Props> {
+class HistoryView extends React.Component<Props> {
 	state = {
-		controller: {} as PredictionController,
-		earthquakePrediction: {} as IEarthquakePrediction,
+		controller: {} as DetectionController,
+		earthquakeDetection: {} as IEarthquakeDetection,
 		seismogram: {} as ISeismogram,
 		navbar: {
 			isLoggedIn: true,
@@ -34,8 +33,8 @@ class PredictionView extends React.Component<Props> {
 			headerInfos: [],
 			btnAuth: null,
 		},
-		recapPrediction: {} as PredictionRecapContentProps,
-		historyPedictions: [] as IEarthquakePrediction[],
+		recapDetection: {} as DetectionRecapContentProps,
+		historyDetections: [] as IEarthquakeDetection[],
 		rerender: 0,
 		currentFilterStartDate: new Date().getTime() - 7 * 24 * 60 * 60 * 1000,
 		currentFilterEndDate: new Date().getTime(),
@@ -43,20 +42,20 @@ class PredictionView extends React.Component<Props> {
 	constructor(props: Props) {
 		super(props);
 		this.state.controller = props.controller;
-		this.state.historyPedictions = props.historyPedictions;
+		this.state.historyDetections = props.historyDetections;
 
 		this.handleFilter.bind(this);
-		this.detailEarthquakePrediction.bind(this);
+		this.detailEarthquakeDetection.bind(this);
 	}
 
 	componentDidMount(): void {
-		if (!this.state.controller.addEarthquakePredictionLocations) return;
+		if (!this.state.controller.addEarthquakeDetectionLocations) return;
 
 		this.state.controller
-			.addEarthquakePredictionLocations(this.state.historyPedictions)
+			.addEarthquakeDetectionLocations(this.state.historyDetections)
 			.then((result) => {
 				if (result) {
-					this.setState({ historyPedictions: [...result] });
+					this.setState({ historyDetection: [...result] });
 				}
 			});
 	}
@@ -67,8 +66,8 @@ class PredictionView extends React.Component<Props> {
 		snapshot?: any
 	): void {
 		if (prevState.rerender !== this.state.rerender) {
-			this.state.controller.addEarthquakePredictionLocations(
-				this.state.historyPedictions
+			this.state.controller.addEarthquakeDetectionLocations(
+				this.state.historyDetections
 			);
 		}
 	}
@@ -90,23 +89,23 @@ class PredictionView extends React.Component<Props> {
 			end_date = new Date().getTime();
 		}
 
-		const newHistoryPedictions =
-			await this.state.controller.filterHistoryEarthquakePrediction(
+		const newHistoryDetection =
+			await this.state.controller.filterHistoryEarthquakeDetection(
 				start_date,
 				end_date
 			);
 
 		this.setState({
-			historyPedictions: [...newHistoryPedictions],
+			historyDetection: [...newHistoryDetection],
 			rerender: this.state.rerender + 1,
 			currentFilterStartDate: start_date,
 			currentFilterEndDate: end_date,
 		});
 	}
 
-	async detailEarthquakePrediction(earthquake: IEarthquakePrediction) {
+	async detailEarthquakeDetection(earthquake: IEarthquakeDetection) {
 		const seismogram =
-			await this.state.controller.getDetailEarthquakePrediction(
+			await this.state.controller.getDetailEarthquakeDetection(
 				earthquake.station,
 				earthquake.time_stamp,
 				{
@@ -184,7 +183,7 @@ class PredictionView extends React.Component<Props> {
 				yaxis: "y6",
 			}
 		);
-		const data: PredictionRecapContentProps = {
+		const data: DetectionRecapContentProps = {
 			...earthquake,
 			z_channel,
 			n_channel,
@@ -199,11 +198,11 @@ class PredictionView extends React.Component<Props> {
 			location: earthquake.location,
 		};
 
-		this.setState({ recapPrediction: data });
+		this.setState({ recapDetection: data });
 	}
 
 	download() {
-		this.state.controller.exportHistoryEarthquakePrediction(
+		this.state.controller.exportHistoryEarthquakeDetection(
 			this.state.currentFilterStartDate,
 			this.state.currentFilterEndDate
 		);
@@ -218,12 +217,12 @@ class PredictionView extends React.Component<Props> {
 				<section className="h-full grid grid-cols-12">
 					<div className="h-full overflow-y-auto overflow-x-hidden col-span-5 pb-32">
 						<div className="flex flex-col p-4">
-							{this.state.historyPedictions && (
+							{this.state.historyDetections && (
 								<div className="text-white mb-5 flex justify-between items-center">
 									<div>
 										<h6 className="text-xs mb-1">JUMLAH PREDIKSI</h6>
 										<h4 className="text-3xl font-semibold">
-											{this.state.historyPedictions.length}
+											{this.state.historyDetections.length}
 										</h4>
 									</div>
 
@@ -237,25 +236,25 @@ class PredictionView extends React.Component<Props> {
 								</div>
 							)}
 
-							{!this.state.historyPedictions ||
-							this.state.historyPedictions.length === 0 ? (
+							{!this.state.historyDetections ||
+							this.state.historyDetections.length === 0 ? (
 								<div className="flex justify-center items-center h-full">
 									<h5 className="text-sm text-gray-500">Tidak ada data</h5>
 								</div>
-							) : (this.state.historyPedictions &&
-										this.state.historyPedictions.map((prediction, index) => {
+							) : (this.state.historyDetections &&
+										this.state.historyDetections.map((detection, index) => {
 											return (
 												<RenderIfVisible key={index}>
-													<PredictionCard
-														location={prediction.location || ""}
-														magnitude={prediction.mag || 0}
-														latitude={prediction.lat || 0}
-														longitude={prediction.long || 0}
-														time={prediction.time_stamp || 0}
-														depth={prediction.depth || 0}
+													<DetectionCard
+														location={detection.location || ""}
+														magnitude={detection.mag || 0}
+														latitude={detection.lat || 0}
+														longitude={detection.long || 0}
+														time={detection.time_stamp || 0}
+														depth={detection.depth || 0}
 														key={index}
 														onClick={() =>
-															this.detailEarthquakePrediction(prediction)
+															this.detailEarthquakeDetection(detection)
 														}
 													/>
 												</RenderIfVisible>
@@ -268,9 +267,9 @@ class PredictionView extends React.Component<Props> {
 					<div className="col-span-7">
 						<div id="tews-history-map" className={`w-full h-[48%]`}></div>
 						<div className="w-full">
-							{this.state.recapPrediction &&
-								this.state.recapPrediction.station && (
-									<PredictionRecapContent {...this.state.recapPrediction} />
+							{this.state.recapDetection &&
+								this.state.recapDetection.station && (
+									<DetectionRecapContent {...this.state.recapDetection} />
 								)}
 						</div>
 					</div>
@@ -280,4 +279,4 @@ class PredictionView extends React.Component<Props> {
 	}
 }
 
-export default observer(PredictionView);
+export default observer(HistoryView);

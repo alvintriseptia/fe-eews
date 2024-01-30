@@ -1,9 +1,9 @@
-import { IEarthquakePrediction, ISeismogram } from "@/entities/_index";
+import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 
-export default class EarthquakePrediction implements IEarthquakePrediction {
+export default class EarthquakeDetection implements IEarthquakeDetection {
 	title: string;
 	description: string;
-	prediction: string;
+	detection: string;
 	station: string;
 	time_stamp: number;
 	depth: number;
@@ -13,23 +13,23 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 	countdown: number;
 	location: string;
 
-	constructor(earthquakePrediction?: IEarthquakePrediction) {
-		if (earthquakePrediction) {
-			this.title = earthquakePrediction.title;
-			this.description = earthquakePrediction.description;
-			this.prediction = earthquakePrediction.prediction;
-			this.time_stamp = earthquakePrediction.time_stamp;
-			this.depth = earthquakePrediction.depth;
-			this.lat = earthquakePrediction.lat;
-			this.long = earthquakePrediction.long;
-			this.mag = earthquakePrediction.mag;
-			this.countdown = earthquakePrediction.countdown;
-			this.station = earthquakePrediction.station;
-			this.location = earthquakePrediction.location;
+	constructor(earthquakeDetection?: IEarthquakeDetection) {
+		if (earthquakeDetection) {
+			this.title = earthquakeDetection.title;
+			this.description = earthquakeDetection.description;
+			this.detection = earthquakeDetection.detection;
+			this.time_stamp = earthquakeDetection.time_stamp;
+			this.depth = earthquakeDetection.depth;
+			this.lat = earthquakeDetection.lat;
+			this.long = earthquakeDetection.long;
+			this.mag = earthquakeDetection.mag;
+			this.countdown = earthquakeDetection.countdown;
+			this.station = earthquakeDetection.station;
+			this.location = earthquakeDetection.location;
 		}
 	}
 
-	async fetchLatestEarthquakePrediction() {
+	async fetchLatestEarthquakeDetection() {
 		const time_stamp = new Date().getTime();
 		let start_date = time_stamp - 1 * 24 * 60 * 60 * 1000;
 		let end_date = time_stamp;
@@ -38,17 +38,17 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 		start_date = Math.floor(start_date);
 		end_date = Math.floor(end_date);
 
-		const response = await this.fetchHistoryEarthquakePrediction(
+		const response = await this.fetchHistoryEarthquakeDetection(
 			start_date,
 			end_date
 		);
 
 		if (response.length) return response[0];
 
-		throw new Error("No earthquake prediction found");
+		throw new Error("No earthquake detection found");
 	}
 
-	async fetchHistoryEarthquakePrediction(start_date: number, end_date: number) {
+	async fetchHistoryEarthquakeDetection(start_date: number, end_date: number) {
 		try {
 			// ubah milliseconds menjadi format unix
 			start_date = Math.floor(start_date);
@@ -60,13 +60,13 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 
 			if (data.error) throw new Error(data.error);
 
-			return Object.values(data) as IEarthquakePrediction[];
+			return Object.values(data) as IEarthquakeDetection[];
 		} catch (error) {
 			throw error;
 		}
 	}
 
-	async fetchSeismogramEarthquakePrediction(
+	async fetchSeismogramEarthquakeDetection(
 		station: string,
 		start_date: number,
 		end_date: number
@@ -108,7 +108,7 @@ export default class EarthquakePrediction implements IEarthquakePrediction {
 		}
 	}
 
-	async exportHistoryEarthquakePrediction(
+	async exportHistoryEarthquakeDetection(
 		start_date: number,
 		end_date: number
 	) {

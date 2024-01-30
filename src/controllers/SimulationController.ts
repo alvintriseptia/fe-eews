@@ -1,7 +1,7 @@
 import { IMap } from "@/entities/IMap";
-import { IEarthquakePrediction, IStation } from "@/entities/_index";
+import { IEarthquakeDetection, IStation } from "@/entities/_index";
 import {
-	EarthquakePrediction,
+	EarthquakeDetection,
 	ExternalSource,
 	Map as TEWSMap,
 	Notification,
@@ -18,14 +18,14 @@ import * as turf from "@turf/turf";
  */
 export default class SimulationController {
 	private externalSource = new ExternalSource();
-	private notificationEarthquakePrediction = new Notification();
+	private notificationEarthquakeDetection = new Notification();
 	private notificationEarthquake = new Notification();
 	private notificationSWaveAffected = new Notification();
 	private map = new TEWSMap();
-	private earthquakePredictionInterval: NodeJS.Timeout;
-	private earthquakePredictionWorker: Worker;
+	private earthquakeDetectionInterval: NodeJS.Timeout;
+	private earthquakeDetectionWorker: Worker;
 	private countdown: number = 0;
-	earthquakePrediction = new EarthquakePrediction();
+	earthquakeDetection = new EarthquakeDetection();
 	private clearTimeout: NodeJS.Timeout;
 
 	private seismogramWorker: Worker;
@@ -42,18 +42,18 @@ export default class SimulationController {
 
 	constructor() {
 		makeObservable(this, {
-			earthquakePrediction: observable,
+			earthquakeDetection: observable,
 			getEarthquakeWeekly: action,
 			getLatestEarthquake: action,
 			getLatestFeltEarthquake: action,
-			getLatestEarthquakePrediction: action,
-			connectEarthquakePrediction: action,
+			getLatestEarthquakeDetection: action,
+			connectEarthquakeDetection: action,
 			showStations: action,
 			showMap: action,
 			stopSimulation: action,
 		} as AnnotationsMap<this, any>);
 
-		this.notificationEarthquakePrediction.setNotification(
+		this.notificationEarthquakeDetection.setNotification(
 			"Peringatan Gempa",
 			"/audio/tingtong.mp3",
 			"",
@@ -85,8 +85,8 @@ export default class SimulationController {
 			new URL("../workers/seismogram.ts", import.meta.url)
 		);
 
-		this.earthquakePredictionWorker = new Worker(
-			new URL("../workers/earthquakePrediction.ts", import.meta.url)
+		this.earthquakeDetectionWorker = new Worker(
+			new URL("../workers/earthquakeDetection.ts", import.meta.url)
 		);
 
 		this.pWavesWorker = new Worker(
@@ -131,23 +131,23 @@ export default class SimulationController {
 
 	// EARTHQUAKE PREDICTION
 	/**
-	 * Retrieves the latest earthquake prediction.
+	 * Retrieves the latest earthquake detection.
 	 */
-	getLatestEarthquakePrediction() {}
+	getLatestEarthquakeDetection() {}
 
 	/**
-	 * Connects to the earthquake prediction service.
+	 * Connects to the earthquake detection service.
 	 */
-	connectEarthquakePrediction() {
-		this.earthquakePredictionWorker.postMessage({
+	connectEarthquakeDetection() {
+		this.earthquakeDetectionWorker.postMessage({
 			mode: "simulation",
 		});
 
-		this.earthquakePredictionWorker.onmessage = async (event: MessageEvent) => {
+		this.earthquakeDetectionWorker.onmessage = async (event: MessageEvent) => {
 			const { data } = event;
 			const date = new Date(data.creation_date);
 
-			const earthquakePrediction: IEarthquakePrediction = {
+			const earthquakeDetection: IEarthquakeDetection = {
 				title: "Terdeteksi Gelombang P",
 				description: `Harap perhatian, muncul deteksi gelombang P di stasiun ${data.station}`,
 				time_stamp: isNaN(date.getTime()) ? Date.now() : date.getTime(),
@@ -155,48 +155,48 @@ export default class SimulationController {
 				lat: data.lat,
 				long: data.long,
 				mag: data.mag,
-				prediction: "warning",
+				detection: "warning",
 				countdown: 10,
 				station: "BBJI",
 			};
 
-			if (earthquakePrediction.prediction === "warning") {
-				this.clearEarthquakePrediction(false);
+			if (earthquakeDetection.detection === "warning") {
+				this.clearEarthquakeDetection(false);
 
 				// GET RANDOM STATION (TESTING)
 				const stasiun = STATIONS_DATA.find(
-					(station) => station.code === earthquakePrediction.station
+					(station) => station.code === earthquakeDetection.station
 				);
 
 				// EARTHQUAKE PREDICTION LOCATION
-				this.map.addEarthquakePrediction(
+				this.map.addEarthquakeDetection(
 					{
-						longitude: earthquakePrediction.long,
-						latitude: earthquakePrediction.lat,
+						longitude: earthquakeDetection.long,
+						latitude: earthquakeDetection.lat,
 					},
 					stasiun
 				);
 
 				// EARTHQUAKE PREDICTION DATA
 				this.countdown = 10;
-				this.earthquakePrediction = new EarthquakePrediction(
-					earthquakePrediction as IEarthquakePrediction
+				this.earthquakeDetection = new EarthquakeDetection(
+					earthquakeDetection as IEarthquakeDetection
 				);
 				let address = await this.map.getAreaName({
-					longitude: earthquakePrediction.long,
-					latitude: earthquakePrediction.lat,
+					longitude: earthquakeDetection.long,
+					latitude: earthquakeDetection.lat,
 				});
 
-				this.notificationEarthquakePrediction.setMessage(
+				this.notificationEarthquakeDetection.setMessage(
 					`Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`
 				);
-				this.notificationEarthquakePrediction.playNotification();
+				this.notificationEarthquakeDetection.playNotification();
 
 				// SORTING NEAREST REGENCIES
 				//calculate distance between wave center and province center
 				this.nearestRegencies.forEach((regency: RegionType) => {
 					const distance = turf.distance(
-						turf.point([earthquakePrediction.long, earthquakePrediction.lat]),
+						turf.point([earthquakeDetection.long, earthquakeDetection.lat]),
 						turf.point([regency.longitude, regency.latitude])
 					);
 					regency.distance = distance;
@@ -206,7 +206,7 @@ export default class SimulationController {
 				this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
 
 				// EARTHQUAKE PREDICTION COUNTDOWN
-				this.earthquakePredictionInterval = setInterval(() => {
+				this.earthquakeDetectionInterval = setInterval(() => {
 					this.countdown--;
 					if (this.countdown === 0) {
 						this.notificationEarthquake.setMessage(`
@@ -214,29 +214,29 @@ export default class SimulationController {
 						this.notificationEarthquake.playNotification();
 						const earthquake = {
 							title: "Terjadi Gempa Bumi",
-							prediction: "earthquake",
+							detection: "earthquake",
 							description: `Perhatian! telah terjadi gempa bumi di wilayah ${address}, segera lakukan tindakan mitigasi!`,
 							time_stamp: Date.now(),
-							depth: this.earthquakePrediction.depth,
-							lat: this.earthquakePrediction.lat,
-							long: this.earthquakePrediction.long,
-							mag: this.earthquakePrediction.mag,
+							depth: this.earthquakeDetection.depth,
+							lat: this.earthquakeDetection.lat,
+							long: this.earthquakeDetection.long,
+							mag: this.earthquakeDetection.mag,
 							countdown: -1,
 						};
 
-						this.earthquakePrediction = new EarthquakePrediction(
-							earthquake as IEarthquakePrediction
+						this.earthquakeDetection = new EarthquakeDetection(
+							earthquake as IEarthquakeDetection
 						);
 
-						clearInterval(this.earthquakePredictionInterval);
+						clearInterval(this.earthquakeDetectionInterval);
 					}
 				}, 1000);
 
 				this.pWavesWorker.postMessage({
 					command: "start",
 					earthquakeEpicenter: {
-						longitude: earthquakePrediction.long,
-						latitude: earthquakePrediction.lat,
+						longitude: earthquakeDetection.long,
+						latitude: earthquakeDetection.lat,
 					},
 				});
 
@@ -256,8 +256,8 @@ export default class SimulationController {
 				this.sWavesWorker.postMessage({
 					command: "start",
 					earthquakeEpicenter: {
-						longitude: earthquakePrediction.long,
-						latitude: earthquakePrediction.lat,
+						longitude: earthquakeDetection.long,
+						latitude: earthquakeDetection.lat,
 					},
 				});
 
@@ -271,7 +271,7 @@ export default class SimulationController {
 						nearestRegencies: this.nearestRegencies,
 						sWave: sWave,
 						sWaveImpacted: this.affectedSWaves,
-						earthquakePrediction: this.earthquakePrediction,
+						earthquakeDetection: this.earthquakeDetection,
 					});
 				};
 
@@ -288,7 +288,7 @@ export default class SimulationController {
 
 					if (data.message == "stop") {
 						this.stopSimulation();
-						this.clearEarthquakePrediction(true);
+						this.clearEarthquakeDetection(true);
 					} else {
 						const regenciesData = data.sWaveImpacted;
 						this.affectedSWaves = regenciesData;
@@ -300,13 +300,13 @@ export default class SimulationController {
 		};
 	}
 
-	disconnectEarthquakePrediction() {
-		this.earthquakePredictionWorker.terminate();
-		this.earthquakePredictionWorker = null;
-		clearInterval(this.earthquakePredictionInterval);
+	disconnectEarthquakeDetection() {
+		this.earthquakeDetectionWorker.terminate();
+		this.earthquakeDetectionWorker = null;
+		clearInterval(this.earthquakeDetectionInterval);
 	}
 
-	clearEarthquakePrediction(delay: boolean) {
+	clearEarthquakeDetection(delay: boolean) {
 		if (!delay) {
 			this.stopSimulation();
 
@@ -321,12 +321,12 @@ export default class SimulationController {
 				this.affectedSWaves = [];
 			}
 
-			this.earthquakePrediction = new EarthquakePrediction();
+			this.earthquakeDetection = new EarthquakeDetection();
 
-			this.map.clearEarthquakePrediction();
+			this.map.clearEarthquakeDetection();
 
 			clearTimeout(this.clearTimeout);
-			clearInterval(this.earthquakePredictionInterval);
+			clearInterval(this.earthquakeDetectionInterval);
 		} else {
 			this.clearTimeout = setTimeout(() => {
 				if (this.affectedPWaves.features.length > 0) {
@@ -340,9 +340,9 @@ export default class SimulationController {
 					this.affectedSWaves = [];
 				}
 
-				this.earthquakePrediction = new EarthquakePrediction();
+				this.earthquakeDetection = new EarthquakeDetection();
 
-				this.map.clearEarthquakePrediction();
+				this.map.clearEarthquakeDetection();
 			}, 180000);
 		}
 	}

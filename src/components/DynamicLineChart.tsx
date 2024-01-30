@@ -1,8 +1,7 @@
 import React from "react";
-import { IEarthquakePrediction, ISeismogram } from "@/entities/_index";
+import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import dynamic from "next/dynamic";
 import { Layout, PlotRelayoutEvent } from "plotly.js";
-import { SeismogramDataType } from "@/workers/seismogram";
 import SeismogramContext from "@/stores/SeismogramContext";
 
 const Plot = dynamic(
@@ -125,7 +124,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 				yside: "left plot",
 			},
 		} as Partial<Layout>,
-		earthquakePredictions: [] as IEarthquakePrediction[],
+		earthquakeDetections: [] as IEarthquakeDetection[],
 		revision: 0,
 		userDefinedRange: null,
 	};
@@ -230,17 +229,17 @@ export default class DynamicLineChart extends React.Component<Props> {
 	}
 	// componentDidUpdate(prevProps: Props) {
 	// 	//context is updated
-	// 	const earthquakePrediction = (this.context as any)
-	// 		?.earthquakePrediction as IEarthquakePrediction | null;
+	// 	const earthquakeDetection = (this.context as any)
+	// 		?.earthquakeDetection as IEarthquakeDetection | null;
 	// 	if (
-	// 		earthquakePrediction &&
-	// 		earthquakePrediction.station === this.state.station &&
-	// 		earthquakePrediction.time_stamp !==
+	// 		earthquakeDetection &&
+	// 		earthquakeDetection.station === this.state.station &&
+	// 		earthquakeDetection.time_stamp !==
 	// 			this.state.prevContextValue?.time_stamp
 	// 	) {
 	// 		console.log(
-	// 			earthquakePrediction,
-	// 			"earthquakePrediction",
+	// 			earthquakeDetection,
+	// 			"earthquakeDetection",
 	// 			this.state.station
 	// 		);
 
@@ -257,7 +256,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 	// 			xaxis: "x",
 	// 		};
 
-	// 		const date = new Date(earthquakePrediction.time_stamp);
+	// 		const date = new Date(earthquakeDetection.time_stamp);
 	// 		pWaveTemp.x.push(date.getTime());
 	// 		pWaveTemp.y.push(0);
 	// 		pWaveTemp.x.push(date.getTime());
@@ -279,7 +278,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 	// 					yaxis: "y6",
 	// 				},
 	// 			],
-	// 			prevContextValue: earthquakePrediction,
+	// 			prevContextValue: earthquakeDetection,
 	// 		}));
 	// 	}
 	// }

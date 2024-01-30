@@ -16,7 +16,7 @@ export type WaveChannel = {
 	name: string;
 };
 
-export interface PredictionRecapContentProps {
+export interface DetectionRecapContentProps {
 	magnitude: number;
 	depth: number;
 	latitude: number;
@@ -30,7 +30,7 @@ export interface PredictionRecapContentProps {
 	pwaves: WaveChannel[];
 }
 
-class PredictionRecapContent extends Component<PredictionRecapContentProps> {
+class DetectionRecapContent extends Component<DetectionRecapContentProps> {
 	state = {
 		z_channel: {} as WaveChannel,
 		n_channel: {} as WaveChannel,
@@ -101,7 +101,7 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 		} as Partial<Layout>
 	};
 
-	constructor(props: PredictionRecapContentProps) {
+	constructor(props: DetectionRecapContentProps) {
 		super(props);
 		this.state.z_channel = props.z_channel;
 		this.state.n_channel = props.n_channel;
@@ -109,7 +109,7 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 		this.state.pwaves = props.pwaves;
 	}
 
-	componentDidUpdate(prevProps: PredictionRecapContentProps) {
+	componentDidUpdate(prevProps: DetectionRecapContentProps) {
 		if (prevProps !== this.props) {
 			const { layout } = this.state;
 			this.setState({
@@ -193,4 +193,4 @@ class PredictionRecapContent extends Component<PredictionRecapContentProps> {
 	}
 }
 
-export default PredictionRecapContent;
+export default DetectionRecapContent;

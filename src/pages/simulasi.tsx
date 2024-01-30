@@ -6,7 +6,7 @@ import { GetServerSideProps } from "next";
 import { IExternalSource } from "@/entities/IExternalSource";
 import { NavbarProps } from "@/components/Navbar";
 import SeismogramContext from "@/stores/SeismogramContext";
-import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
+import { IEarthquakeDetection } from "@/entities/IEarthquakeDetection";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
@@ -90,7 +90,7 @@ interface Props {
 	sidebarProps: {
 		latestFeltEarthquake: IExternalSource;
 		latestEarthquake: IExternalSource;
-		latestPrediction: IEarthquakePrediction;
+		latestDetection: IEarthquakeDetection;
 	};
 }
 

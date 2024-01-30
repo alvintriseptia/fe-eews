@@ -1,8 +1,8 @@
 "use client";
-import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
+import { IEarthquakeDetection } from "@/entities/IEarthquakeDetection";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { IStation } from "@/entities/IStation";
-import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
+import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
 import MMIScale from "@/components/MMIScale";
 import Time from "@/components/Time";
 import EarthquakeRealtimeCard, {
@@ -26,7 +26,7 @@ import SeismogramContext from "@/stores/SeismogramContext";
 const state = {
 	controller: {} as MainController | SimulationController,
 	stationController: {} as StationController,
-	earthquakePrediction: {} as EarthquakeRealtimeProps,
+	earthquakeDetection: {} as EarthquakeRealtimeProps,
 	map: {} as IMap,
 	notification: {} as INotification,
 	seismogram: [] as ISeismogram[],
@@ -44,7 +44,7 @@ const state = {
 	sidebarProps: {
 		latestFeltEarthquake: {} as IExternalSource,
 		latestEarthquake: {} as IExternalSource,
-		latestPrediction: {} as IEarthquakePrediction,
+		latestDetection: {} as IEarthquakeDetection,
 	},
 	earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 	countdown: 0,
@@ -103,13 +103,13 @@ function performance(): JSX.Element {
 					</div>
 
 					<SeismogramContext.Provider value={seismogramWorker}>
-						<EarthquakePredictionContext.Provider
+						<EarthquakeDetectionContext.Provider
 							value={state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<Seismogram
 								seismogramStations={state.stations.map((s) => s.code)}
 							/>
-						</EarthquakePredictionContext.Provider>
+						</EarthquakeDetectionContext.Provider>
 					</SeismogramContext.Provider>
 				</div>
 			</section>

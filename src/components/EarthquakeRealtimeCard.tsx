@@ -1,14 +1,14 @@
-import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
+import { IEarthquakeDetection } from "@/entities/IEarthquakeDetection";
 import React from "react";
 
 
 export interface EarthquakeRealtimeProps {
-	earthquake: IEarthquakePrediction;
+	earthquake: IEarthquakeDetection;
 }
 
 export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRealtimeProps> {
 	state = {
-		earthquake: {} as IEarthquakePrediction,
+		earthquake: {} as IEarthquakeDetection,
 		borderColor: "",
 		backgroundColor: "",
 		intervalId: 0,
@@ -30,10 +30,10 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 		};
 	}
 
-	setFormattedDateAndColors(earthquake: IEarthquakePrediction) {
+	setFormattedDateAndColors(earthquake: IEarthquakeDetection) {
 		let borderColor = "border-tews-mmi-II";
 		let backgroundColor = "bg-tews-mmi-II";
-		switch (earthquake.prediction.toLocaleLowerCase()) {
+		switch (earthquake.detection.toLocaleLowerCase()) {
 			case "warning":
 				borderColor = "border-tews-swamp-green";
 				backgroundColor= "bg-tews-swamp-green";
@@ -132,9 +132,9 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						</h4>
 					</div>
 
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
+					{(this.state.earthquake.detection.toLocaleLowerCase() ===
 						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
+						this.state.earthquake.detection.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
 							<span className="text-tews-silver">Magnitude</span>
@@ -144,9 +144,9 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						</div>
 					)}
 
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
+					{(this.state.earthquake.detection.toLocaleLowerCase() ===
 						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
+						this.state.earthquake.detection.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
 							<span className="text-tews-silver">Kedalaman</span>
@@ -156,9 +156,9 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						</div>
 					)}
 
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
+					{(this.state.earthquake.detection.toLocaleLowerCase() ===
 						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
+						this.state.earthquake.detection.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
 							<span className="text-tews-silver">Latitude</span>
@@ -168,9 +168,9 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						</div>
 					)}
 
-					{(this.state.earthquake.prediction.toLocaleLowerCase() ===
+					{(this.state.earthquake.detection.toLocaleLowerCase() ===
 						"warning" ||
-						this.state.earthquake.prediction.toLocaleLowerCase() ===
+						this.state.earthquake.detection.toLocaleLowerCase() ===
 							"earthquake") && (
 						<div className="flex justify-between items-center gap-x-3">
 							<span className="text-tews-silver">Longitude</span>
@@ -180,7 +180,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 						</div>
 					)}
 
-					{this.state.earthquake.prediction.toLocaleLowerCase() === "warning" &&
+					{this.state.earthquake.detection.toLocaleLowerCase() === "warning" &&
 						this.state.countdown > 0 && (
 							<div className="flex justify-between items-center gap-x-3">
 								<span className="text-tews-silver">Countdown</span>

@@ -1,6 +1,6 @@
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
-import { pWavesData } from "./earthquakePrediction";
+import { pWavesData } from "./earthquakeDetection";
 import { socket } from "./_index";
 import * as indexedDB from "@/lib/indexed-db";
 

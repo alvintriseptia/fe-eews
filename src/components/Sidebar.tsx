@@ -1,4 +1,4 @@
-import { IEarthquakePrediction, IExternalSource } from "@/entities/_index";
+import { IEarthquakeDetection, IExternalSource } from "@/entities/_index";
 import { getIntensityColor } from "@/utils/map-style";
 import { Bars4Icon } from "@heroicons/react/24/outline";
 import React from "react";
@@ -102,7 +102,7 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 export interface SidebarProps {
 	latestFeltEarthquake: IExternalSource;
 	latestEarthquake: IExternalSource;
-	latestPrediction: IEarthquakePrediction | null;
+	latestDetection: IEarthquakeDetection | null;
 }
 
 class Sidebar extends React.Component<SidebarProps> {
@@ -110,7 +110,7 @@ class Sidebar extends React.Component<SidebarProps> {
 		open: true,
 		latestFeltEarthquake: {} as IExternalSource,
 		latestEarthquake: {} as IExternalSource,
-		latestPrediction: {} as IEarthquakePrediction,
+		latestDetection: {} as IEarthquakeDetection,
 	};
 
 	constructor(props: SidebarProps) {
@@ -134,9 +134,9 @@ class Sidebar extends React.Component<SidebarProps> {
 			this.setState({ latestEarthquake: this.props.latestEarthquake });
 		}
 
-		if (this.props.latestPrediction !== prevProps.latestPrediction) {
-			if(this.props.latestPrediction.prediction !== "warning") return;
-			this.setState({ latestPrediction: this.props.latestPrediction });
+		if (this.props.latestDetection !== prevProps.latestDetection) {
+			if(this.props.latestDetection.detection !== "warning") return;
+			this.setState({ latestDetection: this.props.latestDetection });
 		}
 	}
 
@@ -170,20 +170,20 @@ class Sidebar extends React.Component<SidebarProps> {
 								<EarthquakeInfo {...this.state.latestEarthquake} />
 							)}
 
-							{this.state.latestPrediction?.time_stamp && (
+							{this.state.latestDetection?.time_stamp && (
 								<>
 									<div className="w-full h-0.5 bg-purple-950 my-4" />
 									<EarthquakeInfo 
-										id={'latest-prediction'}
-										date={this.state.latestPrediction.time_stamp}
+										id={'latest-detection'}
+										date={this.state.latestDetection.time_stamp}
 										title={'Deteksi Terakhir'}
-										depth={this.state.latestPrediction.depth.toFixed(2)}
-										latitude={this.state.latestPrediction.lat.toFixed(2)}
-										longitude={this.state.latestPrediction.long.toFixed(2)}
-										location={this.state.latestPrediction.location}
-										magnitude={this.state.latestPrediction.mag.toFixed(1)}
-										time={this.state.latestPrediction.time_stamp}
-										station={this.state.latestPrediction.station || "inatews"}
+										depth={this.state.latestDetection.depth.toFixed(2)}
+										latitude={this.state.latestDetection.lat.toFixed(2)}
+										longitude={this.state.latestDetection.long.toFixed(2)}
+										location={this.state.latestDetection.location}
+										magnitude={this.state.latestDetection.mag.toFixed(1)}
+										time={this.state.latestDetection.time_stamp}
+										station={this.state.latestDetection.station || "inatews"}
 									/>
 								</>
 							)}

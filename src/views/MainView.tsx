@@ -8,11 +8,10 @@ import {
 	StationController,
 } from "@/controllers/_index";
 import {
-	IEarthquakePrediction,
+	IEarthquakeDetection,
 	IExternalSource,
 	IMap,
 	INotification,
-	ISeismogram,
 	IStation,
 } from "@/entities/_index";
 import {
@@ -29,7 +28,7 @@ import { NavbarProps } from "@/components/Navbar";
 import { observe } from "mobx";
 import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
 import STATIONS_DATA from "@/assets/data/stations.json";
-import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
+import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
 import * as indexedDB from "@/lib/indexed-db";
 
 interface Props {
@@ -41,7 +40,7 @@ interface Props {
 	sidebarProps: {
 		latestFeltEarthquake: IExternalSource;
 		latestEarthquake: IExternalSource;
-		latestPrediction: IEarthquakePrediction;
+		latestDetection: IEarthquakeDetection;
 	};
 }
 
@@ -49,7 +48,7 @@ class MainView extends React.Component<Props> {
 	state = {
 		controller: {} as MainController | SimulationController,
 		stationController: {} as StationController,
-		earthquakePrediction: {} as EarthquakeRealtimeProps,
+		earthquakeDetection: {} as EarthquakeRealtimeProps,
 		map: {} as IMap,
 		notification: {} as INotification,
 		last5MEartquake: {} as IExternalSource,
@@ -66,7 +65,7 @@ class MainView extends React.Component<Props> {
 		sidebarProps: {
 			latestFeltEarthquake: {} as IExternalSource,
 			latestEarthquake: {} as IExternalSource,
-			latestPrediction: {} as IEarthquakePrediction,
+			latestDetection: {} as IEarthquakeDetection,
 		},
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		countdown: 0,
@@ -111,10 +110,10 @@ class MainView extends React.Component<Props> {
 		// }, 60000);
 
 		setTimeout(() => {
-			this.state.controller.connectEarthquakePrediction();
+			this.state.controller.connectEarthquakeDetection();
 		}, 2000);
 
-		observe(this.state.controller, "earthquakePrediction", (change) => {
+		observe(this.state.controller, "earthquakeDetection", (change) => {
 			if (change.newValue) {
 				this.setState({
 					earthquakeRealtimeInformation: {
@@ -122,7 +121,7 @@ class MainView extends React.Component<Props> {
 					},
 					sidebarProps: {
 						...this.state.sidebarProps,
-						latestPrediction: change.newValue,
+						latestDetection: change.newValue,
 					},
 				});
 			}
@@ -144,7 +143,7 @@ class MainView extends React.Component<Props> {
 	}
 
 	componentWillUnmount(): void {
-		this.state.controller.disconnectEarthquakePrediction();
+		this.state.controller.disconnectEarthquakeDetection();
 	}
 
 	render() {
@@ -185,13 +184,13 @@ class MainView extends React.Component<Props> {
 							</section>
 						</div>
 
-						<EarthquakePredictionContext.Provider
+						<EarthquakeDetectionContext.Provider
 							value={this.state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<Seismogram
 								seismogramStations={this.state.seismogramStations.map(e => e.code)}
 							/>
-						</EarthquakePredictionContext.Provider>
+						</EarthquakeDetectionContext.Provider>
 					</div>
 				</section>
 			</main>

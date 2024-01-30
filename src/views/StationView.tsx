@@ -2,7 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import { MainController, StationController } from "@/controllers/_index";
 import { IStation } from "@/entities/_index";
-import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
+import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
 import {
 	DynamicLineChart,
 	ModalDialog,
@@ -53,7 +53,7 @@ class StationView extends React.Component<Props> {
 		const mainController = new MainController();
 		this.state.controller.connectAllSeismogram("simulation");
 
-		observe(mainController, "earthquakePrediction", (change) => {
+		observe(mainController, "earthquakeDetection", (change) => {
 			if (change.newValue) {
 				this.setState({
 					earthquakeRealtimeInformation: {
@@ -163,7 +163,7 @@ class StationView extends React.Component<Props> {
 					</div>
 
 					{this.state.tab === "enabled" ? (
-						<EarthquakePredictionContext.Provider
+						<EarthquakeDetectionContext.Provider
 							value={this.state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<div className="flex items-center justify-center mb-16">
@@ -213,7 +213,7 @@ class StationView extends React.Component<Props> {
 									</RenderIfVisible>
 								);
 							})}
-						</EarthquakePredictionContext.Provider>
+						</EarthquakeDetectionContext.Provider>
 					) : (
 						<table className="w-full border-collapse">
 							<thead>

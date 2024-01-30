@@ -1,8 +1,7 @@
-import { IEarthquakePrediction, IMap, IStation } from "@/entities/_index";
-import { CoordinateType, GeoJsonCollection, RegionType } from "@/types/_index";
+import { IEarthquakeDetection, IMap, IStation } from "@/entities/_index";
+import { CoordinateType,  RegionType } from "@/types/_index";
 import MapLibreGL, { StyleSpecification } from "maplibre-gl";
 import { Map as MapLibre } from "maplibre-gl";
-import BallMarker from "@/assets/images/ball-marker.ico";
 import { getIntensityColor } from "@/utils/map-style";
 
 class TEWSMap implements IMap {
@@ -14,7 +13,7 @@ class TEWSMap implements IMap {
 	sWaveAffectedMarker: Map<string, maplibregl.Marker> = new Map();
 	earthquakeEpicenter: maplibregl.Marker;
 	stationMarker: maplibregl.Marker;
-	earthquakePredictionMarker: Map<string, maplibregl.Marker> = new Map();
+	earthquakeDetectionMarker: Map<string, maplibregl.Marker> = new Map();
 	stationLocationMarker: Map<string, maplibregl.Marker> = new Map();
 
 	initMap(map: IMap) {
@@ -356,7 +355,7 @@ class TEWSMap implements IMap {
 		}
 	}
 
-	addEarthquakePrediction(location: CoordinateType, station: IStation) {
+	addEarthquakeDetection(location: CoordinateType, station: IStation) {
 		const el = document.createElement("div");
 		const innerEl = `
 			<div class="animate-pulse font-bold text-4xl text-red-500 drop-shadow-[2px_2px_0_rgba(255,255,255,0.8)]">
@@ -396,7 +395,7 @@ class TEWSMap implements IMap {
 		});
 	}
 
-	clearEarthquakePrediction() {
+	clearEarthquakeDetection() {
 		if (this.map.getSource("pWave")) {
 			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
 			source.setData({
@@ -519,7 +518,7 @@ class TEWSMap implements IMap {
 		});
 	}
 
-	addEarthquakePredictionLocations(earthquake: IEarthquakePrediction[]) {
+	addEarthquakeDetectionLocations(earthquake: IEarthquakeDetection[]) {
 		// add area affected
 		earthquake.forEach((eq) => {
 			const el = document.createElement("div");
@@ -555,7 +554,7 @@ class TEWSMap implements IMap {
 					}).setHTML(popupInnerEl)
 				);
 
-			this.earthquakePredictionMarker.set(eq.time_stamp.toString(), marker);
+			this.earthquakeDetectionMarker.set(eq.time_stamp.toString(), marker);
 		});
 	}
 }

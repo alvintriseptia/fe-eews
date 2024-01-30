@@ -1,24 +1,24 @@
 import React from "react";
 import MainView from "@/views/MainView";
-import { MainController, PredictionController, StationController } from "@/controllers/_index";
+import { MainController, DetectionController, StationController } from "@/controllers/_index";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { NavbarProps } from "@/components/Navbar";
 import SeismogramContext from "@/stores/SeismogramContext";
-import { IEarthquakePrediction, IExternalSource } from "@/entities/_index";
+import { IEarthquakeDetection, IExternalSource } from "@/entities/_index";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
 		const controller = new MainController();
-		const predictionController = new PredictionController();
+		const detectionController = new DetectionController();
 		const latestEarthquake =
 			(await controller.getLatestEarthquake()) as IExternalSource;
 		const latestFeltEarthquake =
 			(await controller.getLatestFeltEarthquake()) as IExternalSource;
 		const weeklyEarthquake =
 			(await controller.getEarthquakeWeekly()) as IExternalSource[];
-		const latestPrediction =
-			(await predictionController.getLatestEarthquakePrediction()) as IEarthquakePrediction;
+		const latestDetection =
+			(await detectionController.getLatestEarthquakeDetection()) as IEarthquakeDetection;
 		
 		let newNavbar = {
 			totalEarthquakes: 0,
@@ -50,7 +50,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			sidebarProps: {
 				latestFeltEarthquake,
 				latestEarthquake,
-				latestPrediction
+				latestDetection
 			},
 			weeklyEarthquake,
 		};
@@ -80,7 +80,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 				sidebarProps: {
 					latestFeltEarthquake: {} as IExternalSource,
 					latestEarthquake: {} as IExternalSource,
-					latestPrediction: {} as IEarthquakePrediction,
+					latestDetection: {} as IEarthquakeDetection,
 				},
 				weeklyEarthquake: [] as IExternalSource[],
 			},
@@ -94,7 +94,7 @@ interface Props {
 	sidebarProps: {
 		latestFeltEarthquake: IExternalSource;
 		latestEarthquake: IExternalSource;
-		latestPrediction: IEarthquakePrediction;
+		latestDetection: IEarthquakeDetection;
 	};
 }
 
