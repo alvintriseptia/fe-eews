@@ -1,6 +1,6 @@
 import { EarthquakeDetection, Map } from "@/models/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
-import mapStyle from "@/assets/data/dataviz_dark.json";
+import mapStyle from "@/assets/data/inatews_dark.json";
 import { StyleSpecification } from "maplibre-gl";
 import { IEarthquakeDetection } from "@/entities/_index";
 import toast from "react-hot-toast";
@@ -125,24 +125,27 @@ export default class DetectionController {
 			},
 		});
 
-		if (!detections[0].location) {
-			let result = [] as IEarthquakeDetection[];
-
-			// for (const detection of detections) {
-			// 	const address = await this.map.getAreaName({
-			// 		latitude: detection.lat,
-			// 		longitude: detection.long,
-			// 	});
-			// 	detection.location = address;
-			// 	result.push(detection);
-			// }
-			document.querySelector("#loading_overlay").className = "hidden";
-
+		if(detections.length) {
+			if (!detections[0].location) {
+				let result = [] as IEarthquakeDetection[];
+	
+				// for (const detection of detections) {
+				// 	const address = await this.map.getAreaName({
+				// 		latitude: detection.lat,
+				// 		longitude: detection.long,
+				// 	});
+				// 	detection.location = address;
+				// 	result.push(detection);
+				// }
+				document.querySelector("#loading_overlay").className = "hidden";
+	
+				this.map.addEarthquakeDetectionLocations(detections);
+				return detections;
+			}
+	
 			this.map.addEarthquakeDetectionLocations(detections);
-			return detections;
 		}
-
-		this.map.addEarthquakeDetectionLocations(detections);
+		
 		document.querySelector("#loading_overlay").className = "hidden";
 	}
 

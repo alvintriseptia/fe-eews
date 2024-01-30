@@ -8,9 +8,7 @@ import {
 	DetectionCard,
 	DetectionRecapContent,
 } from "@/components/_index";
-import {
-	DetectionRecapContentProps as DetectionRecapContentProps,
-} from "@/components/DetectionRecapContent";
+import { DetectionRecapContentProps as DetectionRecapContentProps } from "@/components/DetectionRecapContent";
 import RenderIfVisible from "react-render-if-visible";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
@@ -60,11 +58,7 @@ class HistoryView extends React.Component<Props> {
 			});
 	}
 
-	componentDidUpdate(
-		prevProps: Readonly<Props>,
-		prevState: Readonly<{}>,
-		snapshot?: any
-	): void {
+	componentDidUpdate(prevState): void {
 		if (prevState.rerender !== this.state.rerender) {
 			this.state.controller.addEarthquakeDetectionLocations(
 				this.state.historyDetections
@@ -72,23 +66,7 @@ class HistoryView extends React.Component<Props> {
 		}
 	}
 
-	async handleFilter(filter: string) {
-		let start_date = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
-		let end_date = new Date().getTime();
-		if (filter === "current_week") {
-			start_date = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
-			end_date = new Date().getTime();
-		} else if (filter === "current_month") {
-			start_date = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
-			end_date = new Date().getTime();
-		} else if (filter === "last_month") {
-			start_date = new Date().getTime() - 30 * 24 * 60 * 60 * 1000;
-			end_date = new Date().getTime();
-		} else if (filter === "this_year") {
-			start_date = new Date().getTime() - 365 * 24 * 60 * 60 * 1000;
-			end_date = new Date().getTime();
-		}
-
+	async handleFilter(start_date: number, end_date: number) {
 		const newHistoryDetection =
 			await this.state.controller.filterHistoryEarthquakeDetection(
 				start_date,
@@ -104,15 +82,14 @@ class HistoryView extends React.Component<Props> {
 	}
 
 	async detailEarthquakeDetection(earthquake: IEarthquakeDetection) {
-		const seismogram =
-			await this.state.controller.getDetailEarthquakeDetection(
-				earthquake.station,
-				earthquake.time_stamp,
-				{
-					latitude: earthquake.lat,
-					longitude: earthquake.long,
-				}
-			);
+		const seismogram = await this.state.controller.getDetailEarthquakeDetection(
+			earthquake.station,
+			earthquake.time_stamp,
+			{
+				latitude: earthquake.lat,
+				longitude: earthquake.long,
+			}
+		);
 
 		const z_channel = {
 			x: [],
@@ -212,7 +189,7 @@ class HistoryView extends React.Component<Props> {
 		return (
 			<main className="h-screen flex flex-col overflow-hidden">
 				<Navbar {...this.state.navbar} />
-				<Filterbar onFilter={(filter) => this.handleFilter(filter)} />
+				<Filterbar onFilter={(...args) => this.handleFilter(...args)} />
 
 				<section className="h-full grid grid-cols-12">
 					<div className="h-full overflow-y-auto overflow-x-hidden col-span-5 pb-32">
@@ -226,13 +203,15 @@ class HistoryView extends React.Component<Props> {
 										</h4>
 									</div>
 
-									<button
-										className="flex justify-center items-center bg-tews-dark hover:bg-tews-dark/70 transition-all duration-200 ease-in-out px-3 py-2 rounded-md font-semibold"
-										onClick={() => this.download()}
-									>
-										<ArrowUpTrayIcon className="w-5 h-5 mr-2 font-bold" />
-										Ekspor
-									</button>
+									{this.state.historyDetections.length > 0 && (
+										<button
+											className="flex justify-center items-center bg-tews-dark hover:bg-tews-dark/70 transition-all duration-200 ease-in-out px-3 py-2 rounded-md font-semibold"
+											onClick={() => this.download()}
+										>
+											<ArrowUpTrayIcon className="w-5 h-5 mr-2 font-bold" />
+											Ekspor
+										</button>
+									)}
 								</div>
 							)}
 
@@ -241,26 +220,27 @@ class HistoryView extends React.Component<Props> {
 								<div className="flex justify-center items-center h-full">
 									<h5 className="text-sm text-gray-500">Tidak ada data</h5>
 								</div>
-							) : (this.state.historyDetections &&
-										this.state.historyDetections.map((detection, index) => {
-											return (
-												<RenderIfVisible key={index}>
-													<DetectionCard
-														location={detection.location || ""}
-														magnitude={detection.mag || 0}
-														latitude={detection.lat || 0}
-														longitude={detection.long || 0}
-														time={detection.time_stamp || 0}
-														depth={detection.depth || 0}
-														key={index}
-														onClick={() =>
-															this.detailEarthquakeDetection(detection)
-														}
-													/>
-												</RenderIfVisible>
-											);
-										}
-									))}
+							) : (
+								this.state.historyDetections &&
+								this.state.historyDetections.map((detection, index) => {
+									return (
+										<RenderIfVisible key={index}>
+											<DetectionCard
+												location={detection.location || ""}
+												magnitude={detection.mag || 0}
+												latitude={detection.lat || 0}
+												longitude={detection.long || 0}
+												time={detection.time_stamp || 0}
+												depth={detection.depth || 0}
+												key={index}
+												onClick={() =>
+													this.detailEarthquakeDetection(detection)
+												}
+											/>
+										</RenderIfVisible>
+									);
+								})
+							)}
 						</div>
 					</div>
 
