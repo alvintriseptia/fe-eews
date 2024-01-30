@@ -342,14 +342,14 @@ const onmessage = (event: MessageEvent) => {
 				pWavesData.set(station, pWave);
 			}
 
-			// if the current length waves is more than 20.000, then remove the first 100.000
-			if (data.channelZ.x.length > 20000) {
-				data.channelZ.x.splice(0, 10000);
-				data.channelZ.y.splice(0, 10000);
-				data.channelN.x.splice(0, 10000);
-				data.channelN.y.splice(0, 10000);
-				data.channelE.x.splice(0, 10000);
-				data.channelE.y.splice(0, 10000);
+			// if the current length waves is more than 5000, then remove the first 2500
+			if (data.channelZ.x.length > 5000) {
+				data.channelZ.x.splice(0, 2500);
+				data.channelZ.y.splice(0, 2500);
+				data.channelN.x.splice(0, 2500);
+				data.channelN.y.splice(0, 2500);
+				data.channelE.x.splice(0, 2500);
+				data.channelE.y.splice(0, 2500);
 			}
 
 			seismogramData.set(station, data);

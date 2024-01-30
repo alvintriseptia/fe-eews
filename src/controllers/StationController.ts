@@ -34,33 +34,38 @@ class StationController {
 		return await this.station.fetchSavedStations();
 	}
 
-	/**
-	 * Retrieves a station by its code.
-	 * @param code - The code of the station to retrieve.
-	 * @returns An IStation object representing the station with the specified code.
-	 */
-	getStationByCode(code: string): IStation {
-		return this.station.fetchStationByCode(code);
+	async initStations() {
+		const newSeismograms = await this.station.initStations();
+		if (newSeismograms) {
+			this.seismograms = new Map(newSeismograms);
+		}
 	}
 
-	async initSeismogram() {
-		const newSeismograms = await this.station.initSeismogram();
-		this.seismograms = new Map(newSeismograms);
+	async enableStation(station: string) {
+		const newSeismograms = await this.station.enableStation(
+			station,
+			this.seismograms
+		);
+		if (newSeismograms) {
+			this.seismograms = new Map(newSeismograms);
+		}
 	}
 
-	async enableSeismogram(station: string) {
-		const newSeismograms = await this.station.enableSeismogram(station, this.seismograms);
-		this.seismograms = new Map(newSeismograms);
+	async enableAllStation() {
+		const newSeismograms = await this.station.enableAllStation();
+		if (newSeismograms) {
+			this.seismograms = new Map(newSeismograms);
+		}
 	}
 
-	async enableAllSeismogram() {
-		const newSeismograms = await this.station.enableAllSeismogram();
-		this.seismograms = new Map(newSeismograms);
-	}
-
-	async disableSeismogram(station: string) {
-		const newSeismograms = await this.station.disableSeismogram(station, this.seismograms);
-		this.seismograms = new Map(newSeismograms);
+	async disableStation(station: string) {
+		const newSeismograms = await this.station.disableStation(
+			station,
+			this.seismograms
+		);
+		if (newSeismograms) {
+			this.seismograms = new Map(newSeismograms);
+		}
 	}
 
 	/**
@@ -69,7 +74,7 @@ class StationController {
 	 */
 	async connectAllSeismogram(mode: string) {
 		if (this.seismograms.size === 0) {
-			await this.initSeismogram();
+			await this.initStations();
 		}
 		for (const seismogram of this.seismograms.values()) {
 			seismogram.streamSeismogram(this.seismogramWorker, mode);

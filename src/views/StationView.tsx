@@ -13,7 +13,6 @@ import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
 import RenderIfVisible from "react-render-if-visible";
 import { observe } from "mobx";
 import STATIONS_DATA from "@/assets/data/stations.json";
-import toast from "react-hot-toast";
 
 interface Props {
 	controller: StationController;
@@ -94,19 +93,19 @@ class StationView extends React.Component<Props> {
 	}
 
 	async disableSeismogram(station: string) {
-		await this.state.controller.disableSeismogram(station);
+		await this.state.controller.disableStation(station);
 		this.state.controller.disconnectSeismogram(station);
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableSeismogram(station: string) {
-		await this.state.controller.enableSeismogram(station);
+		await this.state.controller.enableStation(station);
 		this.state.controller.connectSeismogram(station, "simulation");
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableAllSeismogram() {
-		await this.state.controller.enableAllSeismogram();
+		await this.state.controller.enableAllStation();
 		this.state.controller.connectAllSeismogram("simulation");
 		this.setState({ dialogOpen: false });
 	}
