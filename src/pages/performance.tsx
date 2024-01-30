@@ -19,7 +19,7 @@ import StationController from "@/controllers/StationController";
 import { IMap } from "@/entities/IMap";
 import { INotification } from "@/entities/INotification";
 import { ISeismogram } from "@/entities/ISeismogram";
-import { IExternalSource } from "@/entities/IExternalSource";
+import { IEarthquakeHistory } from "@/entities/IEarthquakeHistory";
 import React from "react";
 import SeismogramContext from "@/stores/SeismogramContext";
 
@@ -30,9 +30,9 @@ const state = {
 	map: {} as IMap,
 	notification: {} as INotification,
 	seismogram: [] as ISeismogram[],
-	last5MEartquake: {} as IExternalSource,
-	lastFeltEarthquake: {} as IExternalSource,
-	weeklyEarthquake: [] as IExternalSource[],
+	last5MEartquake: {} as IEarthquakeHistory,
+	lastFeltEarthquake: {} as IEarthquakeHistory,
+	weeklyEarthquake: [] as IEarthquakeHistory[],
 	navbar: {
 		isLoggedIn: false,
 		navLinks: [],
@@ -42,8 +42,8 @@ const state = {
 		headerInfos: [],
 	},
 	sidebarProps: {
-		latestFeltEarthquake: {} as IExternalSource,
-		latestEarthquake: {} as IExternalSource,
+		latestFeltEarthquake: {} as IEarthquakeHistory,
+		latestEarthquake: {} as IEarthquakeHistory,
 		latestDetection: {} as IEarthquakeDetection,
 	},
 	earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,

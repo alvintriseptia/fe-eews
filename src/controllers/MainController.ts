@@ -2,7 +2,7 @@ import { IMap } from "@/entities/IMap";
 import { IEarthquakeDetection, IStation } from "@/entities/_index";
 import {
 	EarthquakeDetection,
-	ExternalSource,
+	EarthquakeHistory,
 	Map as TEWSMap,
 	Notification,
 	Seismogram,
@@ -17,7 +17,7 @@ import * as turf from "@turf/turf";
  * MainController class responsible for managing the main functionalities of the application.
  */
 export default class MainController {
-	private externalSource = new ExternalSource();
+	private earthquakeHistory = new EarthquakeHistory();
 	private notificationEarthquakeDetection = new Notification();
 	private notificationEarthquake = new Notification();
 	private notificationSWaveAffected = new Notification();
@@ -88,21 +88,21 @@ export default class MainController {
 	 * Retrieves earthquake data for the past week.
 	 */
 	async getEarthquakeWeekly() {
-		return await this.externalSource.fetchEarthquakeWeekly();
+		return await this.earthquakeHistory.fetchEarthquakeWeekly();
 	}
 
 	/**
 	 * Retrieves the latest earthquake with magnitude 5 or higher.
 	 */
 	async getLatestEarthquake() {
-		return await this.externalSource.fetchLatestEarthquake();
+		return await this.earthquakeHistory.fetchLatestEarthquake();
 	}
 
 	/**
 	 * Retrieves the latest felt earthquake.
 	 */
 	async getLatestFeltEarthquake() {
-		return await this.externalSource.fetchLatestFeltEarthquake();
+		return await this.earthquakeHistory.fetchLatestFeltEarthquake();
 	}
 
 	// EARTHQUAKE PREDICTION

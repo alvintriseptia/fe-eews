@@ -7,9 +7,9 @@ import toast from "react-hot-toast";
 import { CoordinateType } from "@/types/_index";
 
 /**
- * DetectionController class handles the logic for earthquake detection.
+ * HistoryController class handles the logic for earthquake detection.
  */
-export default class DetectionController {
+export default class HistoryController {
 	private earthquakeDetection = new EarthquakeDetection();
 	private map = new Map();
 	private style = mapStyle as StyleSpecification;

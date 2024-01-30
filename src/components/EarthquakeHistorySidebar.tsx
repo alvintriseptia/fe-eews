@@ -4,9 +4,9 @@ import { ClockIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import {
 	ChevronDoubleRightIcon,
 } from "@heroicons/react/24/outline";
-import { IExternalSource } from "@/entities/IExternalSource";
+import { IEarthquakeHistory } from "@/entities/IEarthquakeHistory";
 
-class HistoryCard extends React.Component<IExternalSource> {
+class HistoryCard extends React.Component<IEarthquakeHistory> {
 	render() {
 		const backgroundColor = getIntensityColor(Number(this.props.magnitude));
 		const time = new Date(this.props.time);
@@ -60,11 +60,11 @@ class HistoryCard extends React.Component<IExternalSource> {
 }
 
 interface EarthquakeHistorySidebarProps {
-	weeklyEarthquake: IExternalSource[];
+	weeklyEarthquake: IEarthquakeHistory[];
 }
 
 class EarthquakeHistorySidebar extends React.Component<EarthquakeHistorySidebarProps> {
-	state = { open: false, weeklyEarthquake: [] as IExternalSource[] };
+	state = { open: false, weeklyEarthquake: [] as IEarthquakeHistory[] };
 	constructor(props: EarthquakeHistorySidebarProps) {
 		super(props);
 		this.state = { ...props, open: false };

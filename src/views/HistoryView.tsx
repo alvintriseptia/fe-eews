@@ -1,6 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { DetectionController } from "@/controllers/_index";
+import { HistoryController } from "@/controllers/_index";
 import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import {
 	Filterbar,
@@ -13,13 +13,13 @@ import RenderIfVisible from "react-render-if-visible";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 
 interface Props {
-	controller: DetectionController;
+	controller: HistoryController;
 	historyDetections: IEarthquakeDetection[];
 }
 
 class HistoryView extends React.Component<Props> {
 	state = {
-		controller: {} as DetectionController,
+		controller: {} as HistoryController,
 		earthquakeDetection: {} as IEarthquakeDetection,
 		seismogram: {} as ISeismogram,
 		navbar: {

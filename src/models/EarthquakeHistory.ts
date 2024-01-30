@@ -1,11 +1,11 @@
-import { IExternalSource } from "@/entities/_index";
+import { IEarthquakeHistory } from "@/entities/_index";
 import {
 	ResponseLatestFeltEarthquake,
 	ResponseLatestEarthquake,
 	ResponseEarthquakeWeekly,
 } from "@/models/response/_index";
 
-export default class ExternalSource implements IExternalSource {
+export default class EarthquakeHistory implements IEarthquakeHistory {
 	id: string;
 	title: string;
 	location: string;

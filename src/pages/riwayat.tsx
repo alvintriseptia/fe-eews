@@ -1,13 +1,13 @@
 import React from "react";
 import HistoryView from "@/views/HistoryView";
-import { DetectionController } from "@/controllers/_index";
+import { HistoryController } from "@/controllers/_index";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { IEarthquakeDetection } from "@/entities/_index";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
-		const controller = new DetectionController();
+		const controller = new HistoryController();
 
 		const response = await controller.getHistoryEarthquakeDetection();
 
@@ -55,7 +55,7 @@ export default class Prediksi extends React.Component<Props> {
 	}
 
 	render() {
-		const controller = new DetectionController();
+		const controller = new HistoryController();
 		return (
 			<>
 				<Head>

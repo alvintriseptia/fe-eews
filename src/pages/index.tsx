@@ -1,22 +1,22 @@
 import React from "react";
 import MainView from "@/views/MainView";
-import { MainController, DetectionController, StationController } from "@/controllers/_index";
+import { MainController, HistoryController, StationController } from "@/controllers/_index";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { NavbarProps } from "@/components/Navbar";
 import SeismogramContext from "@/stores/SeismogramContext";
-import { IEarthquakeDetection, IExternalSource } from "@/entities/_index";
+import { IEarthquakeDetection, IEarthquakeHistory } from "@/entities/_index";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
 		const controller = new MainController();
-		const detectionController = new DetectionController();
+		const detectionController = new HistoryController();
 		const latestEarthquake =
-			(await controller.getLatestEarthquake()) as IExternalSource;
+			(await controller.getLatestEarthquake()) as IEarthquakeHistory;
 		const latestFeltEarthquake =
-			(await controller.getLatestFeltEarthquake()) as IExternalSource;
+			(await controller.getLatestFeltEarthquake()) as IEarthquakeHistory;
 		const weeklyEarthquake =
-			(await controller.getEarthquakeWeekly()) as IExternalSource[];
+			(await controller.getEarthquakeWeekly()) as IEarthquakeHistory[];
 		const latestDetection =
 			(await detectionController.getLatestEarthquakeDetection()) as IEarthquakeDetection;
 		
@@ -78,22 +78,22 @@ export const getServerSideProps: GetServerSideProps = async () => {
 					minimumMagnitude: 0,
 				},
 				sidebarProps: {
-					latestFeltEarthquake: {} as IExternalSource,
-					latestEarthquake: {} as IExternalSource,
+					latestFeltEarthquake: {} as IEarthquakeHistory,
+					latestEarthquake: {} as IEarthquakeHistory,
 					latestDetection: {} as IEarthquakeDetection,
 				},
-				weeklyEarthquake: [] as IExternalSource[],
+				weeklyEarthquake: [] as IEarthquakeHistory[],
 			},
 		};
 	}
 };
 
 interface Props {
-	weeklyEarthquake: IExternalSource[];
+	weeklyEarthquake: IEarthquakeHistory[];
 	navbar: NavbarProps;
 	sidebarProps: {
-		latestFeltEarthquake: IExternalSource;
-		latestEarthquake: IExternalSource;
+		latestFeltEarthquake: IEarthquakeHistory;
+		latestEarthquake: IEarthquakeHistory;
 		latestDetection: IEarthquakeDetection;
 	};
 }

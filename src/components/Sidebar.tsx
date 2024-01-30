@@ -1,10 +1,10 @@
-import { IEarthquakeDetection, IExternalSource } from "@/entities/_index";
+import { IEarthquakeDetection, IEarthquakeHistory } from "@/entities/_index";
 import { getIntensityColor } from "@/utils/map-style";
 import { Bars4Icon } from "@heroicons/react/24/outline";
 import React from "react";
 
-class EarthquakeInfo extends React.Component<IExternalSource> {
-	constructor(props: IExternalSource) {
+class EarthquakeInfo extends React.Component<IEarthquakeHistory> {
+	constructor(props: IEarthquakeHistory) {
 		super(props);
 		this.state = {};
 	}
@@ -100,16 +100,16 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 }
 
 export interface SidebarProps {
-	latestFeltEarthquake: IExternalSource;
-	latestEarthquake: IExternalSource;
+	latestFeltEarthquake: IEarthquakeHistory;
+	latestEarthquake: IEarthquakeHistory;
 	latestDetection: IEarthquakeDetection | null;
 }
 
 class Sidebar extends React.Component<SidebarProps> {
 	state = {
 		open: true,
-		latestFeltEarthquake: {} as IExternalSource,
-		latestEarthquake: {} as IExternalSource,
+		latestFeltEarthquake: {} as IEarthquakeHistory,
+		latestEarthquake: {} as IEarthquakeHistory,
 		latestDetection: {} as IEarthquakeDetection,
 	};
 

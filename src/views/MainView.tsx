@@ -9,7 +9,7 @@ import {
 } from "@/controllers/_index";
 import {
 	IEarthquakeDetection,
-	IExternalSource,
+	IEarthquakeHistory,
 	IMap,
 	INotification,
 	IStation,
@@ -35,11 +35,11 @@ interface Props {
 	mode: "simulation" | "realtime";
 	controller: MainController | SimulationController;
 	stationController: StationController;
-	weeklyEarthquake: IExternalSource[];
+	weeklyEarthquake: IEarthquakeHistory[];
 	navbar: NavbarProps;
 	sidebarProps: {
-		latestFeltEarthquake: IExternalSource;
-		latestEarthquake: IExternalSource;
+		latestFeltEarthquake: IEarthquakeHistory;
+		latestEarthquake: IEarthquakeHistory;
 		latestDetection: IEarthquakeDetection;
 	};
 }
@@ -51,9 +51,9 @@ class MainView extends React.Component<Props> {
 		earthquakeDetection: {} as EarthquakeRealtimeProps,
 		map: {} as IMap,
 		notification: {} as INotification,
-		last5MEartquake: {} as IExternalSource,
-		lastFeltEarthquake: {} as IExternalSource,
-		weeklyEarthquake: [] as IExternalSource[],
+		last5MEartquake: {} as IEarthquakeHistory,
+		lastFeltEarthquake: {} as IEarthquakeHistory,
+		weeklyEarthquake: [] as IEarthquakeHistory[],
 		navbar: {
 			isLoggedIn: false,
 			navLinks: [],
@@ -63,8 +63,8 @@ class MainView extends React.Component<Props> {
 			headerInfos: [],
 		},
 		sidebarProps: {
-			latestFeltEarthquake: {} as IExternalSource,
-			latestEarthquake: {} as IExternalSource,
+			latestFeltEarthquake: {} as IEarthquakeHistory,
+			latestEarthquake: {} as IEarthquakeHistory,
 			latestDetection: {} as IEarthquakeDetection,
 		},
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
