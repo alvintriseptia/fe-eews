@@ -129,8 +129,8 @@ const onmessage = (event: MessageEvent) => {
 				await indexedDB.writeToIndexedDB({
 					objectStore: "seismogramTempData",
 					keyPath: "station",
-					key: station, 
-					data: tempData
+					key: station,
+					data: tempData,
 				});
 			}
 		);
@@ -255,14 +255,22 @@ const onmessage = (event: MessageEvent) => {
 					tempData.channelE.x.splice(0, BUFFER / 2);
 					tempData.channelE.y.splice(0, BUFFER / 2);
 					data.currentIndex = 0;
+
+					// pwaves
+					const startTime = data.channelZ.x[0];
+					const endTime = data.channelZ.x[data.channelZ.x.length - 1];
+					data.pWaves = data.pWaves.filter((pWave) => {
+						const pWaveTime = pWave.x[0];
+						return pWaveTime >= startTime && pWaveTime <= endTime;
+					});
 				}
 
 				seismogramData.set(station, data);
 				await indexedDB.writeToIndexedDB({
 					objectStore: "seismogramTempData",
 					keyPath: "station",
-					key: station, 
-					data: tempData
+					key: station,
+					data: tempData,
 				});
 
 				postMessage({
@@ -341,13 +349,13 @@ const onmessage = (event: MessageEvent) => {
 			}
 
 			// if the current length waves is more than 5000, then remove the first 2500
-			if (data.channelZ.x.length > 100) {
-				data.channelZ.x.splice(0, 50);
-				data.channelZ.y.splice(0, 50);
-				data.channelN.x.splice(0, 50);
-				data.channelN.y.splice(0, 50);
-				data.channelE.x.splice(0, 50);
-				data.channelE.y.splice(0, 50);
+			if (data.channelZ.x.length > 5000) {
+				data.channelZ.x.splice(0, 2500);
+				data.channelZ.y.splice(0, 2500);
+				data.channelN.x.splice(0, 2500);
+				data.channelN.y.splice(0, 2500);
+				data.channelE.x.splice(0, 2500);
+				data.channelE.y.splice(0, 2500);
 
 				// pwaves
 				const startTime = data.channelZ.x[0];
