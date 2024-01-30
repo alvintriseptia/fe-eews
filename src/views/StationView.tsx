@@ -24,6 +24,7 @@ class StationView extends React.Component<Props> {
 	state = {
 		controller: {} as StationController,
 		seismogramStations: [] as IStation[],
+		filteredSeismogramStations: [] as IStation[],
 		disabledSeismogramStations: [] as IStation[],
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		navbar: {
@@ -37,6 +38,7 @@ class StationView extends React.Component<Props> {
 		tab: "enabled",
 		dialogOpen: false,
 		selectedStation: "",
+		searchQuery: "",
 	};
 	constructor(props: Props) {
 		super(props);
@@ -64,10 +66,25 @@ class StationView extends React.Component<Props> {
 		observe(this.state.controller, "seismograms", (change) => {
 			console.log(change.newValue);
 			if (change.newValue) {
+				let newFilteredSeismogramStations = STATIONS_DATA.filter((station) => {
+					return change.newValue.has(station.code);
+				});
+
+				if (this.state.searchQuery !== "") {
+					newFilteredSeismogramStations = newFilteredSeismogramStations.filter(
+						(station) => {
+							return station.code
+								.toLowerCase()
+								.includes(this.state.searchQuery.toLowerCase());
+						}
+					);
+				}
+
 				this.setState({
 					seismogramStations: STATIONS_DATA.filter((station) => {
 						return change.newValue.has(station.code);
 					}),
+					filteredSeismogramStations: newFilteredSeismogramStations,
 					disabledSeismogramStations: STATIONS_DATA.filter((station) => {
 						return !change.newValue.has(station.code);
 					}),
@@ -75,8 +92,6 @@ class StationView extends React.Component<Props> {
 			}
 		});
 	}
-
-	componentWillUnmount(): void {}
 
 	async disableSeismogram(station: string) {
 		await this.state.controller.disableSeismogram(station);
@@ -96,11 +111,30 @@ class StationView extends React.Component<Props> {
 		this.setState({ dialogOpen: false });
 	}
 
+	searchStation(query: string) {
+		this.setState({
+			searchQuery: query,
+			filteredSeismogramStations: this.state.seismogramStations.filter(
+				(station) => {
+					return station.code.toLowerCase().includes(query.toLowerCase());
+				}
+			),
+		});
+	}
+
 	render() {
 		return (
 			<main>
 				{/* NAVBAR */}
 				<Navbar {...this.state.navbar} />
+
+				<ModalDialog
+					open={this.state.dialogOpen}
+					title="Nonaktifkan Stasiun"
+					message={`Apakah anda yakin ingin menonaktifkan stasiun ${this.state.selectedStation}?`}
+					onCancel={() => this.setState({ dialogOpen: false })}
+					onConfirm={() => this.disableSeismogram(this.state.selectedStation)}
+				/>
 
 				{/* CONTENT */}
 				<section className="h-full mt-10 overflow-x-hidden">
@@ -128,19 +162,21 @@ class StationView extends React.Component<Props> {
 						</button>
 					</div>
 
-					<ModalDialog
-						open={this.state.dialogOpen}
-						title="Nonaktifkan Stasiun"
-						message="Apakah anda yakin ingin menonaktifkan stasiun ini?"
-						onCancel={() => this.setState({ dialogOpen: false })}
-						onConfirm={() => this.disableSeismogram(this.state.selectedStation)}
-					/>
-
 					{this.state.tab === "enabled" ? (
 						<EarthquakePredictionContext.Provider
 							value={this.state.earthquakeRealtimeInformation?.earthquake}
 						>
-							{this.state.seismogramStations.map((station, index) => {
+							<div className="flex items-center justify-center mb-16">
+								<input
+									type="text"
+									className="border border-gray-300 rounded-md px-4 py-2 w-1/2 focus:outline-none focus:ring-2 focus:ring-tews-mmi-III/50"
+									placeholder="Cari stasiun"
+									value={this.state.searchQuery}
+									onChange={(e) => this.searchStation(e.target.value)}
+								/>
+							</div>
+
+							{this.state.filteredSeismogramStations.map((station, index) => {
 								return (
 									<RenderIfVisible
 										defaultHeight={ESTIMATED_ITEM_HEIGHT}
@@ -188,12 +224,14 @@ class StationView extends React.Component<Props> {
 									<th className="border p-2">
 										<div className="flex justify-center items-center">
 											<span>Aksi</span>
-											<button
-												className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded ml-2 text-sm"
-												onClick={this.enableAllSeismogram}
-											>
-												Aktifkan semua
-											</button>
+											{this.state.disabledSeismogramStations.length > 0 && (
+												<button
+													className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded ml-2 text-sm"
+													onClick={this.enableAllSeismogram}
+												>
+													Aktifkan semua
+												</button>
+											)}
 										</div>
 									</th>
 								</tr>

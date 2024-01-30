@@ -41,6 +41,12 @@ export default class ModalDialog extends Component<ModalDialogProps> {
 				{this.state.isOpen && (
 					<dialog className="fixed w-screen h-screen z-[9999] inset-0 flex items-center justify-center bg-black bg-opacity-50">
 						<div className="bg-white p-4 rounded shadow">
+							{/* title */}
+							<h1 className="text-xl font-medium mb-4">{this.props.title}</h1>
+
+							<hr className="border-gray-300 mb-4" />
+
+							{/* message */}
 							<p className="mb-8">{this.props.message}</p>
 							<div className="flex justify-end">
 								<button

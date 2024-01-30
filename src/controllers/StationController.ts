@@ -49,7 +49,7 @@ class StationController {
 	}
 
 	async enableSeismogram(station: string) {
-		const newSeismograms = await this.station.enableSeismogram(station);
+		const newSeismograms = await this.station.enableSeismogram(station, this.seismograms);
 		this.seismograms = new Map(newSeismograms);
 	}
 
@@ -59,7 +59,7 @@ class StationController {
 	}
 
 	async disableSeismogram(station: string) {
-		const newSeismograms = await this.station.disableSeismogram(station);
+		const newSeismograms = await this.station.disableSeismogram(station, this.seismograms);
 		this.seismograms = new Map(newSeismograms);
 	}
 

@@ -153,8 +153,8 @@ class Station implements IStation {
         return newSeismograms;
     }
 
-	async enableSeismogram(station: string) {
-        const newSeismograms: Map<string, Seismogram> = new Map([]);
+	async enableSeismogram(station: string, seismograms: Map<string, Seismogram>) {
+        const newSeismograms: Map<string, Seismogram> = seismograms;
 		const db_enabled_seismograms = (await indexedDB.readFromIndexedDB(
 			"seismograms",
 			"enabled_seismograms"
@@ -192,8 +192,8 @@ class Station implements IStation {
 		return newSeismograms;
 	}
 
-	async disableSeismogram(station: string) {
-		const newSeismograms: Map<string, Seismogram> = new Map([]);
+	async disableSeismogram(station: string, seismograms: Map<string, Seismogram>) {
+		const newSeismograms: Map<string, Seismogram> = seismograms;
 		// remove from indexedDB
 		await indexedDB.writeToIndexedDB({
 			objectStore: "seismograms",

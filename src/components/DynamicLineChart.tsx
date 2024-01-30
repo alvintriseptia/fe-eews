@@ -191,11 +191,8 @@ export default class DynamicLineChart extends React.Component<Props> {
 						layout.xaxis.range = [first, last];
 					}
 				}
-
 				this.setState({
 					revision: this.state.revision + 1,
-					// currentIndex: length,
-					// waveData: waveData.slice(length),
 					channelZ: {
 						...channelZ,
 						x: data.channelZ.x,
@@ -288,6 +285,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 	// }
 
 	handleRelayout = (event: PlotRelayoutEvent) => {
+		console.log(event)
 		if (event["xaxis.showspikes"] === false) {
 			const { channelZ, layout } = this.state;
 			const now = Date.now();
@@ -307,6 +305,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 		}
 		// Check if the x-axis range has been manually adjusted by the user
 		else if (event["xaxis.range[0]"] && event["xaxis.range[1]"]) {
+			console.log(event["xaxis.range[0]"], event["xaxis.range[1]"])
 			this.setState({
 				userDefinedRange: [event["xaxis.range[0]"], event["xaxis.range[1]"]],
 			});
