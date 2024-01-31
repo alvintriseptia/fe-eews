@@ -38,7 +38,7 @@ const onmessage = (event: MessageEvent) => {
 			addPWave("BBJI", Date.now());
 
 			postMessage(earthquakeDetection);
-		}, 30000);
+		}, 5000);
 	} else {
 		socket.on("detection-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip

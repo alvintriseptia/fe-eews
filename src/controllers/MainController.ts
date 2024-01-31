@@ -385,7 +385,5 @@ export default class MainController {
 				command: "stop",
 			});
 		}
-
-		this.map.stopSimulation();
 	}
 }

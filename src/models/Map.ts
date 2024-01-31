@@ -191,11 +191,14 @@ class TEWSMap implements IMap {
 				}
 			}
 
-			const mainColor = Object.keys(colorsSorted).reduce(
+			let mainColor = Object.keys(colorsSorted).reduce(
 				(a, b) => (colorsSorted[a] > colorsSorted[b] ? a : b),
 				"#fff"
 			);
-
+			if(colorsSorted['green'] && colorsSorted['green'] >= 3){
+				mainColor = 'green';
+			}
+			
 			const el = document.createElement("div");
 			const innerEl = `
                 <div>
@@ -320,7 +323,7 @@ class TEWSMap implements IMap {
 			const marker = new MapLibreGL.Marker({
 				color: "red",
 				draggable: false,
-				scale: 0.5,
+				scale: 1,
 				element: el,
 			})
 				.setLngLat([station.longitude, station.latitude])
@@ -454,25 +457,6 @@ class TEWSMap implements IMap {
 		// update source
 		if (source) {
 			source.setData(sWave);
-		}
-	}
-
-	stopSimulation() {
-		//remove layer
-		if (this.map.getSource("pWave")) {
-			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
-			source.setData({
-				type: "FeatureCollection",
-				features: [],
-			});
-		}
-
-		if (this.map.getSource("sWave")) {
-			const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
-			source.setData({
-				type: "FeatureCollection",
-				features: [],
-			});
 		}
 	}
 

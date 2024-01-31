@@ -1,6 +1,5 @@
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { IStation } from "@/entities/_index";
-import { ResponseStationsStatus } from "./response/_index";
 import * as indexedDB from "@/lib/indexed-db";
 import Seismogram from "./Seismogram";
 import toast from "react-hot-toast";

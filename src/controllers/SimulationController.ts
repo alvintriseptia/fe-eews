@@ -275,17 +275,16 @@ export default class SimulationController {
 					});
 				};
 
-				// GET AFFECTED AREA P-WAVES
+				// // GET AFFECTED AREA P-WAVES
 				this.affectedPWavesWorker.onmessage = (event: MessageEvent) => {
 					const geoJson = event.data;
 					this.affectedPWaves = geoJson;
 					this.map.addAreaAffectedPWave(geoJson);
 				};
 
-				// GET AFFECTED AREA S-WAVES
+				// // GET AFFECTED AREA S-WAVES
 				this.affectedSWavesWorker.onmessage = (event: MessageEvent) => {
 					const data = event.data;
-
 					if (data.message == "stop") {
 						this.stopSimulation();
 						this.clearEarthquakeDetection(true);
@@ -309,6 +308,7 @@ export default class SimulationController {
 	clearEarthquakeDetection(delay: boolean) {
 		if (!delay) {
 			this.stopSimulation();
+			this.map.clearEarthquakeDetection();
 
 			if (this.affectedPWaves.features.length > 0) {
 				this.affectedPWaves = {
@@ -323,12 +323,11 @@ export default class SimulationController {
 
 			this.earthquakeDetection = new EarthquakeDetection();
 
-			this.map.clearEarthquakeDetection();
-
 			clearTimeout(this.clearTimeout);
 			clearInterval(this.earthquakeDetectionInterval);
 		} else {
 			this.clearTimeout = setTimeout(() => {
+				this.map.clearEarthquakeDetection();
 				if (this.affectedPWaves.features.length > 0) {
 					this.affectedPWaves = {
 						type: "FeatureCollection",
@@ -341,8 +340,6 @@ export default class SimulationController {
 				}
 
 				this.earthquakeDetection = new EarthquakeDetection();
-
-				this.map.clearEarthquakeDetection();
 			}, 180000);
 		}
 	}
@@ -381,7 +378,5 @@ export default class SimulationController {
 				command: "stop",
 			});
 		}
-
-		this.map.stopSimulation();
 	}
 }

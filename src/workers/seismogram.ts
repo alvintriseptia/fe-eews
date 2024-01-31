@@ -34,7 +34,8 @@ const seismogramData = new Map<string, SeismogramDataType>(
 );
 
 const SAMPLING_RATE = 20;
-const BUFFER = 5000;
+const FREQUENCY_UPDATE = 3000;
+const BUFFER = 3600;
 
 export type SeismogramDataType = {
 	channelZ: SeismogramPlotType;
@@ -164,37 +165,37 @@ const onmessage = (event: MessageEvent) => {
 				newData.channelZ.x.push(
 					...tempData.channelZ.x.slice(
 						currentLength,
-						currentLength + SAMPLING_RATE
+						currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE / 1000)
 					)
 				);
 				newData.channelZ.y.push(
 					...tempData.channelZ.y.slice(
 						currentLength,
-						currentLength + SAMPLING_RATE
+						currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE / 1000)
 					)
 				);
 				newData.channelN.x.push(
 					...tempData.channelN.x.slice(
 						currentLength,
-						currentLength + SAMPLING_RATE
+						currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE / 1000)
 					)
 				);
 				newData.channelN.y.push(
 					...tempData.channelN.y.slice(
 						currentLength,
-						currentLength + SAMPLING_RATE
+						currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE / 1000)
 					)
 				);
 				newData.channelE.x.push(
 					...tempData.channelE.x.slice(
 						currentLength,
-						currentLength + SAMPLING_RATE
+						currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE / 1000)
 					)
 				);
 				newData.channelE.y.push(
 					...tempData.channelE.y.slice(
 						currentLength,
-						currentLength + SAMPLING_RATE
+						currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE / 1000)
 					)
 				);
 
@@ -204,7 +205,7 @@ const onmessage = (event: MessageEvent) => {
 				data.channelN.y.push(...newData.channelN.y);
 				data.channelE.x.push(...newData.channelE.x);
 				data.channelE.y.push(...newData.channelE.y);
-				data.currentIndex += SAMPLING_RATE;
+				data.currentIndex += (SAMPLING_RATE * FREQUENCY_UPDATE / 1000);
 
 				// check if there is p wave
 				const pWave = pWavesData.get(station);
@@ -239,7 +240,7 @@ const onmessage = (event: MessageEvent) => {
 					pWavesData.set(station, pWave);
 				}
 
-				// if the current length waves is more than 20.000, then remove the first 10.000
+				// if the current length waves is more than BUFFER, then remove the first BUFFER / 2
 				if (data.channelZ.x.length > BUFFER) {
 					data.channelZ.x.splice(0, BUFFER / 2);
 					data.channelZ.y.splice(0, BUFFER / 2);
@@ -278,7 +279,7 @@ const onmessage = (event: MessageEvent) => {
 					data: data,
 				});
 			}
-		}, 1000);
+		}, FREQUENCY_UPDATE);
 	}
 
 	function stopStationSeismogram(station: string) {
@@ -308,12 +309,17 @@ const onmessage = (event: MessageEvent) => {
 	function simulateStationSeismogram(station: string) {
 		seismogramInterval[station] = setInterval(() => {
 			const data = seismogramData.get(station);
-			data.channelZ.x.push(Date.now());
-			data.channelZ.y.push(Math.random() * 2000 + 500);
-			data.channelN.x.push(Date.now());
-			data.channelN.y.push(Math.random() * 1000 + 200);
-			data.channelE.x.push(Date.now());
-			data.channelE.y.push(Math.random() * 500 + 100);
+			let time = Date.now();
+			for(let i = 0; i < (SAMPLING_RATE * FREQUENCY_UPDATE / 1000); i++){
+				data.channelZ.x.push(time);
+				data.channelZ.y.push(Math.random() * 2000 + 500);
+				data.channelN.x.push(time);
+				data.channelN.y.push(Math.random() * 1000 + 200);
+				data.channelE.x.push(time);
+				data.channelE.y.push(Math.random() * 500 + 100);
+
+				time += 1000 / SAMPLING_RATE;
+			}
 
 			// check if there is p wave
 			const pWave = pWavesData.get(station);
@@ -348,14 +354,14 @@ const onmessage = (event: MessageEvent) => {
 				pWavesData.set(station, pWave);
 			}
 
-			// if the current length waves is more than 5000, then remove the first 2500
-			if (data.channelZ.x.length > 5000) {
-				data.channelZ.x.splice(0, 2500);
-				data.channelZ.y.splice(0, 2500);
-				data.channelN.x.splice(0, 2500);
-				data.channelN.y.splice(0, 2500);
-				data.channelE.x.splice(0, 2500);
-				data.channelE.y.splice(0, 2500);
+			// if the current length waves is more than BUFFER, then remove the first BUFFER / 2
+			if (data.channelZ.x.length > BUFFER) {
+				data.channelZ.x.splice(0, BUFFER / 2);
+				data.channelZ.y.splice(0, BUFFER / 2);
+				data.channelN.x.splice(0, BUFFER / 2);
+				data.channelN.y.splice(0, BUFFER / 2);
+				data.channelE.x.splice(0, BUFFER / 2);
+				data.channelE.y.splice(0, BUFFER / 2);
 
 				// pwaves
 				const startTime = data.channelZ.x[0];
@@ -372,7 +378,7 @@ const onmessage = (event: MessageEvent) => {
 				station: station,
 				data: data,
 			});
-		}, 1000);
+		}, FREQUENCY_UPDATE);
 	}
 };
 addEventListener("message", onmessage);

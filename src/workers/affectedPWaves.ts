@@ -1,15 +1,15 @@
 import { GeoJsonCollection, RegionType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
-let isOnMessage = false;
+let isOnMessageAffectedPWaves = true;
 
 const onmessage = async (event: MessageEvent) => {
 	const { nearestRegencies, pWave, pWaveImpacted } = event.data;
-	if (isOnMessage) {
+	if (isOnMessageAffectedPWaves) {
 		return;
 	}
 
-	isOnMessage = true;
+	isOnMessageAffectedPWaves = true;
 	try {
 		//setup provinces geojson
 		let geoJson: GeoJsonCollection = {
@@ -99,7 +99,7 @@ const onmessage = async (event: MessageEvent) => {
 	} catch (error) {
 		console.error(error);
 	} finally {
-		isOnMessage = false;
+		isOnMessageAffectedPWaves = false;
 	}
 };
 

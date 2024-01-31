@@ -17,17 +17,17 @@ class Filterbar extends React.Component<FilterbarProps> {
 
 	render() {
 		return (
-			<section className="p-4 border-b border-b-tews-dark-slate-grey flex items-end">
-				<span className="text-tews-silver font-semibold mr-5 text-lg self-start">Filter:</span>
+			<section className="p-4 border-b border-b-tews-dark-slate-grey flex items-center">
+				<span className="text-tews-silver font-semibold mr-5 text-lg">Filter:</span>
 				{/* start date */}
-				<div className="flex flex-col mr-4">
+				<div className="flex items-center gap-x-2">
 					<label htmlFor="start-date" className="text-tews-silver">
 						Tanggal Mulai
 					</label>
 					<input
 						type="date"
 						id="start-date"
-						className="border border-tews-dark-slate-grey rounded-md p-1"
+						className="border rounded-md p-1 bg-tews-dark-slate-grey text-white"
 						value={new Date(this.state.startDate)
 							.toISOString()
 							.slice(0, 10)}
@@ -36,18 +36,25 @@ class Filterbar extends React.Component<FilterbarProps> {
 								startDate: new Date(e.target.value).getTime(),
 							});
 						}}
+						max={new Date(this.state.endDate)
+							.toISOString()
+							.slice(0, 10)}
 					/>
 				</div>
 
+				<div className="text-tews-silver font-semibold mx-2 text-lg">
+					-
+				</div>
+
 				{/* end date */}
-				<div className="flex flex-col mr-4">
+				<div className="flex items-center mr-4 gap-x-2">
 					<label htmlFor="end-date" className="text-tews-silver">
-						Tanggal Selesai
+						Tanggal Akhir
 					</label>
 					<input
 						type="date"
 						id="end-date"
-						className="border border-tews-dark-slate-grey rounded-md p-1"
+						className="border rounded-md p-1 bg-tews-dark-slate-grey text-white"
 						value={new Date(this.state.endDate)
 							.toISOString()
 							.slice(0, 10)}
@@ -56,6 +63,10 @@ class Filterbar extends React.Component<FilterbarProps> {
 								endDate: new Date(e.target.value).getTime(),
 							});
 						}}
+						min={new Date(this.state.startDate)
+							.toISOString()
+							.slice(0, 10)}
+						max={new Date().toISOString().slice(0, 10)}
 					/>
 				</div>
 

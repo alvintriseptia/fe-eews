@@ -24,9 +24,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 				}
 
 				station.network = item.properties.net;
-				station.latitude = parseFloat(item.geometry.coordinates[1]);
-				station.longitude = parseFloat(item.geometry.coordinates[0]);
-				station.elevation = item.geometry.coordinates[2];
 				station.ch1 = item.properties.ch1;
 				station.ch2 = item.properties.ch2;
 				station.ch3 = item.properties.ch3;

@@ -66,7 +66,8 @@ export default class DynamicLineChart extends React.Component<Props> {
 			xaxis: {
 				type: "date",
 				color: "#fff",
-				range: [Date.now() - 30000, Date.now()],
+				range: [Date.now() - 60000, Date.now()],
+				showspikes: false,
 			},
 			yaxis: {
 				type: "linear",
@@ -182,8 +183,8 @@ export default class DynamicLineChart extends React.Component<Props> {
 				const last = channelZ.x[channelZ.x.length - 1];
 				const first = channelZ.x[0];
 				const diff = last - first;
-				if (diff > 30000) {
-					layout.xaxis.range = [now - 30000, now];
+				if (diff > 60000) {
+					layout.xaxis.range = [now - 60000, now];
 				} else {
 					layout.xaxis.range = [first, last];
 				}
@@ -279,8 +280,8 @@ export default class DynamicLineChart extends React.Component<Props> {
 			const last = channelZ.x[channelZ.x.length - 1];
 			const first = channelZ.x[0];
 			const diff = last - first;
-			if (diff > 30000) {
-				layout.xaxis.range = [now - 30000, now];
+			if (diff > 60000) {
+				layout.xaxis.range = [now - 60000, now];
 			} else {
 				layout.xaxis.range = [first, last];
 			}

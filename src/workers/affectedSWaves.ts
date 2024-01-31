@@ -1,15 +1,15 @@
-import { GeoJsonCollection, RegionType } from "@/types/_index";
+import { RegionType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
-let isOnMessage = false;
+let isOnMessageAffectedSWaves = true;
 
 const onmessage = async (event: MessageEvent) => {
 	const { nearestRegencies, sWave, sWaveImpacted, earthquakeDetection } = event.data;
-	if (isOnMessage) {
+	if (isOnMessageAffectedSWaves) {
 		return;
 	}
 
-	isOnMessage = true;
+	isOnMessageAffectedSWaves = true;
 	try {
 		//setup regencies data
 		let regenciesData: RegionType[] = [];
@@ -94,7 +94,7 @@ const onmessage = async (event: MessageEvent) => {
 	} catch (error) {
 		console.error(error);
 	} finally {
-		isOnMessage = false;
+		isOnMessageAffectedSWaves = false;
 	}
 };
 
