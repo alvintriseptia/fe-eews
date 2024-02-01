@@ -13,7 +13,7 @@ class HistoryCard extends React.Component<IEarthquakeHistory> {
 		const offset = new Date().getTimezoneOffset() * 60 * 1000;
 		time.setTime(time.getTime() - offset);
 		let timeString =
-			time.toLocaleDateString("id-ID") + " " + time.toLocaleTimeString();
+			time.toLocaleDateString("id-ID") + " " + time.toLocaleTimeString("id-ID");
 		// Add timezone WIB, WITA, or WIT
 		if (offset === 7) {
 			timeString += " WIB";

@@ -17,29 +17,29 @@ const onmessage = (event: MessageEvent) => {
 			description: "A magnitude 5.0 earthquake is predicted to occur cuy",
 			time_stamp: Date.now(),
 			depth: 5,
-			lat: -6.1751,
-			long: 106.826,
-			mag: 2,
+			lat: -2.5927,
+			long: 140.1678,
+			mag: 10,
 			detection: typeDetection[Math.floor(Math.random() * 3)],
 			countdown: 10,
-			station: "BBJI",
+			station: "GENI",
 		};
 
-		addPWave("BBJI", Date.now());
+		addPWave("GENI", Date.now());
 
 		postMessage(earthquakeDetection);
 
-		setInterval(() => {
-			const station = STATIONS_DATA[Math.floor(Math.random() * STATIONS_DATA.length) - 1];
-			earthquakeDetection.lat = station.latitude;
-			earthquakeDetection.long = station.longitude;
-			earthquakeDetection.detection =
-				typeDetection[Math.floor(Math.random() * 3)];
-			earthquakeDetection.station = station.code;
-			addPWave(station.code, Date.now());
+		// setInterval(() => {
+		// 	const station = STATIONS_DATA[Math.floor(Math.random() * STATIONS_DATA.length) - 1];
+		// 	earthquakeDetection.lat = station.latitude;
+		// 	earthquakeDetection.long = station.longitude;
+		// 	earthquakeDetection.detection =
+		// 		typeDetection[Math.floor(Math.random() * 3)];
+		// 	earthquakeDetection.station = station.code;
+		// 	addPWave(station.code, Date.now());
 
-			postMessage(earthquakeDetection);
-		}, 60000);
+		// 	postMessage(earthquakeDetection);
+		// }, 60000);
 	} else {
 		socket.on("detection-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip

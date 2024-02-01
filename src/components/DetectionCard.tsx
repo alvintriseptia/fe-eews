@@ -15,7 +15,7 @@ class DetectionCard extends React.Component<DetectionCardProps> {
 	render() {
 		const intensityColor = getIntensityColor(this.props.magnitude);
 		const date = new Date(this.props.time);
-		const time = date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
+		const time = date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString("id-ID")
 		return (
 			<div className="flex w-full border-b border-b-tews-mmi-II" onClick={this.props.onClick}>
 				<div className={`${intensityColor} w-16 flex items-center justify-center text-2xl font-semibold`}>{this.props.magnitude?.toFixed(2) || ""}</div>

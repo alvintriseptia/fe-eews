@@ -14,8 +14,8 @@ class EarthquakeInfo extends React.Component<IEarthquakeHistory> {
     let time = "";
     let date = "";
     if (
-      typeof this.props.date === "number" ||
-      new Date(this.props.date).toString() !== "Invalid Date"
+      (typeof this.props.date === "number" ||
+      new Date(this.props.date).toString() !== "Invalid Date") && !this.props.date.toString().includes("/")
     ) {
       const dateObj = new Date(this.props.date);
       const offset = new Date().getTimezoneOffset() * 60 * 1000;
@@ -29,7 +29,7 @@ class EarthquakeInfo extends React.Component<IEarthquakeHistory> {
           : timezone === 9
           ? "WIT"
           : "";
-      time = dateObj.toLocaleTimeString() + " " + timezoneText;
+      time = dateObj.toLocaleTimeString("id-ID") + " " + timezoneText;
 
       //date dd/mm/yyyy
       date = dateObj.toLocaleDateString("id-ID", {
@@ -39,7 +39,7 @@ class EarthquakeInfo extends React.Component<IEarthquakeHistory> {
       });
     } else {
       time = this.props.time.toString();
-      date = this.props.date;
+      date = this.props.date?.toString() || "";
     }
 
     return (

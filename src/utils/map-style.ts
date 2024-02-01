@@ -38,5 +38,5 @@ export function getIntensityColor(intensity: number) {
   if(intensity < 8) return "bg-tews-mmi-VII text-white"
   if(intensity < 9) return "bg-tews-mmi-VIII text-white"
   if(intensity < 10) return "bg-tews-mmi-IX text-white"
-  return "bg-tews-mmi-X"
+  return "bg-tews-mmi-X text-white"
 }

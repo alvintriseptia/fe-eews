@@ -26,7 +26,8 @@ const onmessage = async (event: MessageEvent) => {
 		};
 
 		//setup regencies data
-		let regenciesData: RegionType[] = sWaveImpacted;
+		let newPWaveImpacted: RegionType[] = pWaveImpacted;
+		let newSWaveImpacted: RegionType[] = sWaveImpacted;
 
 		// remove provinces that already impact
 		let currentRegenciesNotImpactSWave: RegionType[] = [];
@@ -34,9 +35,15 @@ const onmessage = async (event: MessageEvent) => {
 			sWaveImpacted.length
 		);
 
+		if (currentRegenciesNotImpactSWave.length == 0) {
+			postMessage({
+				message: "stop",
+			});
+			return;
+		}
+
 		let stopPWave = false;
 		let stopSWave = false;
-
 		for (const regency of currentRegenciesNotImpactSWave) {
 			if (stopPWave && stopSWave) break;
 
@@ -47,7 +54,7 @@ const onmessage = async (event: MessageEvent) => {
 				continue;
 			}
 			const regencyGeoJson = await response.json();
-			if (regencyGeoJson && pWave && !stopPWave) {
+			if (regencyGeoJson) {
 				let regencyPolygon:
 					| turf.helpers.MultiPolygon
 					| turf.helpers.Polygon
@@ -66,106 +73,55 @@ const onmessage = async (event: MessageEvent) => {
 					);
 				}
 
-				const isIntersect = turf.intersect(
-					regencyPolygon,
-					turf.polygon(pWave.geometry.coordinates)
-				);
-				if (
-					isIntersect &&
-					pWaveImpacted.features.find(
-						(e: RegionType) => e.id === regency.id
-					) === undefined
-				) {
-					geoJson.features.push(...regencyGeoJson.features);
-				} else {
-					stopPWave = true;
-				}
-			}
-
-			if (regencyGeoJson && sWave && !stopSWave) {
-				let regencyPolygon:
-					| turf.helpers.MultiPolygon
-					| turf.helpers.Polygon
-					| turf.helpers.Feature<
-							turf.helpers.MultiPolygon | turf.helpers.Polygon,
-							{ [name: string]: any }
-					  >;
-
-				if (regencyGeoJson.features[0].geometry.type === "MultiPolygon") {
-					regencyPolygon = turf.multiPolygon(
-						regencyGeoJson.features[0].geometry.coordinates
+				if (pWave && !stopPWave && pWaveImpacted.find((e: RegionType) => e.id === regency.id) === undefined) {
+					const isIntersect = turf.intersect(
+						regencyPolygon,
+						turf.polygon(pWave.geometry.coordinates)
 					);
-				} else {
-					regencyPolygon = turf.polygon(
-						regencyGeoJson.features[0].geometry.coordinates
-					);
-				}
-
-				const isIntersect = turf.intersect(
-					regencyPolygon,
-					turf.polygon(sWave.geometry.coordinates)
-				);
-				if (
-					isIntersect &&
-					sWaveImpacted.find((e: RegionType) => e.id === regency.id) ===
-						undefined
-				) {
-					// calculate intensity
-					const distance = turf.distance(
-						turf.point([earthquakeDetection.long, earthquakeDetection.lat]),
-						turf.point([regency.longitude, regency.latitude])
-					);
-					const intensity =
-						parseFloat(earthquakeDetection.mag) > 0
-							? parseFloat(earthquakeDetection.mag) - Math.round(distance / 100)
-							: 0;
-					if (intensity < 1) {
-						//stop simulation
-						postMessage({
-							message: "stop",
-						});
-						stopSWave = true;
-						continue;
+					if (isIntersect) {
+						newPWaveImpacted.push(regency);
+						geoJson.features.push(...regencyGeoJson.features);
+					} else {
+						stopPWave = true;
 					}
-					regency.intensity = intensity;
-					regenciesData.push(regency);
-				} else {
-					stopSWave = true;
+				}
+
+				if (sWave && !stopSWave && sWaveImpacted.find((e: RegionType) => e.id === regency.id) === undefined) {
+					const isIntersect = turf.intersect(
+						regencyPolygon,
+						turf.polygon(sWave.geometry.coordinates)
+					);
+					if (isIntersect) {
+						// calculate intensity
+						const distance = turf.distance(
+							turf.point([earthquakeDetection.long, earthquakeDetection.lat]),
+							turf.point([regency.longitude, regency.latitude])
+						);
+						const intensity =
+							parseFloat(earthquakeDetection.mag) > 0
+								? parseFloat(earthquakeDetection.mag) -
+								  Math.round(distance / 100)
+								: 0;
+						if (intensity < 1) {
+							//stop simulation
+							postMessage({
+								message: "stop",
+							});
+							stopSWave = true;
+							continue;
+						}
+						regency.intensity = intensity;
+						newSWaveImpacted.push(regency);
+					} else {
+						stopSWave = true;
+					}
 				}
 			}
 		}
-
-		const newFeatures: any[] = pWaveImpacted.features;
-		if (geoJson.features.length) {
-			geoJson.features.forEach((feature: any) => {
-				if (
-					!newFeatures.find(
-						(e: any) => e.properties.Code === feature.properties.Code
-					)
-				) {
-					newFeatures.push(feature);
-				}
-			});
-		}
-
-		let newSWaveImpacted: RegionType[] = regenciesData;
-		if (sWaveImpacted.length > 0) {
-			sWaveImpacted.forEach((regency: RegionType) => {
-				if (
-					!newSWaveImpacted.find((e: RegionType) => e.id === regency.id) &&
-					regency.intensity
-				) {
-					newSWaveImpacted.push(regency);
-				}
-			});
-		}
-
 		postMessage({
-			pWaveImpacted: {
-				...geoJson,
-				features: newFeatures,
-			},
-			sWaveImpacted: newSWaveImpacted,
+			pWaveImpacted: pWaveImpacted,
+			pWaveImpactedGeoJson: geoJson,
+			sWaveImpacted: sWaveImpacted,
 		});
 	} catch (error) {
 		console.error(error);

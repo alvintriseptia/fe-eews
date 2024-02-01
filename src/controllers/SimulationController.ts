@@ -7,7 +7,7 @@ import {
 	Notification,
 	Seismogram,
 } from "@/models/_index";
-import { CoordinateType, GeoJsonCollection, RegionType } from "@/types/_index";
+import { CoordinateType, RegionType } from "@/types/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import REGENCIES_DATA from "@/assets/data/regencies.json";
@@ -30,7 +30,7 @@ export default class SimulationController {
 
 	private wavesWorker: Worker;
 	private affectedWavesWorker: Worker;
-	private affectedPWaves: GeoJsonCollection;
+	private affectedPWaves: RegionType[];
 	private affectedSWaves: RegionType[];
 
 	private nearestRegencies = REGENCIES_DATA as RegionType[];
@@ -41,8 +41,10 @@ export default class SimulationController {
 			getEarthquakeWeekly: action,
 			getLatestEarthquake: action,
 			getLatestFeltEarthquake: action,
-			getLatestEarthquakeDetection: action,
 			connectEarthquakeDetection: action,
+			disconnectEarthquakeDetection: action,
+			clearEarthquakeDetection: action,
+			setOnViewCenter: action,
 			showStations: action,
 			showMap: action,
 			stopSimulation: action,
@@ -69,11 +71,7 @@ export default class SimulationController {
 			1000
 		);
 
-		this.affectedPWaves = {
-			type: "FeatureCollection",
-			features: [],
-		};
-
+		this.affectedPWaves = [];
 		this.affectedSWaves = [];
 
 		this.earthquakeDetectionWorker = new Worker(
@@ -111,12 +109,6 @@ export default class SimulationController {
 		return await this.earthquakeHistory.fetchLatestFeltEarthquake();
 	}
 
-	// EARTHQUAKE PREDICTION
-	/**
-	 * Retrieves the latest earthquake detection.
-	 */
-	getLatestEarthquakeDetection() {}
-
 	/**
 	 * Connects to the earthquake detection service.
 	 */
@@ -139,7 +131,7 @@ export default class SimulationController {
 				mag: data.mag,
 				detection: "warning",
 				countdown: 10,
-				station: "BBJI",
+				station: "GENI",
 			};
 
 			if (earthquakeDetection.detection === "warning") {
@@ -248,13 +240,12 @@ export default class SimulationController {
 						this.clearEarthquakeDetection(true);
 					} else {
 						const regenciesData = data.sWaveImpacted;
-						const geoJson = data.pWaveImpacted;
-						this.affectedSWaves = regenciesData;
-						this.affectedPWaves = geoJson;
-						this.map.addAreaAffectedWaves(geoJson, regenciesData);
-						if(regenciesData.length > 0) {
+						if(regenciesData.length > this.affectedSWaves.length) {
 							this.notificationSWaveAffected.playNotification();
 						}
+						this.affectedSWaves = regenciesData;
+						this.affectedPWaves = data.pWaveImpacted;
+						this.map.addAreaAffectedWaves(data.pWaveImpactedGeoJson, regenciesData);
 					}
 				};
 			}
@@ -272,11 +263,8 @@ export default class SimulationController {
 			this.stopSimulation();
 			this.map.clearEarthquakeDetection();
 
-			if (this.affectedPWaves.features.length > 0) {
-				this.affectedPWaves = {
-					type: "FeatureCollection",
-					features: [],
-				};
+			if (this.affectedPWaves.length > 0) {
+				this.affectedPWaves = [];
 			}
 
 			if (this.affectedSWaves.length > 0) {
@@ -292,11 +280,9 @@ export default class SimulationController {
 			this.map.clearWaves();
 			this.clearTimeout = setTimeout(() => {
 				this.map.clearEarthquakeDetection();
-				if (this.affectedPWaves.features.length > 0) {
-					this.affectedPWaves = {
-						type: "FeatureCollection",
-						features: [],
-					};
+
+				if (this.affectedPWaves.length > 0) {
+					this.affectedPWaves = [];
 				}
 
 				if (this.affectedSWaves.length > 0) {

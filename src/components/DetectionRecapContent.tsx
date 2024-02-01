@@ -130,7 +130,7 @@ class DetectionRecapContent extends Component<DetectionRecapContentProps> {
   render() {
     let date = new Date(this.props.time_stamp);
     const time =
-      date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
+      date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString("id-ID");
 
     return (
       <section className="flex flex-col p-4 border-b">

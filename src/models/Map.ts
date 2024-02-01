@@ -512,9 +512,13 @@ class TEWSMap implements IMap {
 
 		// update source
 		if (source) {
-			source.setData(pWaveImpacted);
+			source.setData({
+				type: "FeatureCollection",
+				features: (source._data as any).features.concat(pWaveImpacted.features),
+			});
 		}
 	}
+
 
 	addEarthquakeDetectionLocations(earthquake: IEarthquakeDetection[]) {
 		// add area affected
