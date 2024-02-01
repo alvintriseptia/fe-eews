@@ -67,6 +67,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 				type: "date",
 				color: "#fff",
 				range: [Date.now() - 60000, Date.now()],
+				autorange: false,
 				showspikes: false,
 			},
 			yaxis: {
@@ -246,7 +247,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 		}
 		// Check if the x-axis range has been manually adjusted by the user
 		else if (event["xaxis.range[0]"] && event["xaxis.range[1]"]) {
-			console.log(event["xaxis.range[0]"], event["xaxis.range[1]"]);
 			this.setState({
 				userDefinedRange: [event["xaxis.range[0]"], event["xaxis.range[1]"]],
 			});
