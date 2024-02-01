@@ -35,7 +35,7 @@ const seismogramData = new Map<string, SeismogramDataType>(
 
 const SAMPLING_RATE = 20;
 const FREQUENCY_UPDATE = 3000;
-const BUFFER = 3600;
+const BUFFER = 5000;
 
 export type SeismogramDataType = {
 	channelZ: SeismogramPlotType;

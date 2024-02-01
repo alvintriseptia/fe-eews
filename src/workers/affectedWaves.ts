@@ -148,12 +148,17 @@ const onmessage = async (event: MessageEvent) => {
 			});
 		}
 
-		let newSWaveImpacted: RegionType[] = [];
+		let newSWaveImpacted: RegionType[] = regenciesData;
 		if (sWaveImpacted.length > 0) {
-			newSWaveImpacted.push(...sWaveImpacted);
+			sWaveImpacted.forEach((regency: RegionType) => {
+				if (
+					!newSWaveImpacted.find((e: RegionType) => e.id === regency.id) &&
+					regency.intensity
+				) {
+					newSWaveImpacted.push(regency);
+				}
+			});
 		}
-
-		newSWaveImpacted.push(...regenciesData);
 
 		postMessage({
 			pWaveImpacted: {

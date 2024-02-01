@@ -192,8 +192,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 			this.setState({
 				revision: this.state.revision + 1,
-				// currentIndex: length,
-				// waveData: waveData.slice(length),
 				channelZ: {
 					...channelZ,
 					x: data.channelZ.x,
@@ -227,53 +225,8 @@ export default class DynamicLineChart extends React.Component<Props> {
 			seismogramWorker?.removeEventListener("message", handleSeismogramWorker);
 		};
 	}
-	// componentDidUpdate(prevProps: Props) {
-	// 	//context is updated
-	// 	const earthquakePrediction = (this.context as any)
-	// 		?.earthquakePrediction as IEarthquakePrediction | null;
-	// 	if (
-	// 		earthquakePrediction &&
-	// 		earthquakePrediction.station === this.state.station &&
-	// 		earthquakePrediction.time_stamp !==
-	// 			this.state.prevContextValue?.time_stamp
-	// 	) {
-	// 		console.log(
-	// 			earthquakePrediction,
-	// 			"earthquakePrediction",
-	// 			this.state.station
-	// 		);
-
-	// 		// //if the creation date is less than the last data, then directly add it to the pWaves
-
-	// 		const date = new Date(earthquakeDetection.time_stamp);
-	// 		pWaveTemp.x.push(date.getTime());
-	// 		pWaveTemp.y.push(0);
-	// 		pWaveTemp.x.push(date.getTime());
-	// 		pWaveTemp.y.push(6000);
-
-	// 		this.setState((prevState: any) => ({
-	// 			pWaves: [
-	// 				...prevState.pWaves,
-	// 				{
-	// 					...pWaveTemp,
-	// 					yaxis: "y4",
-	// 				},
-	// 				{
-	// 					...pWaveTemp,
-	// 					yaxis: "y5",
-	// 				},
-	// 				{
-	// 					...pWaveTemp,
-	// 					yaxis: "y6",
-	// 				},
-	// 			],
-	// 			prevContextValue: earthquakeDetection,
-	// 		}));
-	// 	}
-	// }
 
 	handleRelayout = (event: PlotRelayoutEvent) => {
-		console.log(event);
 		if (event["xaxis.showspikes"] === false) {
 			const { channelZ, layout } = this.state;
 			const now = Date.now();
