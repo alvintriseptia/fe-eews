@@ -1,7 +1,7 @@
 import { RegionType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
-let isOnMessageAffectedSWaves = true;
+let isOnMessageAffectedSWaves = false;
 
 const onmessage = async (event: MessageEvent) => {
 	const { nearestRegencies, sWave, sWaveImpacted, earthquakeDetection } = event.data;
@@ -16,7 +16,6 @@ const onmessage = async (event: MessageEvent) => {
 
 		// remove provinces that already impact
 		let currentRegenciesNotImpact: RegionType[] = [];
-		
 		currentRegenciesNotImpact = nearestRegencies.slice(
 			sWaveImpacted.length
 		);

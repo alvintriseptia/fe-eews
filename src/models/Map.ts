@@ -398,6 +398,24 @@ class TEWSMap implements IMap {
 		});
 	}
 
+	clearWaves(){
+		if (this.map.getSource("pWave")) {
+			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+
+		if (this.map.getSource("sWave")) {
+			const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+	}
+
 	clearEarthquakeDetection() {
 		if (this.map.getSource("pWave")) {
 			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
@@ -440,41 +458,27 @@ class TEWSMap implements IMap {
 		}
 	}
 
-	simulatePWaves(pWave: any) {
+	simulateWaves(pWave: any, sWave: any) {
 		// get source
-		const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+		const sourcePWave = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
 
-		// update source
-		if (source) {
-			source.setData(pWave);
+		// update sourcePWave
+		if (sourcePWave) {
+			sourcePWave.setData(sWave);
 		}
-	}
 
-	simulateSWaves(sWave: any) {
 		// get source
-		const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
+		const sourceSWave = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
 
-		// update source
-		if (source) {
-			source.setData(sWave);
+		// update sourceSWave
+		if (sourceSWave) {
+			sourceSWave.setData(pWave);
 		}
 	}
 
-	addAreaAffectedPWave(areas: any) {
-		// add area affected
-		const source = this.map.getSource(
-			"pWaveAffected"
-		) as maplibregl.GeoJSONSource;
-
-		// update source
-		if (source) {
-			source.setData(areas);
-		}
-	}
-
-	addAreaAffectedSWave(regencies: RegionType[]) {
-		// add area affected
-		regencies.forEach((regency) => {
+	addAreaAffectedWaves(pWaveImpacted: any, sWaveImpacted: RegionType[]) {
+		// add area affected sWave
+		sWaveImpacted.forEach((regency) => {
 			if (this.sWaveAffectedMarker.has(regency.id.toString())) {
 				return;
 			}
@@ -500,6 +504,16 @@ class TEWSMap implements IMap {
 
 			this.sWaveAffectedMarker.set(regency.id.toString(), marker);
 		});
+		
+		// add area affected pWave
+		const source = this.map.getSource(
+			"pWaveAffected"
+		) as maplibregl.GeoJSONSource;
+
+		// update source
+		if (source) {
+			source.setData(pWaveImpacted);
+		}
 	}
 
 	addEarthquakeDetectionLocations(earthquake: IEarthquakeDetection[]) {

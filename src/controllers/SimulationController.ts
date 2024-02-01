@@ -28,14 +28,9 @@ export default class SimulationController {
 	earthquakeDetection = new EarthquakeDetection();
 	private clearTimeout: NodeJS.Timeout;
 
-	private seismogramWorker: Worker;
-
-	private pWavesWorker: Worker;
-	private affectedPWavesWorker: Worker;
+	private wavesWorker: Worker;
+	private affectedWavesWorker: Worker;
 	private affectedPWaves: GeoJsonCollection;
-
-	private sWavesWorker: Worker;
-	private affectedSWavesWorker: Worker;
 	private affectedSWaves: RegionType[];
 
 	private nearestRegencies = REGENCIES_DATA as RegionType[];
@@ -81,28 +76,15 @@ export default class SimulationController {
 
 		this.affectedSWaves = [];
 
-		this.seismogramWorker = new Worker(
-			new URL("../workers/seismogram.ts", import.meta.url)
-		);
-
 		this.earthquakeDetectionWorker = new Worker(
 			new URL("../workers/earthquakeDetection.ts", import.meta.url)
 		);
 
-		this.pWavesWorker = new Worker(
-			new URL("../workers/pWaves.ts", import.meta.url)
+		this.wavesWorker = new Worker(
+			new URL("../workers/waves.ts", import.meta.url)
 		);
-
-		this.sWavesWorker = new Worker(
-			new URL("../workers/sWaves.ts", import.meta.url)
-		);
-
-		this.affectedPWavesWorker = new Worker(
-			new URL("../workers/affectedPWaves.ts", import.meta.url)
-		);
-
-		this.affectedSWavesWorker = new Worker(
-			new URL("../workers/affectedSWaves.ts", import.meta.url)
+		this.affectedWavesWorker = new Worker(
+			new URL("../workers/affectedWaves.ts", import.meta.url)
 		);
 	}
 
@@ -232,7 +214,8 @@ export default class SimulationController {
 					}
 				}, 1000);
 
-				this.pWavesWorker.postMessage({
+				// WAVE SIMULATION
+				this.wavesWorker.postMessage({
 					command: "start",
 					earthquakeEpicenter: {
 						longitude: earthquakeDetection.long,
@@ -240,35 +223,17 @@ export default class SimulationController {
 					},
 				});
 
-				this.pWavesWorker.onmessage = (event: MessageEvent) => {
+				this.wavesWorker.onmessage = (event: MessageEvent) => {
 					const data = event.data;
 					const pWave = data.pWave;
-					this.map.simulatePWaves(pWave);
+					const sWave = data.sWave;
+					this.map.simulateWaves(pWave, sWave);
 
 					// EARTHQUAKE PREDICTION AFFECTED AREA PWAVE
-					this.affectedPWavesWorker.postMessage({
+					this.affectedWavesWorker.postMessage({
 						nearestRegencies: this.nearestRegencies,
 						pWave: pWave,
 						pWaveImpacted: this.affectedPWaves,
-					});
-				};
-
-				this.sWavesWorker.postMessage({
-					command: "start",
-					earthquakeEpicenter: {
-						longitude: earthquakeDetection.long,
-						latitude: earthquakeDetection.lat,
-					},
-				});
-
-				this.sWavesWorker.onmessage = (event: MessageEvent) => {
-					const data = event.data;
-					const sWave = data.sWave;
-					this.map.simulateSWaves(sWave);
-
-					// EARTHQUAKE PREDICTION AFFECTED AREA SWAVE
-					this.affectedSWavesWorker.postMessage({
-						nearestRegencies: this.nearestRegencies,
 						sWave: sWave,
 						sWaveImpacted: this.affectedSWaves,
 						earthquakeDetection: this.earthquakeDetection,
@@ -276,23 +241,20 @@ export default class SimulationController {
 				};
 
 				// // GET AFFECTED AREA P-WAVES
-				this.affectedPWavesWorker.onmessage = (event: MessageEvent) => {
-					const geoJson = event.data;
-					this.affectedPWaves = geoJson;
-					this.map.addAreaAffectedPWave(geoJson);
-				};
-
-				// // GET AFFECTED AREA S-WAVES
-				this.affectedSWavesWorker.onmessage = (event: MessageEvent) => {
+				this.affectedWavesWorker.onmessage = (event: MessageEvent) => {
 					const data = event.data;
 					if (data.message == "stop") {
 						this.stopSimulation();
 						this.clearEarthquakeDetection(true);
 					} else {
 						const regenciesData = data.sWaveImpacted;
+						const geoJson = data.pWaveImpacted;
 						this.affectedSWaves = regenciesData;
-						this.map.addAreaAffectedSWave(regenciesData);
-						this.notificationSWaveAffected.playNotification();
+						this.affectedPWaves = geoJson;
+						this.map.addAreaAffectedWaves(geoJson, regenciesData);
+						if(regenciesData.length > 0) {
+							this.notificationSWaveAffected.playNotification();
+						}
 					}
 				};
 			}
@@ -326,6 +288,8 @@ export default class SimulationController {
 			clearTimeout(this.clearTimeout);
 			clearInterval(this.earthquakeDetectionInterval);
 		} else {
+			this.stopSimulation();
+			this.map.clearWaves();
 			this.clearTimeout = setTimeout(() => {
 				this.map.clearEarthquakeDetection();
 				if (this.affectedPWaves.features.length > 0) {
@@ -367,14 +331,8 @@ export default class SimulationController {
 	 * Stops the simulation.
 	 */
 	stopSimulation() {
-		if (this.pWavesWorker) {
-			this.pWavesWorker.postMessage({
-				command: "stop",
-			});
-		}
-
-		if (this.sWavesWorker) {
-			this.sWavesWorker.postMessage({
+		if (this.wavesWorker) {
+			this.wavesWorker.postMessage({
 				command: "stop",
 			});
 		}

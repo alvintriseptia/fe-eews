@@ -3,7 +3,7 @@ import * as turf from "@turf/turf";
 
 let pWaveInterval: NodeJS.Timeout;
 let pWaveRadius = 0;
-const updateFrequency = 500;
+const updateFrequency = 2000;
 let isOnMessagePWaves = false;
 
 const onmessage = (event: MessageEvent) => {
@@ -25,7 +25,7 @@ const onmessage = (event: MessageEvent) => {
 	}
 	function runPWave(waveCenter: CoordinateType) {
 		isOnMessagePWaves = true;
-		pWaveRadius += Math.random() * (3.5 - 2.5) + 2.5;
+		pWaveRadius += (Math.random() * 2) + 10;
 		const center = turf.point([waveCenter.longitude, waveCenter.latitude]);
 		const options = { steps: 25 };
 		const pWavePolygon = turf.circle(center, pWaveRadius, options);

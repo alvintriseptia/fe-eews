@@ -30,15 +30,16 @@ const onmessage = (event: MessageEvent) => {
 		postMessage(earthquakeDetection);
 
 		setInterval(() => {
-			earthquakeDetection.lat = Math.random() * 10 - 5;
-			earthquakeDetection.long = Math.random() * 10 - 5;
+			const station = STATIONS_DATA[Math.floor(Math.random() * STATIONS_DATA.length) - 1];
+			earthquakeDetection.lat = station.latitude;
+			earthquakeDetection.long = station.longitude;
 			earthquakeDetection.detection =
 				typeDetection[Math.floor(Math.random() * 3)];
-			earthquakeDetection.station = "BBJI";
-			addPWave("BBJI", Date.now());
+			earthquakeDetection.station = station.code;
+			addPWave(station.code, Date.now());
 
 			postMessage(earthquakeDetection);
-		}, 5000);
+		}, 60000);
 	} else {
 		socket.on("detection-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip

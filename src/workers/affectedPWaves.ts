@@ -1,7 +1,7 @@
 import { GeoJsonCollection, RegionType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
-let isOnMessageAffectedPWaves = true;
+let isOnMessageAffectedPWaves = false;
 
 const onmessage = async (event: MessageEvent) => {
 	const { nearestRegencies, pWave, pWaveImpacted } = event.data;

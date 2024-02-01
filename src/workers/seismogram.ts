@@ -76,10 +76,44 @@ const onmessage = (event: MessageEvent) => {
 		} else if (stationData && message === "stop") {
 			stopStationSeismogram(stationData.code);
 		} else if (stationData && message === "lastData") {
-			postMessage({
-				station: stationData.code,
-				data: seismogramData.get(stationData.code),
-			});
+			// batching per 500 data
+			const data = seismogramData.get(station);
+			const tempData = {
+				channelZ: {
+					x: [],
+					y: [],
+				},
+				channelN: {
+					x: [],
+					y: [],
+				},
+				channelE: {
+					x: [],
+					y: [],
+				},
+				pWaves: [],
+			};
+			for (let i = 0; i < data.channelZ.x.length; i += 500) {
+				tempData.channelZ.x.push(...data.channelZ.x.slice(i, i + 500));
+				tempData.channelZ.y.push(...data.channelZ.y.slice(i, i + 500));
+				tempData.channelN.x.push(...data.channelN.x.slice(i, i + 500));
+				tempData.channelN.y.push(...data.channelN.y.slice(i, i + 500));
+				tempData.channelE.x.push(...data.channelE.x.slice(i, i + 500));
+				tempData.channelE.y.push(...data.channelE.y.slice(i, i + 500));
+
+				// pwaves
+				const startTime = tempData.channelZ.x[0];
+				const endTime = tempData.channelZ.x[tempData.channelZ.x.length - 1];
+				tempData.pWaves = data.pWaves.filter((pWave) => {
+					const pWaveTime = pWave.x[0];
+					return pWaveTime >= startTime && pWaveTime <= endTime;
+				});
+
+				postMessage({
+					station: station,
+					data: tempData,
+				});
+			}
 		}
 	}
 
