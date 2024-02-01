@@ -5,10 +5,10 @@ import { Layout, PlotRelayoutEvent } from "plotly.js";
 import SeismogramContext from "@/stores/SeismogramContext";
 
 const Plot = dynamic(
-	() => import("react-plotly.js").then((mod) => mod.default),
-	{
-		ssr: false,
-	}
+  () => import("react-plotly.js").then((mod) => mod.default),
+  {
+    ssr: false,
+  }
 );
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default class DynamicLineChart extends React.Component<Props> {
-	static contextType = SeismogramContext;
+  static contextType = SeismogramContext;
 
 	state = {
 		station: "",
@@ -162,9 +162,9 @@ export default class DynamicLineChart extends React.Component<Props> {
 		}
 	}
 
-	componentDidMount() {
-		let isMounted = true;
-		const seismogramWorker = this.context as any as Worker | null;
+  componentDidMount() {
+    let isMounted = true;
+    const seismogramWorker = this.context as any as Worker | null;
 
 		const handleSeismogramWorker = (event: MessageEvent) => {
 			const { station, data } = event.data;
@@ -213,14 +213,12 @@ export default class DynamicLineChart extends React.Component<Props> {
 			layout.datarevision = this.state.revision + 1;
 		};
 
-		if (this.state.channelZ.x.length === 0) {
-			seismogramWorker?.postMessage({
-				station: this.state.station,
-				message: "lastData",
-			});
-		}
-
-		seismogramWorker?.addEventListener("message", handleSeismogramWorker);
+    if (this.state.channelZ.x.length === 0) {
+      seismogramWorker?.postMessage({
+        station: this.state.station,
+        message: "lastData",
+      });
+    }
 
 		return () => {
 			seismogramWorker?.removeEventListener("message", handleSeismogramWorker);
