@@ -1,8 +1,7 @@
-import { IEarthquakePrediction, IMap, IStation } from "@/entities/_index";
-import { CoordinateType, GeoJsonCollection, RegionType } from "@/types/_index";
+import { IEarthquakeDetection, IMap, IStation } from "@/entities/_index";
+import { CoordinateType,  RegionType } from "@/types/_index";
 import MapLibreGL, { StyleSpecification } from "maplibre-gl";
 import { Map as MapLibre } from "maplibre-gl";
-import BallMarker from "@/assets/images/ball-marker.ico";
 import { getIntensityColor } from "@/utils/map-style";
 
 class TEWSMap implements IMap {
@@ -14,7 +13,8 @@ class TEWSMap implements IMap {
 	sWaveAffectedMarker: Map<string, maplibregl.Marker> = new Map();
 	earthquakeEpicenter: maplibregl.Marker;
 	stationMarker: maplibregl.Marker;
-	earthquakePredictionMarker: Map<string, maplibregl.Marker> = new Map();
+	earthquakeDetectionMarker: Map<string, maplibregl.Marker> = new Map();
+	stationLocationMarker: Map<string, maplibregl.Marker> = new Map();
 
 	initMap(map: IMap) {
 		this.id = map.id;
@@ -129,19 +129,201 @@ class TEWSMap implements IMap {
 	}
 
 	addStations(stations: IStation[]) {
+		// clear station location marker
+		if (this.stationLocationMarker.size > 0) {
+			this.stationLocationMarker.forEach((marker) => marker.remove());
+			this.stationLocationMarker.clear();
+		}
+
+		const offset = new Date().getTimezoneOffset() * 60 * 1000;
+		const timezone = -(new Date().getTimezoneOffset() / 60);
+		const timezoneText =
+			timezone === 7
+				? "WIB"
+				: timezone === 8
+				? "WITA"
+				: timezone === 9
+				? "WIT"
+				: "";
+
 		stations.forEach((station) => {
+			const colorsSorted = {};
+			if (station.color1) {
+				if (!colorsSorted[station.color1]) {
+					colorsSorted[station.color1] = 1;
+				} else {
+					colorsSorted[station.color1] += 1;
+				}
+			}
+			if (station.color2) {
+				if (!colorsSorted[station.color2]) {
+					colorsSorted[station.color2] = 1;
+				} else {
+					colorsSorted[station.color2] += 1;
+				}
+			}
+			if (station.color3) {
+				if (!colorsSorted[station.color3]) {
+					colorsSorted[station.color3] = 1;
+				} else {
+					colorsSorted[station.color3] += 1;
+				}
+			}
+			if (station.color4) {
+				if (!colorsSorted[station.color4]) {
+					colorsSorted[station.color4] = 1;
+				} else {
+					colorsSorted[station.color4] += 1;
+				}
+			}
+			if (station.color5) {
+				if (!colorsSorted[station.color5]) {
+					colorsSorted[station.color5] = 1;
+				} else {
+					colorsSorted[station.color5] += 1;
+				}
+			}
+			if (station.color6) {
+				if (!colorsSorted[station.color6]) {
+					colorsSorted[station.color6] = 1;
+				} else {
+					colorsSorted[station.color6] += 1;
+				}
+			}
+
+			let mainColor = Object.keys(colorsSorted).reduce(
+				(a, b) => (colorsSorted[a] > colorsSorted[b] ? a : b),
+				"#fff"
+			);
+			if(colorsSorted['green'] && colorsSorted['green'] >= 3){
+				mainColor = 'green';
+			}
+			
 			const el = document.createElement("div");
 			const innerEl = `
-                <div class="station-marker">
-					<Image src="${BallMarker.src}" width="24" height="24" alt="station" />
-                    <div class="station-marker__code text-white">${station.code}</div>
+                <div>
+					<div class="station-marker" style="border-bottom: 16px solid ${mainColor}"></div>
+                    <div class="station-marker__code text-white text-center">${station.code}</div>
                 </div>
             `;
 			el.innerHTML = innerEl;
-			new MapLibreGL.Marker({
+
+			let popUpHtml = `
+					<div>
+						<h3>${station.description}</h3>
+						<div>Didirikan: ${new Date(station.creation_date).toLocaleString("id-ID")}</div>
+						<table class="w-full">
+							<thead>
+								<tr class="text-center">
+									<th>Channel</th>
+									<th>Data Terakhir</th>
+									<th>Latency</th>
+								</tr>
+							</thead>
+							<tbody class="text-white">
+				`;
+
+			if (station.ch1) {
+				const time = new Date(station.timech1);
+				let timeText = "-";
+				if (time && time.toDateString() != "Invalid Date") {
+					time.setTime(time.getTime() - offset);
+					timeText = time.toLocaleString("id-ID") + " " + timezoneText;
+				}
+				popUpHtml += `
+					<tr class="w-full text-center" style="background-color: ${station.color1}">
+						<td>${station.ch1}</td>
+						<td>${timeText}</td>
+						<td>${station.latency1}</td>
+					</tr>
+				`;
+			}
+			if (station.ch2) {
+				const time = new Date(station.timech2);
+				let timeText = "-";
+				if (time && time.toDateString() != "Invalid Date") {
+					time.setTime(time.getTime() - offset);
+					timeText = time.toLocaleString("id-ID") + " " + timezoneText;
+				}
+				popUpHtml += `
+					<tr class="w-full text-center" style="background-color: ${station.color2}">
+						<td>${station.ch2}</td>
+						<td>${timeText}</td>
+						<td>${station.latency2}</td>
+					</tr>
+				`;
+			}
+			if (station.ch3) {
+				const time = new Date(station.timech3);
+				let timeText = "-";
+				if (time && time.toDateString() != "Invalid Date") {
+					time.setTime(time.getTime() - offset);
+					timeText = time.toLocaleString("id-ID") + " " + timezoneText;
+				}
+				popUpHtml += `
+					<tr class="w-full text-center" style="background-color: ${station.color3}">
+						<td>${station.ch3}</td>
+						<td>${timeText}</td>
+						<td>${station.latency3}</td>
+					</tr>
+				`;
+			}
+			if (station.ch4) {
+				const time = new Date(station.timech4);
+				let timeText = "-";
+				if (time && time.toDateString() != "Invalid Date") {
+					time.setTime(time.getTime() - offset);
+					timeText = time.toLocaleString("id-ID") + " " + timezoneText;
+				}
+				popUpHtml += `
+					<tr class="w-full text-center" style="background-color: ${station.color4}">
+						<td>${station.ch4}</td>
+						<td>${timeText}</td>
+						<td>${station.latency4}</td>
+					</tr>
+				`;
+			}
+			if (station.ch5) {
+				const time = new Date(station.timech5);
+				let timeText = "-";
+				if (time && time.toDateString() != "Invalid Date") {
+					time.setTime(time.getTime() - offset);
+					timeText = time.toLocaleString("id-ID") + " " + timezoneText;
+				}
+				popUpHtml += `
+					<tr class="w-full text-center" style="background-color: ${station.color5}">
+						<td>${station.ch5}</td>
+						<td>${timeText}</td>
+						<td>${station.latency5}</td>
+					</tr>
+				`;
+			}
+			if (station.ch6) {
+				const time = new Date(station.timech6);
+				let timeText = "-";
+				if (time && time.toDateString() != "Invalid Date") {
+					time.setTime(time.getTime() - offset);
+					timeText = time.toLocaleString("id-ID") + " " + timezoneText;
+				}
+				popUpHtml += `
+					<tr class="w-full text-center" style="background-color: ${station.color6}">
+						<td>${station.ch6}</td>
+						<td>${timeText}</td>
+						<td>${station.latency6}</td>
+					</tr>
+				`;
+			}
+
+			popUpHtml += `
+							</tbody>
+						</table>
+					</div>
+				`;
+				
+			const marker = new MapLibreGL.Marker({
 				color: "red",
 				draggable: false,
-				scale: 0.5,
+				scale: 1,
 				element: el,
 			})
 				.setLngLat([station.longitude, station.latitude])
@@ -149,13 +331,10 @@ class TEWSMap implements IMap {
 				.setPopup(
 					new MapLibreGL.Popup({
 						closeButton: false,
-						closeOnClick: false,
-					}).setHTML(`<div>
-									<h3>${station.description}</h3>
-									<div>Didirikan: ${new Date(station.creation_date).toLocaleString()}</div>
-								</div>
-						`)
+						maxWidth: "none",
+					}).setHTML(popUpHtml)
 				);
+			this.stationLocationMarker.set(station.code, marker);
 		});
 	}
 
@@ -179,7 +358,7 @@ class TEWSMap implements IMap {
 		}
 	}
 
-	addEarthquakePrediction(location: CoordinateType, station: IStation) {
+	addEarthquakeDetection(location: CoordinateType, station: IStation) {
 		const el = document.createElement("div");
 		const innerEl = `
 			<div class="animate-pulse font-bold text-4xl text-red-500 drop-shadow-[2px_2px_0_rgba(255,255,255,0.8)]">
@@ -219,7 +398,25 @@ class TEWSMap implements IMap {
 		});
 	}
 
-	clearEarthquakePrediction() {
+	clearWaves(){
+		if (this.map.getSource("pWave")) {
+			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+
+		if (this.map.getSource("sWave")) {
+			const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
+			source.setData({
+				type: "FeatureCollection",
+				features: [],
+			});
+		}
+	}
+
+	clearEarthquakeDetection() {
 		if (this.map.getSource("pWave")) {
 			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
 			source.setData({
@@ -261,60 +458,27 @@ class TEWSMap implements IMap {
 		}
 	}
 
-	simulatePWaves(pWave: any) {
+	simulateWaves(pWave: any, sWave: any) {
 		// get source
-		const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+		const sourcePWave = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
 
-		// update source
-		if (source) {
-			source.setData(pWave);
+		// update sourcePWave
+		if (sourcePWave) {
+			sourcePWave.setData(sWave);
 		}
-	}
 
-	simulateSWaves(sWave: any) {
 		// get source
-		const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
+		const sourceSWave = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
 
-		// update source
-		if (source) {
-			source.setData(sWave);
+		// update sourceSWave
+		if (sourceSWave) {
+			sourceSWave.setData(pWave);
 		}
 	}
 
-	stopSimulation() {
-		//remove layer
-		if (this.map.getSource("pWave")) {
-			const source = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
-			source.setData({
-				type: "FeatureCollection",
-				features: [],
-			});
-		}
-
-		if (this.map.getSource("sWave")) {
-			const source = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
-			source.setData({
-				type: "FeatureCollection",
-				features: [],
-			});
-		}
-	}
-
-	addAreaAffectedPWave(areas: any) {
-		// add area affected
-		const source = this.map.getSource(
-			"pWaveAffected"
-		) as maplibregl.GeoJSONSource;
-
-		// update source
-		if (source) {
-			source.setData(areas);
-		}
-	}
-
-	addAreaAffectedSWave(regencies: RegionType[]) {
-		// add area affected
-		regencies.forEach((regency) => {
+	addAreaAffectedWaves(pWaveImpacted: any, sWaveImpacted: RegionType[]) {
+		// add area affected sWave
+		sWaveImpacted.forEach((regency) => {
 			if (this.sWaveAffectedMarker.has(regency.id.toString())) {
 				return;
 			}
@@ -340,9 +504,23 @@ class TEWSMap implements IMap {
 
 			this.sWaveAffectedMarker.set(regency.id.toString(), marker);
 		});
+		
+		// add area affected pWave
+		const source = this.map.getSource(
+			"pWaveAffected"
+		) as maplibregl.GeoJSONSource;
+
+		// update source
+		if (source) {
+			source.setData({
+				type: "FeatureCollection",
+				features: (source._data as any).features.concat(pWaveImpacted.features),
+			});
+		}
 	}
 
-	addEarthquakePredictionLocations(earthquake: IEarthquakePrediction[]) {
+
+	addEarthquakeDetectionLocations(earthquake: IEarthquakeDetection[]) {
 		// add area affected
 		earthquake.forEach((eq) => {
 			const el = document.createElement("div");
@@ -378,7 +556,7 @@ class TEWSMap implements IMap {
 					}).setHTML(popupInnerEl)
 				);
 
-			this.earthquakePredictionMarker.set(eq.time_stamp.toString(), marker);
+			this.earthquakeDetectionMarker.set(eq.time_stamp.toString(), marker);
 		});
 	}
 }

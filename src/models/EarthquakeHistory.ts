@@ -1,11 +1,11 @@
-import { IExternalSource } from "@/entities/_index";
+import { IEarthquakeHistory } from "@/entities/_index";
 import {
 	ResponseLatestFeltEarthquake,
 	ResponseLatestEarthquake,
 	ResponseEarthquakeWeekly,
 } from "@/models/response/_index";
 
-export default class ExternalSource implements IExternalSource {
+export default class EarthquakeHistory implements IEarthquakeHistory {
 	id: string;
 	title: string;
 	location: string;
@@ -65,7 +65,11 @@ export default class ExternalSource implements IExternalSource {
 					month: "2-digit",
 					day: "2-digit",
 				}),
-				time: time.toLocaleTimeString() + " " + timezoneText,
+				time: time.toLocaleTimeString("id-ID", {
+					hour: "2-digit",
+					minute: "2-digit",
+					second: "2-digit",
+				}) + " " + timezoneText,
 				magnitude: parseFloat(data.info.magnitude).toFixed(2),
 				depth: parseFloat(data.info.depth).toFixed(2),
 				latitude: parseFloat(data.info.latitude).toFixed(2),
@@ -103,7 +107,11 @@ export default class ExternalSource implements IExternalSource {
 					month: "2-digit",
 					day: "2-digit",
 				}),
-				time: time.toLocaleTimeString() + " " + timezoneText,
+				time: time.toLocaleTimeString("id-ID", {
+					hour: "2-digit",
+					minute: "2-digit",
+					second: "2-digit",
+				}) + " " + timezoneText,
 				magnitude: parseFloat(earthquake.properties.mag).toFixed(2),
 				depth: parseFloat(earthquake.properties.depth).toFixed(2),
 				latitude: parseFloat(lat).toFixed(2),

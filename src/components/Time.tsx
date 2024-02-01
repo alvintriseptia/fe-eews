@@ -12,7 +12,7 @@ class Time extends React.Component {
 			const date = new Date();
 			const timezone = -(new Date().getTimezoneOffset() / 60);
 			let newTime =
-				date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString();
+				date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString("id-ID");
 			//add timezone WIB, WITA, OR WIT
 			if (timezone === 7) {
 				newTime += " WIB";

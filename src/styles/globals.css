@@ -46,3 +46,11 @@
 		background: #0d121c;
 	}
 }
+
+.station-marker {
+	width: 0;  
+	height: 0;  
+	border-left: 16px solid transparent; 
+	border-right: 16px solid transparent; 
+	border-bottom: 16px solid green; 
+}

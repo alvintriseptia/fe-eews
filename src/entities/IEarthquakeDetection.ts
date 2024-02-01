@@ -1,7 +1,7 @@
-export interface IEarthquakePrediction {
+export interface IEarthquakeDetection {
     title: string;
     description: string;
-    prediction: string;
+    detection: string;
     station: string;
     time_stamp: number;
     depth: number;

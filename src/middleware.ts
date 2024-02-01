@@ -34,5 +34,5 @@ export async function middleware(request: NextRequest) {
 
 // //Add your protected routes
 export const config = {
-	matcher: ["/", "/prediksi"],
+	matcher: ["/", "/riwayat", "/stasiun"],
 };

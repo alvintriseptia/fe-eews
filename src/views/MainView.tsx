@@ -8,11 +8,10 @@ import {
 	StationController,
 } from "@/controllers/_index";
 import {
-	IEarthquakePrediction,
-	IExternalSource,
+	IEarthquakeDetection,
+	IEarthquakeHistory,
 	IMap,
 	INotification,
-	ISeismogram,
 	IStation,
 } from "@/entities/_index";
 import {
@@ -29,19 +28,19 @@ import { NavbarProps } from "@/components/Navbar";
 import { observe } from "mobx";
 import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
 import STATIONS_DATA from "@/assets/data/stations.json";
-import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
+import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
 import * as indexedDB from "@/lib/indexed-db";
 
 interface Props {
 	mode: "simulation" | "realtime";
 	controller: MainController | SimulationController;
 	stationController: StationController;
-	weeklyEarthquake: IExternalSource[];
+	weeklyEarthquake: IEarthquakeHistory[];
 	navbar: NavbarProps;
 	sidebarProps: {
-		latestFeltEarthquake: IExternalSource;
-		latestEarthquake: IExternalSource;
-		latestPrediction: IEarthquakePrediction;
+		latestFeltEarthquake: IEarthquakeHistory;
+		latestEarthquake: IEarthquakeHistory;
+		latestDetection: IEarthquakeDetection;
 	};
 }
 
@@ -49,28 +48,28 @@ class MainView extends React.Component<Props> {
 	state = {
 		controller: {} as MainController | SimulationController,
 		stationController: {} as StationController,
-		earthquakePrediction: {} as EarthquakeRealtimeProps,
+		earthquakeDetection: {} as EarthquakeRealtimeProps,
 		map: {} as IMap,
 		notification: {} as INotification,
-		seismogram: [] as ISeismogram[],
-		last5MEartquake: {} as IExternalSource,
-		lastFeltEarthquake: {} as IExternalSource,
-		weeklyEarthquake: [] as IExternalSource[],
+		last5MEartquake: {} as IEarthquakeHistory,
+		lastFeltEarthquake: {} as IEarthquakeHistory,
+		weeklyEarthquake: [] as IEarthquakeHistory[],
 		navbar: {
 			isLoggedIn: false,
 			navLinks: [],
 			totalEarthquakes: 0,
 			maximumMagnitude: 0,
-			minimumMagnitude: 100,
+			minimumMagnitude: 0,
 			headerInfos: [],
 		},
 		sidebarProps: {
-			latestFeltEarthquake: {} as IExternalSource,
-			latestEarthquake: {} as IExternalSource,
-			latestPrediction: {} as IEarthquakePrediction,
+			latestFeltEarthquake: {} as IEarthquakeHistory,
+			latestEarthquake: {} as IEarthquakeHistory,
+			latestDetection: {} as IEarthquakeDetection,
 		},
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		countdown: 0,
+		seismogramStations: [] as IStation[],
 		stations: STATIONS_DATA as IStation[],
 	};
 	constructor(props: Props) {
@@ -88,10 +87,10 @@ class MainView extends React.Component<Props> {
 		}
 	}
 
-	componentDidMount(): void {
+	async componentDidMount(){
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
-			id: "tews-map",
+			id: "eews-map",
 			mapStyle: style,
 			zoom: 5,
 			initialViewState: {
@@ -101,13 +100,20 @@ class MainView extends React.Component<Props> {
 		});
 
 		// Get saved stations
-		const stations = this.state.stationController.getStations();
+		const stations = await this.state.stationController.getStations();
 		this.state.controller.showStations(stations);
+
+		// setInterval(() => {
+		// 	this.state.stationController.getStations().then((stations) => {
+		// 		this.state.controller.showStations(stations);
+		// 	});
+		// }, 60000);
+
 		setTimeout(() => {
-			this.state.controller.connectEarthquakePrediction();
+			this.state.controller.connectEarthquakeDetection();
 		}, 2000);
 
-		observe(this.state.controller, "earthquakePrediction", (change) => {
+		observe(this.state.controller, "earthquakeDetection", (change) => {
 			if (change.newValue) {
 				this.setState({
 					earthquakeRealtimeInformation: {
@@ -115,19 +121,29 @@ class MainView extends React.Component<Props> {
 					},
 					sidebarProps: {
 						...this.state.sidebarProps,
-						latestPrediction: change.newValue,
+						latestDetection: change.newValue,
 					},
 				});
 			}
 		});
 
-		indexedDB.createIndexedDB().then(() => {
-			this.state.stationController.connectSeismogram(this.props.mode);
+		observe(this.state.stationController, "seismograms", (change) => {
+			if (change.newValue) {
+				this.setState({
+					seismogramStations: STATIONS_DATA.filter((station) => {
+						return change.newValue.has(station.code);
+					}),
+				});
+			}
+		});
+
+		indexedDB.createIndexedDB().then(async () => {
+			await this.state.stationController.connectAllSeismogram(this.props.mode);
 		});
 	}
 
 	componentWillUnmount(): void {
-		this.state.controller.disconnectEarthquakePrediction();
+		this.state.controller.disconnectEarthquakeDetection();
 	}
 
 	render() {
@@ -148,7 +164,7 @@ class MainView extends React.Component<Props> {
 
 					<div className="flex flex-col w-full">
 						<div className="relative h-full">
-							<div className="w-full h-full" id="tews-map"></div>
+							<div className="w-full h-full" id="eews-map"></div>
 
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&
@@ -168,13 +184,13 @@ class MainView extends React.Component<Props> {
 							</section>
 						</div>
 
-						<EarthquakePredictionContext.Provider
+						<EarthquakeDetectionContext.Provider
 							value={this.state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<Seismogram
-								seismogramStations={this.state.stations.map((s) => s.code)}
+								seismogramStations={this.state.seismogramStations.map(e => e.code)}
 							/>
-						</EarthquakePredictionContext.Provider>
+						</EarthquakeDetectionContext.Provider>
 					</div>
 				</section>
 			</main>

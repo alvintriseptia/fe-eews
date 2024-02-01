@@ -6,6 +6,7 @@ import Image from "next/image";
 import {
 	ArrowLeftOnRectangleIcon,
 	BookOpenIcon,
+	ChartBarIcon,
 	HomeIcon,
 } from "@heroicons/react/24/outline";
 import { UserController } from "@/controllers/_index";
@@ -104,9 +105,16 @@ class Navbar extends React.Component<NavbarProps> {
 				fontStyle: "text-white font-semibold",
 			},
 			{
+				icon: <ChartBarIcon className="w-6 h-6" />,
+				label: "Stasiun",
+				link: "/stasiun",
+				backgroundColor: "bg-tews-dark",
+				fontStyle: "text-white font-semibold",
+			},
+			{
 				icon: <BookOpenIcon className="w-6 h-6" />,
-				label: "Prediksi",
-				link: "/prediksi",
+				label: "Riwayat",
+				link: "/riwayat",
 				backgroundColor: "bg-tews-dark",
 				fontStyle: "text-white font-semibold",
 			},

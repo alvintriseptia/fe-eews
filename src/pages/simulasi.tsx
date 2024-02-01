@@ -3,20 +3,20 @@ import MainView from "@/views/MainView";
 import { MainController, SimulationController, StationController } from "@/controllers/_index";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
-import { IExternalSource } from "@/entities/IExternalSource";
+import { IEarthquakeHistory } from "@/entities/IEarthquakeHistory";
 import { NavbarProps } from "@/components/Navbar";
 import SeismogramContext from "@/stores/SeismogramContext";
-import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
+import { IEarthquakeDetection } from "@/entities/IEarthquakeDetection";
 
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
 		const controller = new MainController();
 		const latestEarthquake =
-			(await controller.getLatestEarthquake()) as IExternalSource;
+			(await controller.getLatestEarthquake()) as IEarthquakeHistory;
 		const latestFeltEarthquake =
-			(await controller.getLatestFeltEarthquake()) as IExternalSource;
+			(await controller.getLatestFeltEarthquake()) as IEarthquakeHistory;
 		const weeklyEarthquake =
-			(await controller.getEarthquakeWeekly()) as IExternalSource[];
+			(await controller.getEarthquakeWeekly()) as IEarthquakeHistory[];
 
 		let newNavbar = {
 			totalEarthquakes: 0,
@@ -75,22 +75,22 @@ export const getServerSideProps: GetServerSideProps = async () => {
 					minimumMagnitude: 0,
 				},
 				sidebarProps: {
-					latestFeltEarthquake: {} as IExternalSource,
-					latestEarthquake: {} as IExternalSource,
+					latestFeltEarthquake: {} as IEarthquakeHistory,
+					latestEarthquake: {} as IEarthquakeHistory,
 				},
-				weeklyEarthquake: [] as IExternalSource[],
+				weeklyEarthquake: [] as IEarthquakeHistory[],
 			},
 		};
 	}
 };
 
 interface Props {
-	weeklyEarthquake: IExternalSource[];
+	weeklyEarthquake: IEarthquakeHistory[];
 	navbar: NavbarProps;
 	sidebarProps: {
-		latestFeltEarthquake: IExternalSource;
-		latestEarthquake: IExternalSource;
-		latestPrediction: IEarthquakePrediction;
+		latestFeltEarthquake: IEarthquakeHistory;
+		latestEarthquake: IEarthquakeHistory;
+		latestDetection: IEarthquakeDetection;
 	};
 }
 

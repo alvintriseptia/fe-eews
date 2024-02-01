@@ -1,10 +1,10 @@
-import { IEarthquakePrediction, IExternalSource } from "@/entities/_index";
+import { IEarthquakeDetection, IEarthquakeHistory } from "@/entities/_index";
 import { getIntensityColor } from "@/utils/map-style";
 import { Bars4Icon } from "@heroicons/react/24/outline";
 import React from "react";
 
-class EarthquakeInfo extends React.Component<IExternalSource> {
-  constructor(props: IExternalSource) {
+class EarthquakeInfo extends React.Component<IEarthquakeHistory> {
+  constructor(props: IEarthquakeHistory) {
     super(props);
     this.state = {};
   }
@@ -14,8 +14,8 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
     let time = "";
     let date = "";
     if (
-      typeof this.props.date === "number" ||
-      new Date(this.props.date).toString() !== "Invalid Date"
+      (typeof this.props.date === "number" ||
+      new Date(this.props.date).toString() !== "Invalid Date") && !this.props.date.toString().includes("/")
     ) {
       const dateObj = new Date(this.props.date);
       const offset = new Date().getTimezoneOffset() * 60 * 1000;
@@ -29,7 +29,7 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
           : timezone === 9
           ? "WIT"
           : "";
-      time = dateObj.toLocaleTimeString() + " " + timezoneText;
+      time = dateObj.toLocaleTimeString("id-ID") + " " + timezoneText;
 
       //date dd/mm/yyyy
       date = dateObj.toLocaleDateString("id-ID", {
@@ -39,7 +39,7 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
       });
     } else {
       time = this.props.time.toString();
-      date = this.props.date;
+      date = this.props.date?.toString() || "";
     }
 
     return (
@@ -106,18 +106,18 @@ class EarthquakeInfo extends React.Component<IExternalSource> {
 }
 
 export interface SidebarProps {
-  latestFeltEarthquake: IExternalSource;
-  latestEarthquake: IExternalSource;
-  latestPrediction: IEarthquakePrediction | null;
+	latestFeltEarthquake: IEarthquakeHistory;
+	latestEarthquake: IEarthquakeHistory;
+	latestDetection: IEarthquakeDetection | null;
 }
 
 class Sidebar extends React.Component<SidebarProps> {
-  state = {
-    open: true,
-    latestFeltEarthquake: {} as IExternalSource,
-    latestEarthquake: {} as IExternalSource,
-    latestPrediction: {} as IEarthquakePrediction,
-  };
+	state = {
+		open: true,
+		latestFeltEarthquake: {} as IEarthquakeHistory,
+		latestEarthquake: {} as IEarthquakeHistory,
+		latestDetection: {} as IEarthquakeDetection,
+	};
 
   constructor(props: SidebarProps) {
     super(props);
@@ -140,11 +140,11 @@ class Sidebar extends React.Component<SidebarProps> {
       this.setState({ latestEarthquake: this.props.latestEarthquake });
     }
 
-    if (this.props.latestPrediction !== prevProps.latestPrediction) {
-      if (this.props.latestPrediction.prediction !== "warning") return;
-      this.setState({ latestPrediction: this.props.latestPrediction });
-    }
-  }
+		if (this.props.latestDetection !== prevProps.latestDetection) {
+			if(this.props.latestDetection.detection !== "warning") return;
+			this.setState({ latestDetection: this.props.latestDetection });
+		}
+	}
 
   render() {
     return (
@@ -176,29 +176,29 @@ class Sidebar extends React.Component<SidebarProps> {
                 <EarthquakeInfo {...this.state.latestEarthquake} />
               )}
 
-              {this.state.latestPrediction?.time_stamp && (
-                <>
-                  <div className="w-full h-0.5 bg-purple-950 my-4" />
-                  <EarthquakeInfo
-                    id={"latest-prediction"}
-                    date={this.state.latestPrediction.time_stamp}
-                    title={"Deteksi Terakhir"}
-                    depth={this.state.latestPrediction.depth.toFixed(2)}
-                    latitude={this.state.latestPrediction.lat.toFixed(2)}
-                    longitude={this.state.latestPrediction.long.toFixed(2)}
-                    location={this.state.latestPrediction.location}
-                    magnitude={this.state.latestPrediction.mag.toFixed(1)}
-                    time={this.state.latestPrediction.time_stamp}
-                    station={this.state.latestPrediction.station || "inatews"}
-                  />
-                </>
-              )}
-            </div>
-          </aside>
-        </div>
-      </>
-    );
-  }
+							{this.state.latestDetection?.time_stamp && (
+								<>
+									<div className="w-full h-0.5 bg-purple-950 my-4" />
+									<EarthquakeInfo 
+										id={'latest-detection'}
+										date={this.state.latestDetection.time_stamp}
+										title={'Deteksi Terakhir'}
+										depth={this.state.latestDetection.depth.toFixed(2)}
+										latitude={this.state.latestDetection.lat.toFixed(2)}
+										longitude={this.state.latestDetection.long.toFixed(2)}
+										location={this.state.latestDetection.location}
+										magnitude={this.state.latestDetection.mag.toFixed(1)}
+										time={this.state.latestDetection.time_stamp}
+										station={this.state.latestDetection.station || "inatews"}
+									/>
+								</>
+							)}
+						</div>
+					</aside>
+				</div>
+			</>
+		);
+	}
 }
 
 export default Sidebar;

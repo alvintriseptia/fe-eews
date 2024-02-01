@@ -1,49 +1,49 @@
-import { EarthquakePrediction, Map } from "@/models/_index";
+import { EarthquakeDetection, Map } from "@/models/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
-import mapStyle from "@/assets/data/dataviz_dark.json";
+import mapStyle from "@/assets/data/inatews_dark.json";
 import { StyleSpecification } from "maplibre-gl";
-import { IEarthquakePrediction } from "@/entities/_index";
+import { IEarthquakeDetection } from "@/entities/_index";
 import toast from "react-hot-toast";
 import { CoordinateType } from "@/types/_index";
 
 /**
- * PredictionController class handles the logic for earthquake prediction.
+ * HistoryController class handles the logic for earthquake detection.
  */
-export default class PredictionController {
-	private earthquakePrediction = new EarthquakePrediction();
+export default class HistoryController {
+	private earthquakeDetection = new EarthquakeDetection();
 	private map = new Map();
 	private style = mapStyle as StyleSpecification;
 
 	constructor() {
 		makeObservable(this, {
 			map: observable,
-			getHistoryEarthquakePrediction: action,
-			filterHistoryEarthquakePrediction: action,
-			exportHistoryEarthquakePrediction: action,
-			getDetailEarthquakePrediction: action,
+			getHistoryEarthquakeDetection: action,
+			filterHistoryEarthquakeDetection: action,
+			exportHistoryEarthquakeDetection: action,
+			getDetailEarthquakeDetection: action,
 			displayError: action,
 		} as AnnotationsMap<this, any>);
 	}
 
 	/**
-	 * Retrieves the history of earthquake predictions.
+	 * Retrieves the history of earthquake detections.
 	 */
-	async getHistoryEarthquakePrediction() {
+	async getHistoryEarthquakeDetection() {
 		try {
 			const now = new Date().getTime();
 			const lastWeek = now - 30 * 24 * 60 * 60 * 1000;
 			const response =
-				await this.earthquakePrediction.fetchHistoryEarthquakePrediction(
+				await this.earthquakeDetection.fetchHistoryEarthquakeDetection(
 					lastWeek,
 					now
 				);
 
-			const earthquakePredictions = response;
+			const earthquakeDetections = response;
 
-			if (earthquakePredictions.length) {
+			if (earthquakeDetections.length) {
 				// get addresses
 				return {
-					data: earthquakePredictions,
+					data: earthquakeDetections,
 				};
 			} else {
 				return {
@@ -57,15 +57,15 @@ export default class PredictionController {
 		}
 	}
 
-	async getLatestEarthquakePrediction() {
+	async getLatestEarthquakeDetection() {
 		try {
 			const response =
-				await this.earthquakePrediction.fetchLatestEarthquakePrediction();
+				await this.earthquakeDetection.fetchLatestEarthquakeDetection();
 
-			const earthquakePrediction = response;
+			const earthquakeDetection = response;
 
-			if (earthquakePrediction) {
-				return earthquakePrediction;
+			if (earthquakeDetection) {
+				return earthquakeDetection;
 			} else {
 				return null;
 			}
@@ -74,7 +74,7 @@ export default class PredictionController {
 		}
 	}
 
-	async filterHistoryEarthquakePrediction(
+	async filterHistoryEarthquakeDetection(
 		start_date: number,
 		end_date: number
 	) {
@@ -82,24 +82,24 @@ export default class PredictionController {
 			document.querySelector("#loading_overlay").className = "block";
 
 			const response =
-				await this.earthquakePrediction.fetchHistoryEarthquakePrediction(
+				await this.earthquakeDetection.fetchHistoryEarthquakeDetection(
 					start_date,
 					end_date
 				);
 
-			const earthquakePredictions = response;
+			const earthquakeDetections = response;
 
-			if (earthquakePredictions.length) {
+			if (earthquakeDetections.length) {
 				// get addresses
-				let result = [] as IEarthquakePrediction[];
+				let result = [] as IEarthquakeDetection[];
 
-				for (const prediction of earthquakePredictions) {
+				for (const detection of earthquakeDetections) {
 					const address = await this.map.getAreaName({
-						latitude: prediction.lat,
-						longitude: prediction.long,
+						latitude: detection.lat,
+						longitude: detection.long,
 					});
-					prediction.location = address;
-					result.push(prediction);
+					detection.location = address;
+					result.push(detection);
 				}
 
 				return result;
@@ -113,7 +113,7 @@ export default class PredictionController {
 		}
 	}
 
-	async addEarthquakePredictionLocations(predictions: IEarthquakePrediction[]) {
+	async addEarthquakeDetectionLocations(detections: IEarthquakeDetection[]) {
 		document.querySelector("#loading_overlay").className = "block";
 		this.map.initMap({
 			id: "tews-history-map",
@@ -125,31 +125,34 @@ export default class PredictionController {
 			},
 		});
 
-		if (!predictions[0].location) {
-			let result = [] as IEarthquakePrediction[];
-
-			// for (const prediction of predictions) {
-			// 	const address = await this.map.getAreaName({
-			// 		latitude: prediction.lat,
-			// 		longitude: prediction.long,
-			// 	});
-			// 	prediction.location = address;
-			// 	result.push(prediction);
-			// }
-			document.querySelector("#loading_overlay").className = "hidden";
-
-			this.map.addEarthquakePredictionLocations(predictions);
-			return predictions;
+		if(detections.length) {
+			if (!detections[0].location) {
+				let result = [] as IEarthquakeDetection[];
+	
+				// for (const detection of detections) {
+				// 	const address = await this.map.getAreaName({
+				// 		latitude: detection.lat,
+				// 		longitude: detection.long,
+				// 	});
+				// 	detection.location = address;
+				// 	result.push(detection);
+				// }
+				document.querySelector("#loading_overlay").className = "hidden";
+	
+				this.map.addEarthquakeDetectionLocations(detections);
+				return detections;
+			}
+	
+			this.map.addEarthquakeDetectionLocations(detections);
 		}
-
-		this.map.addEarthquakePredictionLocations(predictions);
+		
 		document.querySelector("#loading_overlay").className = "hidden";
 	}
 
 	/**
-	 * Retrieves the detailed information of an earthquake prediction.
+	 * Retrieves the detailed information of an earthquake detection.
 	 */
-	async getDetailEarthquakePrediction(
+	async getDetailEarthquakeDetection(
 		station: string,
 		time_stamp: number,
 		coordinate: CoordinateType
@@ -166,7 +169,7 @@ export default class PredictionController {
 			const end_date = date.getTime() + 1 * 60 * 1000;
 
 			const response =
-				await this.earthquakePrediction.fetchSeismogramEarthquakePrediction(
+				await this.earthquakeDetection.fetchSeismogramEarthquakeDetection(
 					station,
 					start_date,
 					end_date
@@ -184,15 +187,15 @@ export default class PredictionController {
 	}
 
 	/**
-	 * Exports the history of earthquake predictions to a file.
+	 * Exports the history of earthquake detections to a file.
 	 */
-	async exportHistoryEarthquakePrediction(
+	async exportHistoryEarthquakeDetection(
 		start_date: number,
 		end_date: number
 	) {
 		try {
 			document.querySelector("#loading_overlay").className = "block";
-			await this.earthquakePrediction.exportHistoryEarthquakePrediction(
+			await this.earthquakeDetection.exportHistoryEarthquakeDetection(
 				start_date,
 				end_date
 			);
@@ -204,7 +207,7 @@ export default class PredictionController {
 	}
 
 	/**
-	 * Displays an error message related to earthquake prediction.
+	 * Displays an error message related to earthquake detection.
 	 */
 	displayError(message: string) {
 		toast.error(message);

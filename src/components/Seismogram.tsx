@@ -6,7 +6,7 @@ import React, { Component } from "react";
 import DynamicLineChart from "./DynamicLineChart";
 import RenderIfVisible from "react-render-if-visible";
 
-const ESTIMATED_ITEM_HEIGHT = 300;
+const ESTIMATED_ITEM_HEIGHT = 500;
 
 interface SeismogramProps {
 	seismogramStations: string[];
@@ -21,6 +21,12 @@ export default class Seismogram extends Component<SeismogramProps> {
 	constructor(props: any) {
 		super(props);
 		this.state.seismogramStations = props.seismogramStations;
+	}
+
+	componentDidUpdate(prevProps: SeismogramProps) {
+		if (prevProps.seismogramStations !== this.props.seismogramStations) {
+			this.setState({ seismogramStations: this.props.seismogramStations });
+		}
 	}
 
 	toggleOpen = () => {

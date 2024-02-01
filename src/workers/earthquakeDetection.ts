@@ -1,4 +1,4 @@
-import { IEarthquakePrediction } from "@/entities/_index";
+import { IEarthquakeDetection } from "@/entities/_index";
 import { SeismogramPlotType } from "@/types/_index";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { socket } from "./_index";
@@ -11,36 +11,37 @@ const onmessage = (event: MessageEvent) => {
 	const { data } = event;
 
 	if (data.mode === "simulation") {
-		const typePrediction = ["warning", "warning", "warning"];
-		const earthquakePrediction: IEarthquakePrediction = {
+		const typeDetection = ["warning", "warning", "warning"];
+		const earthquakeDetection: IEarthquakeDetection = {
 			title: "Terdeteksi Gelombang P",
 			description: "A magnitude 5.0 earthquake is predicted to occur cuy",
 			time_stamp: Date.now(),
 			depth: 5,
-			lat: -6.1751,
-			long: 106.826,
-			mag: 2,
-			prediction: typePrediction[Math.floor(Math.random() * 3)],
+			lat: -2.5927,
+			long: 140.1678,
+			mag: 10,
+			detection: typeDetection[Math.floor(Math.random() * 3)],
 			countdown: 10,
-			station: "BBJI",
+			station: "GENI",
 		};
 
-		addPWave("BBJI", Date.now());
+		addPWave("GENI", Date.now());
 
-		postMessage(earthquakePrediction);
+		postMessage(earthquakeDetection);
 
-		setInterval(() => {
-			earthquakePrediction.lat = Math.random() * 10 - 5;
-			earthquakePrediction.long = Math.random() * 10 - 5;
-			earthquakePrediction.prediction =
-				typePrediction[Math.floor(Math.random() * 3)];
-			earthquakePrediction.station = "BBJI";
-			addPWave("BBJI", Date.now());
+		// setInterval(() => {
+		// 	const station = STATIONS_DATA[Math.floor(Math.random() * STATIONS_DATA.length) - 1];
+		// 	earthquakeDetection.lat = station.latitude;
+		// 	earthquakeDetection.long = station.longitude;
+		// 	earthquakeDetection.detection =
+		// 		typeDetection[Math.floor(Math.random() * 3)];
+		// 	earthquakeDetection.station = station.code;
+		// 	addPWave(station.code, Date.now());
 
-			postMessage(earthquakePrediction);
-		}, 30000);
+		// 	postMessage(earthquakeDetection);
+		// }, 60000);
 	} else {
-		socket.on("prediction-data-all", (message: any) => {
+		socket.on("detection-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip
 			const date = new Date(message.time_stamp);
 			// timezone in local
@@ -72,7 +73,7 @@ const onmessage = (event: MessageEvent) => {
 		pWaveTemp.x.push(date.getTime());
 		pWaveTemp.y.push(0);
 		pWaveTemp.x.push(date.getTime());
-		pWaveTemp.y.push(6000);
+		pWaveTemp.y.push(20000);
 
 		const data = pWavesData.get(station);
 

@@ -1,8 +1,8 @@
 "use client";
-import { IEarthquakePrediction } from "@/entities/IEarthquakePrediction";
+import { IEarthquakeDetection } from "@/entities/IEarthquakeDetection";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { IStation } from "@/entities/IStation";
-import EarthquakePredictionContext from "@/stores/EarthquakePredictionContext";
+import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
 import MMIScale from "@/components/MMIScale";
 import Time from "@/components/Time";
 import EarthquakeRealtimeCard, {
@@ -19,20 +19,20 @@ import StationController from "@/controllers/StationController";
 import { IMap } from "@/entities/IMap";
 import { INotification } from "@/entities/INotification";
 import { ISeismogram } from "@/entities/ISeismogram";
-import { IExternalSource } from "@/entities/IExternalSource";
+import { IEarthquakeHistory } from "@/entities/IEarthquakeHistory";
 import React from "react";
 import SeismogramContext from "@/stores/SeismogramContext";
 
 const state = {
 	controller: {} as MainController | SimulationController,
 	stationController: {} as StationController,
-	earthquakePrediction: {} as EarthquakeRealtimeProps,
+	earthquakeDetection: {} as EarthquakeRealtimeProps,
 	map: {} as IMap,
 	notification: {} as INotification,
 	seismogram: [] as ISeismogram[],
-	last5MEartquake: {} as IExternalSource,
-	lastFeltEarthquake: {} as IExternalSource,
-	weeklyEarthquake: [] as IExternalSource[],
+	last5MEartquake: {} as IEarthquakeHistory,
+	lastFeltEarthquake: {} as IEarthquakeHistory,
+	weeklyEarthquake: [] as IEarthquakeHistory[],
 	navbar: {
 		isLoggedIn: false,
 		navLinks: [],
@@ -42,9 +42,9 @@ const state = {
 		headerInfos: [],
 	},
 	sidebarProps: {
-		latestFeltEarthquake: {} as IExternalSource,
-		latestEarthquake: {} as IExternalSource,
-		latestPrediction: {} as IEarthquakePrediction,
+		latestFeltEarthquake: {} as IEarthquakeHistory,
+		latestEarthquake: {} as IEarthquakeHistory,
+		latestDetection: {} as IEarthquakeDetection,
 	},
 	earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 	countdown: 0,
@@ -63,7 +63,7 @@ function performance(): JSX.Element {
 
 		state.stationController = new StationController(seismogramWorker);
 
-		state.stationController.connectSeismogram("simulation");
+		state.stationController.connectAllSeismogram("simulation");
 	}, []);
 
     if(!seismogramWorker) return (<></>)
@@ -103,13 +103,13 @@ function performance(): JSX.Element {
 					</div>
 
 					<SeismogramContext.Provider value={seismogramWorker}>
-						<EarthquakePredictionContext.Provider
+						<EarthquakeDetectionContext.Provider
 							value={state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<Seismogram
 								seismogramStations={state.stations.map((s) => s.code)}
 							/>
-						</EarthquakePredictionContext.Provider>
+						</EarthquakeDetectionContext.Provider>
 					</SeismogramContext.Provider>
 				</div>
 			</section>

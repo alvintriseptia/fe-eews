@@ -1,4 +1,4 @@
-export interface IExternalSource {
+export interface IEarthquakeHistory {
 	id: string | number;
 	title: string;
 	location: string;
