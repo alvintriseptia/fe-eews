@@ -242,7 +242,7 @@ const onmessage = (event: MessageEvent) => {
 				data.currentIndex += (SAMPLING_RATE * FREQUENCY_UPDATE / 1000);
 
 				// check if there is p wave
-				const pWave = pWavesData.get(station);
+				let pWave = pWavesData.get(station);
 				if (pWave.length > 0) {
 					for (let i = 0; i < pWave.length; i++) {
 						// if the p wave time is not range channelZ time, then skipped
@@ -298,6 +298,11 @@ const onmessage = (event: MessageEvent) => {
 						const pWaveTime = pWave.x[0];
 						return pWaveTime >= startTime && pWaveTime <= endTime;
 					});
+					pWave = pWave.filter((pWave) => {
+						const pWaveTime = pWave.x[0];
+						return pWaveTime >= startTime && pWaveTime <= endTime;
+					});
+					pWavesData.set(station, pWave);
 				}
 
 				seismogramData.set(station, data);
