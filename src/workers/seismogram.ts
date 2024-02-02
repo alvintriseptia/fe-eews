@@ -594,6 +594,8 @@ const onmessage = (event: MessageEvent) => {
 				const key = obj[0];
 				const dataValue = obj[1];
 				const date = new Date(parseInt(key));
+				const offset = - (new Date().getTimezoneOffset() * 60 * 1000);
+				date.setTime(date.getTime() - offset);
 
 				newSeismogramData.channelZ.x.push(date.getTime());
 				newSeismogramData.channelZ.y.push(dataValue.Z);
