@@ -19,6 +19,7 @@ const onmessage = (event: MessageEvent) => {
 
 	if (command === "start") {
 		sWaveRadius = 0;
+		pWaveRadius = 0;
 		waveInterval = setInterval(() => {
 			if (isOnMessageWaves) return;
 			runWave(earthquakeEpicenter);
