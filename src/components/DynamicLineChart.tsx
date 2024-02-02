@@ -137,6 +137,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 		earthquakePredictions: [] as IEarthquakeDetection[],
 		revision: 0,
 		userDefinedRange: null,
+		seismogramWorker: null as Worker | null,
 	};
 
 	constructor(props: Props) {
@@ -164,20 +165,22 @@ export default class DynamicLineChart extends React.Component<Props> {
 	}
 
 	componentDidMount() {
-		let isMounted = true;
+		const isMounted = true;
 		const seismogramWorker = this.context as any as Worker | null;
 
 		const handleSeismogramWorker = (event: MessageEvent) => {
 			const { station, data } = event.data;
+			console.log("Received seismogram data " + station, data)
 			if (station !== this.state.station) {
 				return; // Ignore messages not meant for this station
 			}
 			if (!isMounted || !data) {
 				return; // Ignore messages if component is unmounted
 			}
-
 			this.simulateSeismogram(data);
 		};
+
+		seismogramWorker?.addEventListener("message", handleSeismogramWorker);
 
 		if (this.state.channelZ.x.length === 0) {
 			seismogramWorker?.postMessage({
@@ -189,6 +192,21 @@ export default class DynamicLineChart extends React.Component<Props> {
 		return () => {
 			seismogramWorker?.removeEventListener("message", handleSeismogramWorker);
 		};
+	}
+
+	
+	componentDidUpdate() {
+		const { userDefinedRange } = this.state;
+		const seismogramWorker = this.context as any as Worker | null;
+		if(userDefinedRange && seismogramWorker !== null){
+			console.log("Requesting history", userDefinedRange[0], userDefinedRange[1])
+			seismogramWorker.postMessage({
+				station: this.state.station,
+				message: "history",
+				start_date: new Date(userDefinedRange[0]).getTime(),
+				end_date: new Date(userDefinedRange[1]).getTime(),
+			});
+		}
 	}
 
 	simulateSeismogram(data: SeismogramDataType) {
