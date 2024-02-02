@@ -112,7 +112,7 @@ export default class MainController {
 		this.affectedWavesWorker = new Worker(
 			new URL("../workers/affectedWaves.ts", import.meta.url)
 		);
-		
+
 		this.earthquakeDetectionWorker.postMessage({
 			mode: "realtime",
 		});
@@ -139,117 +139,119 @@ export default class MainController {
 			if (earthquakeDetection.detection === "warning") {
 				this.clearEarthquakeDetection(false);
 
-				// GET RANDOM STATION (TESTING)
-				const stasiun = STATIONS_DATA.find(
-					(station) => station.code === earthquakeDetection.station
-				);
+				await this.displayEarthquakeDetection(earthquakeDetection);
+			}
+		};
+	}
 
-				// EARTHQUAKE PREDICTION LOCATION
-				this.map.addEarthquakeDetection(
-					{
-						longitude: earthquakeDetection.long,
-						latitude: earthquakeDetection.lat,
-					},
-					stasiun
-				);
+	async displayEarthquakeDetection(earthquakeDetection: IEarthquakeDetection) {
+		// GET RANDOM STATION (TESTING)
+		const stasiun = STATIONS_DATA.find(
+			(station) => station.code === earthquakeDetection.station
+		);
 
-				// EARTHQUAKE PREDICTION DATA
-				this.countdown = 10;
-				this.earthquakeDetection = new EarthquakeDetection(
-					earthquakeDetection
-				);
-				let address = await this.map.getAreaName({
-					longitude: earthquakeDetection.long,
-					latitude: earthquakeDetection.lat,
-				});
+		// EARTHQUAKE PREDICTION LOCATION
+		this.map.addEarthquakeDetection(
+			{
+				longitude: earthquakeDetection.long,
+				latitude: earthquakeDetection.lat,
+			},
+			stasiun
+		);
 
-				this.notificationEarthquakeDetection.setMessage(
-					`Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`
-				);
-				this.notificationEarthquakeDetection.playNotification();
+		// EARTHQUAKE PREDICTION DATA
+		this.countdown = 10;
+		this.earthquakeDetection = new EarthquakeDetection(earthquakeDetection);
+		let address = await this.map.getAreaName({
+			longitude: earthquakeDetection.long,
+			latitude: earthquakeDetection.lat,
+		});
 
-				// SORTING NEAREST REGENCIES
-				//calculate distance between wave center and province center
-				this.nearestRegencies.forEach((regency: RegionType) => {
-					const distance = turf.distance(
-						turf.point([earthquakeDetection.long, earthquakeDetection.lat]),
-						turf.point([regency.longitude, regency.latitude])
-					);
-					regency.distance = distance;
-				});
+		this.notificationEarthquakeDetection.setMessage(
+			`Baru saja muncul potensi gempa yang dideteksi oleh stasiun ${stasiun.code}.`
+		);
+		this.notificationEarthquakeDetection.playNotification();
 
-				//sort by distance
-				this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
+		// SORTING NEAREST REGENCIES
+		//calculate distance between wave center and province center
+		this.nearestRegencies.forEach((regency: RegionType) => {
+			const distance = turf.distance(
+				turf.point([earthquakeDetection.long, earthquakeDetection.lat]),
+				turf.point([regency.longitude, regency.latitude])
+			);
+			regency.distance = distance;
+		});
 
-				// EARTHQUAKE PREDICTION COUNTDOWN
-				this.earthquakeDetectionInterval = setInterval(() => {
-					this.countdown--;
-					if (this.countdown === 0) {
-						this.notificationEarthquake.setMessage(`
+		//sort by distance
+		this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
+
+		// EARTHQUAKE PREDICTION COUNTDOWN
+		this.earthquakeDetectionInterval = setInterval(() => {
+			this.countdown--;
+			if (this.countdown === 0) {
+				this.notificationEarthquake.setMessage(`
 						Harap perhatian, telah terjadi gempa bumi di wilayah ${address}. Gelombang ini dideteksi oleh stasiun ${stasiun.code}. Harap segera lakukan tindakan mitigasi, terima kasih`);
-						this.notificationEarthquake.playNotification();
-						const earthquake = {
-							title: "Terjadi Gempa Bumi",
-							detection: "earthquake",
-							description: `Perhatian! telah terjadi gempa bumi di wilayah ${address}, segera lakukan tindakan mitigasi!`,
-							time_stamp: date.getTime() + 10000,
-							depth: this.earthquakeDetection.depth,
-							lat: this.earthquakeDetection.lat,
-							long: this.earthquakeDetection.long,
-							mag: this.earthquakeDetection.mag,
-							countdown: -1,
-						};
-
-						this.earthquakeDetection = new EarthquakeDetection(
-							earthquake as IEarthquakeDetection
-						);
-
-						clearInterval(this.earthquakeDetectionInterval);
-					}
-				}, 1000);
-
-				// WAVE SIMULATION
-				this.wavesWorker.postMessage({
-					command: "start",
-					earthquakeEpicenter: {
-						longitude: earthquakeDetection.long,
-						latitude: earthquakeDetection.lat,
-					},
-				});
-
-				this.wavesWorker.onmessage = (event: MessageEvent) => {
-					const data = event.data;
-					const pWave = data.pWave;
-					const sWave = data.sWave;
-					this.map.simulateWaves(pWave, sWave);
-
-					this.affectedWavesWorker.postMessage({
-						nearestRegencies: this.nearestRegencies,
-						pWave: pWave,
-						pWaveImpacted: this.affectedPWaves,
-						sWave: sWave,
-						sWaveImpacted: this.affectedSWaves,
-						earthquakeDetection: this.earthquakeDetection,
-					});
+				this.notificationEarthquake.playNotification();
+				const earthquake = {
+					title: "Terjadi Gempa Bumi",
+					detection: "earthquake",
+					description: `Perhatian! telah terjadi gempa bumi di wilayah ${address}, segera lakukan tindakan mitigasi!`,
+					time_stamp: new Date( this.earthquakeDetection.time_stamp).getTime() + 10000,
+					depth: this.earthquakeDetection.depth,
+					lat: this.earthquakeDetection.lat,
+					long: this.earthquakeDetection.long,
+					mag: this.earthquakeDetection.mag,
+					countdown: -1,
 				};
 
-				// // GET AFFECTED AREA WAVES
-				this.affectedWavesWorker.onmessage = (event: MessageEvent) => {
-					const data = event.data;
-					if (data.message == "stop") {
-						this.stopSimulation();
-						this.clearEarthquakeDetection(true);
-					} else {
-						const regenciesData = data.sWaveImpacted;
-						const geoJson = data.pWaveImpacted;
-						if(regenciesData.length > this.affectedSWaves.length) {
-							this.notificationSWaveAffected.playNotification();
-						}
-						this.affectedSWaves = regenciesData;
-						this.affectedPWaves = geoJson;
-						this.map.addAreaAffectedWaves(geoJson, regenciesData);
-					}
-				};
+				this.earthquakeDetection = new EarthquakeDetection(
+					earthquake as IEarthquakeDetection
+				);
+
+				clearInterval(this.earthquakeDetectionInterval);
+			}
+		}, 1000);
+
+		// WAVE SIMULATION
+		this.wavesWorker.postMessage({
+			command: "start",
+			earthquakeEpicenter: {
+				longitude: earthquakeDetection.long,
+				latitude: earthquakeDetection.lat,
+			},
+		});
+
+		this.wavesWorker.onmessage = (event: MessageEvent) => {
+			const data = event.data;
+			const pWave = data.pWave;
+			const sWave = data.sWave;
+			this.map.simulateWaves(pWave, sWave);
+
+			this.affectedWavesWorker.postMessage({
+				nearestRegencies: this.nearestRegencies,
+				pWave: pWave,
+				pWaveImpacted: this.affectedPWaves,
+				sWave: sWave,
+				sWaveImpacted: this.affectedSWaves,
+				earthquakeDetection: this.earthquakeDetection,
+			});
+		};
+
+		// // GET AFFECTED AREA WAVES
+		this.affectedWavesWorker.onmessage = (event: MessageEvent) => {
+			const data = event.data;
+			if (data.message == "stop") {
+				this.stopSimulation();
+				this.clearEarthquakeDetection(true);
+			} else {
+				const regenciesData = data.sWaveImpacted;
+				const geoJson = data.pWaveImpacted;
+				if (regenciesData.length > this.affectedSWaves.length) {
+					this.notificationSWaveAffected.playNotification();
+				}
+				this.affectedSWaves = regenciesData;
+				this.affectedPWaves = geoJson;
+				this.map.addAreaAffectedWaves(geoJson, regenciesData);
 			}
 		};
 	}
@@ -264,7 +266,6 @@ export default class MainController {
 		if (!delay) {
 			this.stopSimulation();
 			this.map.clearEarthquakeDetection();
-
 
 			if (this.affectedPWaves.length > 0) {
 				this.affectedPWaves = [];

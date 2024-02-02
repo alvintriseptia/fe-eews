@@ -1,11 +1,4 @@
 import { SeismogramTempDataType } from "@/workers/seismogram";
-import toast from "react-hot-toast";
-
-// Struktur data yang disimpan di IndexedDB
-interface SeismogramDBEntry {
-	station: string;
-	data: SeismogramTempDataType;
-}
 
 // Variabel database
 let db: IDBDatabase | null = null;

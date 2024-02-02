@@ -1,6 +1,7 @@
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 import { Seismogram, Station } from "@/models/_index";
 import { IStation } from "@/entities/_index";
+import toast from "react-hot-toast";
 
 /**
  * The StationController class handles the logic for managing stations.
@@ -35,40 +36,61 @@ class StationController {
 	 * @returns An array of IStation objects representing the saved stations.
 	 */
 	async getStations(): Promise<IStation[]> {
-		return await this.station.fetchSavedStations();
+		try {
+			return await this.station.fetchSavedStations();
+		} catch (error) {
+			this.displayError(error);
+			return [];
+		}
 	}
 
 	async initStations() {
-		const newSeismograms = await this.station.initStations();
-		if (newSeismograms) {
-			this.seismograms = new Map(newSeismograms);
+		try {
+			const newSeismograms = await this.station.initStations();
+			if (newSeismograms) {
+				this.seismograms = new Map(newSeismograms);
+			}
+		} catch (error) {
+			this.displayError(error);
 		}
 	}
 
 	async enableStation(station: string) {
-		const newSeismograms = await this.station.enableStation(
-			station,
-			this.seismograms
-		);
-		if (newSeismograms) {
-			this.seismograms = new Map(newSeismograms);
+		try {
+			const newSeismograms = await this.station.enableStation(
+				station,
+				this.seismograms
+			);
+			if (newSeismograms) {
+				this.seismograms = new Map(newSeismograms);
+			}
+		} catch (error) {
+			this.displayError(error);
 		}
 	}
 
 	async enableAllStations() {
-		const newSeismograms = await this.station.enableAllStations();
-		if (newSeismograms) {
-			this.seismograms = new Map(newSeismograms);
+		try {
+			const newSeismograms = await this.station.enableAllStations();
+			if (newSeismograms) {
+				this.seismograms = new Map(newSeismograms);
+			}
+		} catch (error) {
+			this.displayError(error);
 		}
 	}
 
 	async disableStation(station: string) {
-		const newSeismograms = await this.station.disableStation(
-			station,
-			this.seismograms
-		);
-		if (newSeismograms) {
-			this.seismograms = new Map(newSeismograms);
+		try {
+			const newSeismograms = await this.station.disableStation(
+				station,
+				this.seismograms
+			);
+			if (newSeismograms) {
+				this.seismograms = new Map(newSeismograms);
+			}
+		} catch (error) {
+			this.displayError(error);
 		}
 	}
 
@@ -112,6 +134,10 @@ class StationController {
 	 */
 	disconnectSeismogram(station: string) {
 		this.seismograms.get(station)?.stopSeismogram(this.seismogramWorker);
+	}
+
+	displayError(error: string) {
+		toast.error(error);
 	}
 }
 

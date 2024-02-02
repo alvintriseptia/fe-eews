@@ -3,12 +3,13 @@ import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import dynamic from "next/dynamic";
 import { Layout, PlotRelayoutEvent } from "plotly.js";
 import SeismogramContext from "@/stores/SeismogramContext";
+import { SeismogramDataType } from "@/workers/seismogram";
 
 const Plot = dynamic(
-  () => import("react-plotly.js").then((mod) => mod.default),
-  {
-    ssr: false,
-  }
+	() => import("react-plotly.js").then((mod) => mod.default),
+	{
+		ssr: false,
+	}
 );
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export default class DynamicLineChart extends React.Component<Props> {
-  static contextType = SeismogramContext;
+	static contextType = SeismogramContext;
 
 	state = {
 		station: "",
@@ -162,9 +163,9 @@ export default class DynamicLineChart extends React.Component<Props> {
 		}
 	}
 
-  componentDidMount() {
-    let isMounted = true;
-    const seismogramWorker = this.context as any as Worker | null;
+	componentDidMount() {
+		let isMounted = true;
+		const seismogramWorker = this.context as any as Worker | null;
 
 		const handleSeismogramWorker = (event: MessageEvent) => {
 			const { station, data } = event.data;
@@ -175,54 +176,58 @@ export default class DynamicLineChart extends React.Component<Props> {
 				return; // Ignore messages if component is unmounted
 			}
 
-			const { channelZ, channelN, channelE, layout, userDefinedRange } =
-				this.state;
-			if (userDefinedRange) {
-				layout.xaxis.range = userDefinedRange;
-			} else {
-				const now = Date.now();
-				const last = channelZ.x[channelZ.x.length - 1];
-				const first = channelZ.x[0];
-				const diff = last - first;
-				if (diff > 60000) {
-					layout.xaxis.range = [now - 60000, now];
-				} else {
-					layout.xaxis.range = [first, last];
-				}
-			}
-
-			this.setState({
-				revision: this.state.revision + 1,
-				channelZ: {
-					...channelZ,
-					x: data.channelZ.x,
-					y: data.channelZ.y,
-				},
-				channelN: {
-					...channelN,
-					x: data.channelN.x,
-					y: data.channelN.y,
-				},
-				channelE: {
-					...channelE,
-					x: data.channelE.x,
-					y: data.channelE.y,
-				},
-				pWaves: data.pWaves,
-			});
-			layout.datarevision = this.state.revision + 1;
+			this.simulateSeismogram(data);
 		};
 
-    if (this.state.channelZ.x.length === 0) {
-      seismogramWorker?.postMessage({
-        station: this.state.station,
-        message: "lastData",
-      });
-    }
+		if (this.state.channelZ.x.length === 0) {
+			seismogramWorker?.postMessage({
+				station: this.state.station,
+				message: "lastData",
+			});
+		}
 
 		return () => {
 			seismogramWorker?.removeEventListener("message", handleSeismogramWorker);
 		};
+	}
+
+	simulateSeismogram(data: SeismogramDataType) {
+		const { channelZ, channelN, channelE, layout, userDefinedRange } =
+			this.state;
+		if (userDefinedRange) {
+			layout.xaxis.range = userDefinedRange;
+		} else {
+			const now = Date.now();
+			const last = channelZ.x[channelZ.x.length - 1];
+			const first = channelZ.x[0];
+			const diff = last - first;
+			if (diff > 60000) {
+				layout.xaxis.range = [now - 60000, now];
+			} else {
+				layout.xaxis.range = [first, last];
+			}
+		}
+
+		this.setState({
+			revision: this.state.revision + 1,
+			channelZ: {
+				...channelZ,
+				x: data.channelZ.x,
+				y: data.channelZ.y,
+			},
+			channelN: {
+				...channelN,
+				x: data.channelN.x,
+				y: data.channelN.y,
+			},
+			channelE: {
+				...channelE,
+				x: data.channelE.x,
+				y: data.channelE.y,
+			},
+			pWaves: data.pWaves,
+		});
+		layout.datarevision = this.state.revision + 1;
 	}
 
 	handleRelayout = (event: PlotRelayoutEvent) => {

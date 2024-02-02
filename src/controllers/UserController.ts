@@ -8,7 +8,6 @@ export default class UserController {
 
 	constructor() {
 		makeObservable(this, {
-			user: observable,
 			login: action,
 			logout: action,
 			displayError: action,

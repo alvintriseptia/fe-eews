@@ -146,6 +146,22 @@ class Sidebar extends React.Component<SidebarProps> {
 		}
 	}
 
+  displayError(title: string) {
+    return (
+      <div className="flex flex-col gap-y-4">
+        <div>
+          <div className="flex justify-between gap-x-3">
+            <h2 className="text-white font-semibold text-xl whitespace-pre-line">
+              {title}
+            </h2>
+          </div>
+
+          <p className="text-gray-400 text-sm text-center">Tidak ada informasi</p>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     return (
       <>
@@ -165,15 +181,19 @@ class Sidebar extends React.Component<SidebarProps> {
         >
           <aside className="flex flex-col bg-transparent overflow-y-auto h-full">
             <div className="p-4 flex flex-col">
-              {this.state.latestFeltEarthquake?.title && (
+              {this.state.latestFeltEarthquake?.title ? (
                 <>
                   <EarthquakeInfo {...this.state.latestFeltEarthquake} />
                   <div className="w-full h-0.5 bg-purple-950 my-4" />
                 </>
+              ) : (
+                this.displayError("Gempa Terakhir\nDirasakan")
               )}
 
-              {this.state.latestEarthquake?.title && (
+              {this.state.latestEarthquake?.title ? (
                 <EarthquakeInfo {...this.state.latestEarthquake} />
+              ) : (
+                this.displayError("Gempa Terakhir\nRealtime M > 2")
               )}
 
 							{this.state.latestDetection?.time_stamp && (

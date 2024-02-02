@@ -2,6 +2,7 @@ import { GeoJsonCollection, RegionType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
 let isOnMessageAffectedWaves = false;
+const abortController = new AbortController();
 
 const onmessage = async (event: MessageEvent) => {
 	const {
@@ -48,8 +49,12 @@ const onmessage = async (event: MessageEvent) => {
 			if (stopPWave && stopSWave) break;
 
 			const response = await fetch(
-				`/api/ina-geojson/${regency.province_id}/${regency.id}`
+				`/api/ina-geojson/${regency.province_id}/${regency.id}`,
+				{
+					signal: abortController.signal,
+				}
 			);
+			abortController.abort();
 			if (!response.ok) {
 				continue;
 			}
@@ -118,6 +123,9 @@ const onmessage = async (event: MessageEvent) => {
 				}
 			}
 		}
+
+		abortController.abort();
+		
 		postMessage({
 			pWaveImpacted: pWaveImpacted,
 			pWaveImpactedGeoJson: geoJson,

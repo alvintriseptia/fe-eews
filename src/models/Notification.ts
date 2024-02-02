@@ -51,7 +51,7 @@ export default class Notification implements INotification {
 		}
 	}
 
-	isPlayingNotification() {
+	private isPlayingNotification() {
 		if(this.message){
 			return (this.sound && !this.sound.paused) || speechSynthesis.speaking;
 		}else{

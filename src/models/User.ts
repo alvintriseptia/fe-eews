@@ -3,7 +3,6 @@ import { auth } from "@/lib/firebase-config";
 import {
 	getAuth,
 	signInWithEmailAndPassword,
-	signInWithRedirect,
 	signOut,
 } from "firebase/auth";
 
@@ -61,7 +60,6 @@ export default class User implements IUser {
 	}
 
 	async fetchUser() {
-		// return auth.currentUser;
 		try {
 			const response = await fetch("/api/session");
 			const data = await response.json();

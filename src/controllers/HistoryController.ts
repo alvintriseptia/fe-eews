@@ -18,6 +18,8 @@ export default class HistoryController {
 		makeObservable(this, {
 			map: observable,
 			getHistoryEarthquakeDetection: action,
+			getLatestEarthquakeDetection: action,
+			addEarthquakeDetectionLocations: action,
 			filterHistoryEarthquakeDetection: action,
 			exportHistoryEarthquakeDetection: action,
 			getDetailEarthquakeDetection: action,
@@ -30,12 +32,12 @@ export default class HistoryController {
 	 */
 	async getHistoryEarthquakeDetection() {
 		try {
-			const now = new Date().getTime();
-			const lastWeek = now - 30 * 24 * 60 * 60 * 1000;
+			const end_date = new Date().getTime();
+			const start_date = end_date - 30 * 24 * 60 * 60 * 1000;
 			const response =
 				await this.earthquakeDetection.fetchHistoryEarthquakeDetection(
-					lastWeek,
-					now
+					start_date,
+					end_date
 				);
 
 			const earthquakeDetections = response;

@@ -519,7 +519,6 @@ class TEWSMap implements IMap {
 		}
 	}
 
-
 	addEarthquakeDetectionLocations(earthquake: IEarthquakeDetection[]) {
 		// add area affected
 		earthquake.forEach((eq) => {

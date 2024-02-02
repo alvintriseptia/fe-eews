@@ -2,7 +2,6 @@ import STATIONS_DATA from "@/assets/data/stations.json";
 import { IStation } from "@/entities/_index";
 import * as indexedDB from "@/lib/indexed-db";
 import Seismogram from "./Seismogram";
-import toast from "react-hot-toast";
 
 const stations = STATIONS_DATA as IStation[];
 
@@ -81,8 +80,7 @@ class Station implements IStation {
 
 			return newSeismograms;
 		} catch (error) {
-			toast.error(error.message);
-			return null;
+			throw new Error(error);
 		}
 	}
 
@@ -108,11 +106,9 @@ class Station implements IStation {
 			});
 
 			newSeismograms.set(station, new Seismogram(station));
-			toast.success(`${station} berhasil diaktifkan`);
 			return newSeismograms;
-		} catch (error) {
-			toast.error(error.message);
-			return null;
+		} catch (error) {			
+			throw new Error(error);
 		}
 	}
 
@@ -131,11 +127,9 @@ class Station implements IStation {
 				newSeismograms.set(station.code, new Seismogram(station.code));
 			}
 
-			toast.success("Semua stasiun berhasil diaktifkan");
 			return newSeismograms;
 		} catch (error) {
-			toast.error(error.message);
-			return null;
+			throw new Error(error);
 		}
 	}
 
@@ -155,11 +149,9 @@ class Station implements IStation {
 
 			newSeismograms.delete(station);
 
-			toast.success(`${station} berhasil dinonaktifkan`);
 			return newSeismograms;
 		} catch (error) {
-			toast.error(error.message);
-			return null;
+			throw new Error(error);
 		}
 	}
 }
