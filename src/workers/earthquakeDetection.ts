@@ -14,7 +14,7 @@ const onmessage = (event: MessageEvent) => {
 		const typeDetection = ["warning", "warning", "warning"];
 		const earthquakeDetection: IEarthquakeDetection = {
 			title: "Terdeteksi Gelombang P",
-			description: "A magnitude 5.0 earthquake is predicted to occur cuy",
+			description: "Harap perhatian, muncul deteksi gelombang P di stasiun GENI",
 			time_stamp: Date.now(),
 			depth: 5,
 			lat: -2.5927,
@@ -29,17 +29,17 @@ const onmessage = (event: MessageEvent) => {
 
 		postMessage(earthquakeDetection);
 
-		// setInterval(() => {
-		// 	const station = STATIONS_DATA[Math.floor(Math.random() * STATIONS_DATA.length) - 1];
-		// 	earthquakeDetection.lat = station.latitude;
-		// 	earthquakeDetection.long = station.longitude;
-		// 	earthquakeDetection.detection =
-		// 		typeDetection[Math.floor(Math.random() * 3)];
-		// 	earthquakeDetection.station = station.code;
-		// 	addPWave(station.code, Date.now());
+		setInterval(() => {
+			const station = STATIONS_DATA[Math.floor(Math.random() * STATIONS_DATA.length) - 1];
+			earthquakeDetection.lat = station.latitude;
+			earthquakeDetection.long = station.longitude;
+			earthquakeDetection.detection =
+				typeDetection[Math.floor(Math.random() * 3)];
+			earthquakeDetection.station = station.code;
+			addPWave(station.code, Date.now());
 
-		// 	postMessage(earthquakeDetection);
-		// }, 60000);
+			postMessage(earthquakeDetection);
+		}, 60000);
 	} else {
 		socket.on("detection-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip
