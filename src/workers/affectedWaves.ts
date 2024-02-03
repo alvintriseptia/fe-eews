@@ -2,7 +2,6 @@ import { GeoJsonCollection, RegionType } from "@/types/_index";
 import * as turf from "@turf/turf";
 
 let isOnMessageAffectedWaves = false;
-const abortController = new AbortController();
 
 const onmessage = async (event: MessageEvent) => {
 	const {
@@ -50,11 +49,7 @@ const onmessage = async (event: MessageEvent) => {
 
 			const response = await fetch(
 				`/api/ina-geojson/${regency.province_id}/${regency.id}`,
-				{
-					signal: abortController.signal,
-				}
 			);
-			abortController.abort();
 			if (!response.ok) {
 				continue;
 			}
@@ -78,7 +73,12 @@ const onmessage = async (event: MessageEvent) => {
 					);
 				}
 
-				if (pWave && !stopPWave && pWaveImpacted.find((e: RegionType) => e.id === regency.id) === undefined) {
+				if (
+					pWave &&
+					!stopPWave &&
+					pWaveImpacted.find((e: RegionType) => e.id === regency.id) ===
+						undefined
+				) {
 					const isIntersect = turf.intersect(
 						regencyPolygon,
 						turf.polygon(pWave.geometry.coordinates)
@@ -91,7 +91,12 @@ const onmessage = async (event: MessageEvent) => {
 					}
 				}
 
-				if (sWave && !stopSWave && sWaveImpacted.find((e: RegionType) => e.id === regency.id) === undefined) {
+				if (
+					sWave &&
+					!stopSWave &&
+					sWaveImpacted.find((e: RegionType) => e.id === regency.id) ===
+						undefined
+				) {
 					const isIntersect = turf.intersect(
 						regencyPolygon,
 						turf.polygon(sWave.geometry.coordinates)
@@ -123,9 +128,6 @@ const onmessage = async (event: MessageEvent) => {
 				}
 			}
 		}
-
-		abortController.abort();
-		
 		postMessage({
 			pWaveImpacted: pWaveImpacted,
 			pWaveImpactedGeoJson: geoJson,

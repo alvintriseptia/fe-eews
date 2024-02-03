@@ -120,7 +120,14 @@ class EarthquakeHistorySidebar extends React.Component<EarthquakeHistorySidebarP
 						<ChevronDoubleRightIcon className="w-6 h-6" />
 					</button>
 					<aside className="flex flex-col bg-tews-cinder h-full overflow-y-auto">
-						{this.displayError()}
+						{this.state.weeklyEarthquake.length > 0 ? (
+							this.state.weeklyEarthquake.map((feature, index) => {
+								feature.id = index + 1;
+								return <HistoryCard key={index} {...feature} />;
+							})
+						) : (
+							this.displayError()
+						)}
 					</aside>
 				</section>
 			</>

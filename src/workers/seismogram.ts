@@ -56,7 +56,7 @@ const seismogramHistoryData = new Map<string, SeismogramDataType>(
 
 const SAMPLING_RATE = 20;
 const FREQUENCY_UPDATE = 3000;
-const BUFFER = 5000;
+const BUFFER = 3600;
 let isFetching = false;
 
 export type SeismogramDataType = {
@@ -74,7 +74,7 @@ export type SeismogramTempDataType = {
 	pWaves: any[];
 };
 
-const onmessage = (event: MessageEvent) => {
+const onmessage = async (event: MessageEvent) => {
 	const { station, message, mode, start_date, end_date } = event.data;
 	const stationData = stations.find((s) => s.code === station);
 	if (mode === "simulation") {
@@ -99,42 +99,10 @@ const onmessage = (event: MessageEvent) => {
 		} else if (stationData && message === "lastData") {
 			// batching per 500 data
 			const data = seismogramData.get(station);
-			const tempData = {
-				channelZ: {
-					x: [],
-					y: [],
-				},
-				channelN: {
-					x: [],
-					y: [],
-				},
-				channelE: {
-					x: [],
-					y: [],
-				},
-				pWaves: [],
-			};
-			for (let i = 0; i < data.channelZ.x.length; i += 500) {
-				tempData.channelZ.x.push(...data.channelZ.x.slice(i, i + 500));
-				tempData.channelZ.y.push(...data.channelZ.y.slice(i, i + 500));
-				tempData.channelN.x.push(...data.channelN.x.slice(i, i + 500));
-				tempData.channelN.y.push(...data.channelN.y.slice(i, i + 500));
-				tempData.channelE.x.push(...data.channelE.x.slice(i, i + 500));
-				tempData.channelE.y.push(...data.channelE.y.slice(i, i + 500));
-
-				// pwaves
-				const startTime = tempData.channelZ.x[0];
-				const endTime = tempData.channelZ.x[tempData.channelZ.x.length - 1];
-				tempData.pWaves = data.pWaves.filter((pWave) => {
-					const pWaveTime = pWave.x[0];
-					return pWaveTime >= startTime && pWaveTime <= endTime;
-				});
-
-				postMessage({
-					station: station,
-					data: tempData,
-				});
-			}
+			postMessage({
+				station: station,
+				data: data,
+			});
 		} else if (stationData && message === "history" && start_date && end_date) {
 			getHistoryStationSeismogram(station, start_date, end_date);
 		}
@@ -549,7 +517,9 @@ const onmessage = (event: MessageEvent) => {
 			}
 		}
 
-		const response = await fetch(`http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`);
+		const response = await fetch(
+			`http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`
+		);
 		let data = await response.json();
 
 		// dummy, data
@@ -594,7 +564,7 @@ const onmessage = (event: MessageEvent) => {
 				const key = obj[0];
 				const dataValue = obj[1];
 				const date = new Date(parseInt(key));
-				const offset = - (new Date().getTimezoneOffset() * 60 * 1000);
+				const offset = -(new Date().getTimezoneOffset() * 60 * 1000);
 				date.setTime(date.getTime() - offset);
 
 				newSeismogramData.channelZ.x.push(date.getTime());

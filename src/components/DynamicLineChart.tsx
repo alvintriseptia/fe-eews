@@ -170,7 +170,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 		const handleSeismogramWorker = (event: MessageEvent) => {
 			const { station, data } = event.data;
-			console.log("Received seismogram data " + station, data)
 			if (station !== this.state.station) {
 				return; // Ignore messages not meant for this station
 			}
