@@ -100,13 +100,13 @@ class StationView extends React.Component<Props> {
 
 	async enableSeismogram(station: string) {
 		await this.state.controller.enableStation(station);
-		this.state.controller.connectSeismogram(station, "simulation");
+		this.state.controller.connectSeismogram(station, "realtime");
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableAllSeismogram() {
 		await this.state.controller.enableAllStations();
-		this.state.controller.connectAllSeismogram("simulation");
+		this.state.controller.connectAllSeismogram("realtime");
 		this.setState({ dialogOpen: false });
 	}
 
@@ -204,8 +204,6 @@ class StationView extends React.Component<Props> {
 												station={station.code}
 												width={"100%"}
 												height={800}
-												startRange={-5000}
-												endRange={8000}
 												showTitle={false}
 											/>
 										</div>
