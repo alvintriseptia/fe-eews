@@ -33,10 +33,16 @@ class HistoryView extends React.Component<Props> {
 		},
 		recapDetection: {} as DetectionRecapContentProps,
 		historyDetections: [] as IEarthquakeDetection[],
-		rerender: 0,
+		totalDetection: 0,
+		currentDateCursor: new Date().getTime() - 7 * 24 * 60 * 60 * 1000,
+		hasMore: false,
 		currentFilterStartDate: new Date().getTime() - 7 * 24 * 60 * 60 * 1000,
 		currentFilterEndDate: new Date().getTime(),
+		offsetHours: new Date().getTimezoneOffset() / 60,
 	};
+	isLoading = false;
+	scrollerRef = React.createRef<HTMLDivElement>();
+
 	constructor(props: Props) {
 		super(props);
 		this.state.controller = props.controller;
@@ -44,11 +50,12 @@ class HistoryView extends React.Component<Props> {
 
 		this.handleFilter.bind(this);
 		this.detailEarthquakeDetection.bind(this);
+		this.loadMore.bind(this);
+		this.handleScroll.bind(this);
 	}
 
 	componentDidMount(): void {
 		if (!this.state.controller.addEarthquakeDetectionLocations) return;
-
 		this.state.controller
 			.addEarthquakeDetectionLocations(this.state.historyDetections)
 			.then((result) => {
@@ -58,11 +65,14 @@ class HistoryView extends React.Component<Props> {
 			});
 	}
 
-	componentDidUpdate(prevState): void {
-		if (prevState.rerender !== this.state.rerender) {
-			this.state.controller.addEarthquakeDetectionLocations(
-				this.state.historyDetections
-			);
+	handleScroll() {
+		const scroller = this.scrollerRef.current;
+		if (
+			Math.floor(scroller.scrollHeight - scroller.scrollTop) - 200 <=
+				scroller.clientHeight &&
+			this.state.hasMore
+		) {
+			this.loadMore();
 		}
 	}
 
@@ -73,15 +83,22 @@ class HistoryView extends React.Component<Props> {
 				end_date
 			);
 
+		this.state.controller.addEarthquakeDetectionLocations(
+			newHistoryDetection.data
+		);
+
 		this.setState({
-			historyDetection: [...newHistoryDetection],
-			rerender: this.state.rerender + 1,
+			historyDetections: [...newHistoryDetection.data],
+			totalDetection: newHistoryDetection.total,
+			currentDateCursor: start_date,
 			currentFilterStartDate: start_date,
 			currentFilterEndDate: end_date,
+			hasMore: newHistoryDetection.total > 20 ? true : false,
 		});
 	}
 
 	async detailEarthquakeDetection(earthquake: IEarthquakeDetection) {
+		this.isLoading = true;
 		const seismogram = await this.state.controller.getDetailEarthquakeDetection(
 			earthquake.station,
 			earthquake.time_stamp,
@@ -178,6 +195,56 @@ class HistoryView extends React.Component<Props> {
 		this.setState({ recapDetection: data });
 	}
 
+	async loadMore() {
+		if (this.isLoading) return;
+		this.isLoading = true;
+		const newCurrentDate = new Date(
+			this.state.historyDetections[
+				this.state.historyDetections.length - 1
+			].time_stamp
+		);
+		newCurrentDate.setHours(newCurrentDate.getHours() - this.state.offsetHours);
+
+		console.log(
+			new Date(newCurrentDate.getTime() + 10),
+			this.state.historyDetections[this.state.historyDetections.length - 1]
+				.time_stamp
+		);
+		console.log(
+			"newCurrentDate",
+			newCurrentDate,
+			this.state.currentFilterStartDate
+		);
+		if (newCurrentDate.getTime() + 10 > this.state.currentFilterEndDate) {
+			this.isLoading = false;
+			this.setState({ hasMore: false });
+			return;
+		} else {
+			const newHistoryDetection =
+				await this.state.controller.filterHistoryEarthquakeDetection(
+					newCurrentDate.getTime() + 10,
+					this.state.currentFilterEndDate
+				);
+			if (newHistoryDetection.data.length === 0) {
+				this.setState({ hasMore: false });
+			} else {
+				this.state.controller.addEarthquakeDetectionLocations([
+					...this.state.historyDetections,
+					...newHistoryDetection.data,
+				]);
+				this.setState({
+					historyDetections: [
+						...this.state.historyDetections,
+						...newHistoryDetection.data,
+					],
+					currentDateCursor: newCurrentDate.getTime() + 10,
+					hasMore: newHistoryDetection.total > 20 ? true : false,
+				});
+			}
+			this.isLoading = false;
+		}
+	}
+
 	download() {
 		this.state.controller.exportHistoryEarthquakeDetection(
 			this.state.currentFilterStartDate,
@@ -192,14 +259,18 @@ class HistoryView extends React.Component<Props> {
 				<Filterbar onFilter={(...args) => this.handleFilter(...args)} />
 
 				<section className="h-full grid grid-cols-12">
-					<div className="h-full overflow-y-auto overflow-x-hidden col-span-5 pb-32">
+					<div
+						className="h-full overflow-y-auto overflow-x-hidden col-span-5 pb-32"
+						ref={this.scrollerRef}
+						onScroll={() => this.handleScroll()}
+					>
 						<div className="flex flex-col p-4">
 							{this.state.historyDetections && (
 								<div className="text-white mb-5 flex justify-between items-center">
 									<div>
-										<h6 className="text-xs mb-1">JUMLAH PREDIKSI</h6>
+										<h6 className="text-xs mb-1">JUMLAH DETEKSI</h6>
 										<h4 className="text-3xl font-semibold">
-											{this.state.historyDetections.length}
+											{this.state.totalDetection}
 										</h4>
 									</div>
 
@@ -221,25 +292,34 @@ class HistoryView extends React.Component<Props> {
 									<h5 className="text-sm text-gray-500">Tidak ada data</h5>
 								</div>
 							) : (
-								this.state.historyDetections &&
-								this.state.historyDetections.map((detection, index) => {
-									return (
-										<RenderIfVisible key={index}>
-											<DetectionCard
-												location={detection.location || ""}
-												magnitude={detection.mag || 0}
-												latitude={detection.lat || 0}
-												longitude={detection.long || 0}
-												time={detection.time_stamp || 0}
-												depth={detection.depth || 0}
-												key={index}
-												onClick={() =>
-													this.detailEarthquakeDetection(detection)
-												}
-											/>
-										</RenderIfVisible>
-									);
-								})
+								this.state.historyDetections && (
+									<>
+										{this.state.historyDetections.map((detection, index) => {
+											return (
+												<DetectionCard
+													key={index}
+													location={detection.location || ""}
+													magnitude={detection.mag || 0}
+													latitude={detection.lat || 0}
+													longitude={detection.long || 0}
+													time={detection.time_stamp || 0}
+													depth={detection.depth || 0}
+													onClick={() =>
+														this.detailEarthquakeDetection(detection)
+													}
+												/>
+											);
+										})}
+
+										{this.state.hasMore && (
+											<div className="flex justify-center items-center my-8">
+												<h5 className="text-sm text-gray-100">
+													Sedang memuat...
+												</h5>
+											</div>
+										)}
+									</>
+								)
 							)}
 						</div>
 					</div>

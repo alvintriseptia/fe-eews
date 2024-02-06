@@ -50,17 +50,14 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 
 	async fetchHistoryEarthquakeDetection(start_date: number, end_date: number) {
 		try {
-			// ubah milliseconds menjadi format unix
-			start_date = Math.floor(start_date);
-			end_date = Math.floor(end_date);
-			const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}`;
+			const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}&limit=20`;
 
 			const response = await fetch(url);
 			const data = await response.json();
 
 			if (data.error) throw new Error(data.error);
 
-			return Object.values(data) as IEarthquakeDetection[];
+			return data;
 		} catch (error) {
 			throw error;
 		}
@@ -73,8 +70,8 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 	) {
 		try {
 			// to unix
-			start_date = Math.floor(start_date);
-			end_date = Math.floor(end_date);
+			start_date = start_date;
+			end_date = end_date;
 			const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);

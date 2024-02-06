@@ -6,6 +6,11 @@ import { IEarthquakeDetection } from "@/entities/_index";
 import toast from "react-hot-toast";
 import { CoordinateType } from "@/types/_index";
 
+interface IEarthquakeDetectionResponse {
+	data: IEarthquakeDetection[];
+	total: number;
+}
+
 /**
  * HistoryController class handles the logic for earthquake detection.
  */
@@ -30,31 +35,42 @@ export default class HistoryController {
 	/**
 	 * Retrieves the history of earthquake detections.
 	 */
-	async getHistoryEarthquakeDetection() {
+	async getHistoryEarthquakeDetection(start_date: number) {
 		try {
 			const end_date = new Date().getTime();
-			const start_date = end_date - 30 * 24 * 60 * 60 * 1000;
 			const response =
 				await this.earthquakeDetection.fetchHistoryEarthquakeDetection(
 					start_date,
 					end_date
 				);
 
-			const earthquakeDetections = response;
+			const earthquakeDetections =
+				response as unknown as IEarthquakeDetectionResponse | null;
 
-			if (earthquakeDetections.length) {
+			if (earthquakeDetections) {
 				// get addresses
+				for (const detection of earthquakeDetections.data) {
+					const address = await this.map.getAreaName({
+						latitude: detection.lat,
+						longitude: detection.long,
+					});
+					detection.location = address;
+				}
+
 				return {
-					data: earthquakeDetections,
+					data: earthquakeDetections.data,
+					total: earthquakeDetections.total,
 				};
 			} else {
 				return {
 					data: [],
+					total: 0,
 				};
 			}
 		} catch (error) {
 			return {
 				data: [],
+				total: 0,
 			};
 		}
 	}
@@ -76,10 +92,7 @@ export default class HistoryController {
 		}
 	}
 
-	async filterHistoryEarthquakeDetection(
-		start_date: number,
-		end_date: number
-	) {
+	async filterHistoryEarthquakeDetection(start_date: number, end_date: number) {
 		try {
 			document.querySelector("#loading_overlay").className = "block";
 
@@ -89,27 +102,33 @@ export default class HistoryController {
 					end_date
 				);
 
-			const earthquakeDetections = response;
-
-			if (earthquakeDetections.length) {
+			const earthquakeDetections =
+				response as unknown as IEarthquakeDetectionResponse | null;
+			if (earthquakeDetections) {
 				// get addresses
-				let result = [] as IEarthquakeDetection[];
-
-				for (const detection of earthquakeDetections) {
+				for (const detection of Object.values(earthquakeDetections.data)) {
 					const address = await this.map.getAreaName({
 						latitude: detection.lat,
 						longitude: detection.long,
 					});
 					detection.location = address;
-					result.push(detection);
 				}
 
-				return result;
+				return {
+					data: Object.values(earthquakeDetections.data),
+					total: earthquakeDetections.total,
+				};
 			} else {
-				return [];
+				return {
+					data: [],
+					total: 0,
+				};
 			}
 		} catch (error) {
-			return [];
+			return {
+				data: [],
+				total: 0,
+			};
 		} finally {
 			document.querySelector("#loading_overlay").className = "hidden";
 		}
@@ -127,10 +146,10 @@ export default class HistoryController {
 			},
 		});
 
-		if(detections.length) {
+		if (detections.length) {
 			if (!detections[0].location) {
 				let result = [] as IEarthquakeDetection[];
-	
+
 				// for (const detection of detections) {
 				// 	const address = await this.map.getAreaName({
 				// 		latitude: detection.lat,
@@ -140,14 +159,14 @@ export default class HistoryController {
 				// 	result.push(detection);
 				// }
 				document.querySelector("#loading_overlay").className = "hidden";
-	
+
 				this.map.addEarthquakeDetectionLocations(detections);
 				return detections;
 			}
-	
+
 			this.map.addEarthquakeDetectionLocations(detections);
 		}
-		
+
 		document.querySelector("#loading_overlay").className = "hidden";
 	}
 
@@ -191,10 +210,7 @@ export default class HistoryController {
 	/**
 	 * Exports the history of earthquake detections to a file.
 	 */
-	async exportHistoryEarthquakeDetection(
-		start_date: number,
-		end_date: number
-	) {
+	async exportHistoryEarthquakeDetection(start_date: number, end_date: number) {
 		try {
 			document.querySelector("#loading_overlay").className = "block";
 			await this.earthquakeDetection.exportHistoryEarthquakeDetection(

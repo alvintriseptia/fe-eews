@@ -8,12 +8,11 @@ import { IEarthquakeDetection } from "@/entities/_index";
 export const getServerSideProps: GetServerSideProps = async () => {
 	try {
 		const controller = new HistoryController();
-
-		const response = await controller.getHistoryEarthquakeDetection();
+		const start_date = new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days ago
+		const response = await controller.getHistoryEarthquakeDetection(start_date);
 
 		if (
-			response.data.length > 0 &&
-			(response.data[0] as any) == "No Data Found For this range"
+			response.data.length > 0
 		) {
 			return {
 				props: {

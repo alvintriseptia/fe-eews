@@ -12,7 +12,11 @@ class Filterbar extends React.Component<FilterbarProps> {
 	};
 
 	handleFilter() {
-		this.props.onFilter(this.state.startDate, this.state.endDate);
+		const startDate = new Date(this.state.startDate);
+		startDate.setHours(0, 0, 0, 0);
+		const endDate = new Date(this.state.endDate);
+		endDate.setHours(23, 59, 59, 999);
+		this.props.onFilter(startDate.getTime(), endDate.getTime());
 	}
 
 	render() {
