@@ -110,18 +110,18 @@ class MainView extends React.Component<Props> {
 		// }, 60000);
 
 		setTimeout(() => {
-			this.state.controller.connectEarthquakeDetection();
+			this.state.controller.connectEarthquakeDetection(this.props.mode);
 		}, 2000);
 
-		observe(this.state.controller, "earthquakeDetection", (change) => {
+		observe(this.state.controller, "rerender", (change) => {
 			if (change.newValue) {
 				this.setState({
 					earthquakeRealtimeInformation: {
-						earthquake: change.newValue,
+						earthquake: this.state.controller.earthquakeDetection,
 					},
 					sidebarProps: {
 						...this.state.sidebarProps,
-						latestDetection: change.newValue,
+						latestDetection: this.state.controller.earthquakeDetection,
 					},
 				});
 			}
@@ -144,6 +144,7 @@ class MainView extends React.Component<Props> {
 
 	componentWillUnmount(): void {
 		this.state.controller.disconnectEarthquakeDetection();
+		this.state.stationController.disconnectAllSeismogram();
 	}
 
 	render() {

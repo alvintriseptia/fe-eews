@@ -198,7 +198,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 		const { userDefinedRange } = this.state;
 		const seismogramWorker = this.context as any as Worker | null;
 		if(userDefinedRange && seismogramWorker !== null){
-			console.log("Requesting history", userDefinedRange[0], userDefinedRange[1])
 			seismogramWorker.postMessage({
 				station: this.state.station,
 				message: "history",

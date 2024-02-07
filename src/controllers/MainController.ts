@@ -6,8 +6,14 @@ import {
 	Map as TEWSMap,
 	Notification,
 } from "@/models/_index";
-import { CoordinateType, GeoJsonCollection, RegionType } from "@/types/_index";
-import { AnnotationsMap, action, makeObservable, observable } from "mobx";
+import { CoordinateType, RegionType } from "@/types/_index";
+import {
+	AnnotationsMap,
+	action,
+	makeObservable,
+	observable,
+	observe,
+} from "mobx";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import REGENCIES_DATA from "@/assets/data/regencies.json";
 import * as turf from "@turf/turf";
@@ -25,6 +31,7 @@ export default class MainController {
 	private earthquakeDetectionWorker: Worker;
 	private countdown: number = 0;
 	earthquakeDetection = new EarthquakeDetection();
+	rerender = 0;
 	private clearTimeout: NodeJS.Timeout;
 
 	private wavesWorker: Worker;
@@ -36,7 +43,7 @@ export default class MainController {
 
 	constructor() {
 		makeObservable(this, {
-			earthquakeDetection: observable,
+			rerender: observable,
 			getEarthquakeWeekly: action,
 			getLatestEarthquake: action,
 			getLatestFeltEarthquake: action,
@@ -72,6 +79,18 @@ export default class MainController {
 
 		this.affectedPWaves = [];
 		this.affectedSWaves = [];
+
+		this.earthquakeDetectionWorker = new Worker(
+			new URL("../workers/earthquakeDetection.ts", import.meta.url)
+		);
+
+		this.wavesWorker = new Worker(
+			new URL("../workers/waves.ts", import.meta.url)
+		);
+
+		this.affectedWavesWorker = new Worker(
+			new URL("../workers/affectedWaves.ts", import.meta.url)
+		);
 	}
 
 	// EXTERNAL SOURCE
@@ -100,48 +119,15 @@ export default class MainController {
 	/**
 	 * Connects to the earthquake detection service.
 	 */
-	connectEarthquakeDetection() {
-		this.earthquakeDetectionWorker = new Worker(
-			new URL("../workers/earthquakeDetection.ts", import.meta.url)
+	connectEarthquakeDetection(mode: string = "realtime") {
+		this.earthquakeDetection.streamEarthquakeDetection(
+			this.earthquakeDetectionWorker,
+			mode
 		);
 
-		this.wavesWorker = new Worker(
-			new URL("../workers/waves.ts", import.meta.url)
-		);
-
-		this.affectedWavesWorker = new Worker(
-			new URL("../workers/affectedWaves.ts", import.meta.url)
-		);
-
-		this.earthquakeDetectionWorker.postMessage({
-			mode: "realtime",
+		observe(this.earthquakeDetection, "time_stamp", (change) => {
+			this.displayEarthquakeDetection(this.earthquakeDetection);
 		});
-
-		this.earthquakeDetectionWorker.onmessage = async (event: MessageEvent) => {
-			const { data } = event;
-			const date = new Date(data.time_stamp);
-			const offset = new Date().getTimezoneOffset() * 60 * 1000;
-			date.setTime(date.getTime() - offset);
-
-			const earthquakeDetection: IEarthquakeDetection = {
-				title: "Terdeteksi Gelombang P",
-				description: `Harap perhatian, muncul deteksi gelombang P di stasiun ${data.station}`,
-				time_stamp: date.getTime(),
-				depth: data.depth,
-				lat: data.lat,
-				long: data.long,
-				mag: data.mag,
-				detection: "warning",
-				countdown: 10,
-				station: data.station,
-			};
-
-			if (earthquakeDetection.detection === "warning") {
-				this.clearEarthquakeDetection(false);
-
-				await this.displayEarthquakeDetection(earthquakeDetection);
-			}
-		};
 	}
 
 	async displayEarthquakeDetection(earthquakeDetection: IEarthquakeDetection) {
@@ -160,8 +146,6 @@ export default class MainController {
 		);
 
 		// EARTHQUAKE PREDICTION DATA
-		this.countdown = 10;
-		this.earthquakeDetection = new EarthquakeDetection(earthquakeDetection);
 		let address = await this.map.getAreaName({
 			longitude: earthquakeDetection.long,
 			latitude: earthquakeDetection.lat,
@@ -186,6 +170,11 @@ export default class MainController {
 		this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
 
 		// EARTHQUAKE PREDICTION COUNTDOWN
+		this.countdown = 10;
+		earthquakeDetection.location = address;
+		earthquakeDetection.countdown = this.countdown;
+		this.rerender++;
+
 		this.earthquakeDetectionInterval = setInterval(() => {
 			this.countdown--;
 			if (this.countdown === 0) {
@@ -196,18 +185,16 @@ export default class MainController {
 					title: "Terjadi Gempa Bumi",
 					detection: "earthquake",
 					description: `Perhatian! telah terjadi gempa bumi di wilayah ${address}, segera lakukan tindakan mitigasi!`,
-					time_stamp: new Date( this.earthquakeDetection.time_stamp).getTime() + 10000,
-					depth: this.earthquakeDetection.depth,
-					lat: this.earthquakeDetection.lat,
-					long: this.earthquakeDetection.long,
-					mag: this.earthquakeDetection.mag,
 					countdown: -1,
 				};
 
-				this.earthquakeDetection = new EarthquakeDetection(
-					earthquake as IEarthquakeDetection
+				this.earthquakeDetection.setStatusDetection(
+					earthquake.title,
+					earthquake.description,
+					earthquake.detection,
+					earthquake.countdown
 				);
-
+				this.rerender++;
 				clearInterval(this.earthquakeDetectionInterval);
 			}
 		}, 1000);
@@ -251,7 +238,7 @@ export default class MainController {
 				}
 				this.affectedSWaves = regenciesData;
 				this.affectedPWaves = geoJson;
-				this.map.addAreaAffectedWaves(geoJson, regenciesData);
+				this.map.addAreaAffectedWaves(data.pWaveImpactedGeoJson, regenciesData);
 			}
 		};
 	}
@@ -275,7 +262,7 @@ export default class MainController {
 				this.affectedSWaves = [];
 			}
 
-			this.earthquakeDetection = new EarthquakeDetection();
+			this.rerender = 0;
 
 			clearTimeout(this.clearTimeout);
 			clearInterval(this.earthquakeDetectionInterval);
@@ -293,7 +280,7 @@ export default class MainController {
 					this.affectedSWaves = [];
 				}
 
-				this.earthquakeDetection = new EarthquakeDetection();
+				this.rerender = 0;
 			}, 180000);
 		}
 	}

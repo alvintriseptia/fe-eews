@@ -1,11 +1,12 @@
 import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
+import { AnnotationsMap, makeObservable, observable } from "mobx";
 
 export default class EarthquakeDetection implements IEarthquakeDetection {
 	title: string;
 	description: string;
 	detection: string;
 	station: string;
-	time_stamp: number;
+	time_stamp: number = 0;
 	depth: number;
 	lat: number;
 	long: number;
@@ -27,6 +28,60 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 			this.station = earthquakeDetection.station;
 			this.location = earthquakeDetection.location;
 		}
+
+		makeObservable(this, {
+			time_stamp: observable,
+		} as AnnotationsMap<this, any>);
+	}
+
+	setEarthquakeDetection(earthquakeDetection: IEarthquakeDetection) {
+		this.title = earthquakeDetection.title;
+		this.description = earthquakeDetection.description;
+		this.detection = earthquakeDetection.detection;
+		this.depth = earthquakeDetection.depth;
+		this.lat = earthquakeDetection.lat;
+		this.long = earthquakeDetection.long;
+		this.mag = earthquakeDetection.mag;
+		this.countdown = earthquakeDetection.countdown;
+		this.station = earthquakeDetection.station;
+		this.location = earthquakeDetection.location;
+		this.time_stamp = earthquakeDetection.time_stamp;
+	}
+
+	setStatusDetection(title: string, description: string, detection: string, countdown: number) {
+		this.title = title;
+		this.description = description;
+		this.detection = detection;
+		this.countdown = countdown;
+	}
+
+	streamEarthquakeDetection(earthquakeDetectionWorker: Worker, mode: string = "realtime") {
+		earthquakeDetectionWorker.postMessage({
+			mode: mode,
+		});
+
+		earthquakeDetectionWorker.onmessage = async (event: MessageEvent) => {
+			const { data } = event;
+			const date = new Date(data.time_stamp);
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			date.setTime(date.getTime() - offset);
+
+			const earthquakeDetection: IEarthquakeDetection = {
+				title: "Terdeteksi Gelombang P",
+				description: `Harap perhatian, muncul deteksi gelombang P di stasiun ${data.station}`,
+				time_stamp: date.getTime(),
+				depth: data.depth,
+				lat: data.lat,
+				long: data.long,
+				mag: data.mag,
+				detection: "warning",
+				countdown: 10,
+				station: data.station,
+				location: data.location,
+			};
+
+			this.setEarthquakeDetection(earthquakeDetection);
+		};
 	}
 
 	async fetchLatestEarthquakeDetection() {

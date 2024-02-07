@@ -205,16 +205,6 @@ class HistoryView extends React.Component<Props> {
 		);
 		newCurrentDate.setHours(newCurrentDate.getHours() - this.state.offsetHours);
 
-		console.log(
-			new Date(newCurrentDate.getTime() + 10),
-			this.state.historyDetections[this.state.historyDetections.length - 1]
-				.time_stamp
-		);
-		console.log(
-			"newCurrentDate",
-			newCurrentDate,
-			this.state.currentFilterStartDate
-		);
 		if (newCurrentDate.getTime() + 10 > this.state.currentFilterEndDate) {
 			this.isLoading = false;
 			this.setState({ hasMore: false });

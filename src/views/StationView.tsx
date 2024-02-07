@@ -22,6 +22,7 @@ const ESTIMATED_ITEM_HEIGHT = 800;
 class StationView extends React.Component<Props> {
 	state = {
 		controller: {} as StationController,
+		mainController: {} as MainController,
 		seismogramStations: [] as IStation[],
 		filteredSeismogramStations: [] as IStation[],
 		disabledSeismogramStations: [] as IStation[],
@@ -46,24 +47,25 @@ class StationView extends React.Component<Props> {
 		this.disableSeismogram = this.disableSeismogram.bind(this);
 		this.enableSeismogram = this.enableSeismogram.bind(this);
 		this.enableAllSeismogram = this.enableAllSeismogram.bind(this);
+
+		this.state.mainController = new MainController();
 	}
 
 	componentDidMount(): void {
-		const mainController = new MainController();
 		this.state.controller.connectAllSeismogram("simulation");
+		this.state.mainController.connectEarthquakeDetection();
 
-		observe(mainController, "earthquakeDetection", (change) => {
+		observe(this.state.mainController, "rerender", (change) => {
 			if (change.newValue) {
 				this.setState({
 					earthquakeRealtimeInformation: {
-						earthquake: change.newValue,
+						earthquake: this.state.mainController.earthquakeDetection,
 					},
 				});
 			}
 		});
 
 		observe(this.state.controller, "seismograms", (change) => {
-			console.log(change.newValue);
 			if (change.newValue) {
 				let newFilteredSeismogramStations = STATIONS_DATA.filter((station) => {
 					return change.newValue.has(station.code);
@@ -90,6 +92,11 @@ class StationView extends React.Component<Props> {
 				});
 			}
 		});
+	}
+
+	componentWillUnmount(): void {
+		this.state.controller.disconnectAllSeismogram();
+		this.state.mainController.disconnectEarthquakeDetection();
 	}
 
 	async disableSeismogram(station: string) {

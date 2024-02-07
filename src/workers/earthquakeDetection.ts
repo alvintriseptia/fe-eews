@@ -19,7 +19,7 @@ const onmessage = (event: MessageEvent) => {
 			depth: 5,
 			lat: -2.5927,
 			long: 140.1678,
-			mag: 10,
+			mag: 2,
 			detection: typeDetection[Math.floor(Math.random() * 3)],
 			countdown: 10,
 			station: "GENI",
@@ -30,16 +30,17 @@ const onmessage = (event: MessageEvent) => {
 		postMessage(earthquakeDetection);
 
 		setInterval(() => {
-			const station = STATIONS_DATA[Math.floor(Math.random() * STATIONS_DATA.length) - 1];
+			const station = STATIONS_DATA[Math.floor(Math.random() * 20) - 1];
 			earthquakeDetection.lat = station.latitude;
 			earthquakeDetection.long = station.longitude;
 			earthquakeDetection.detection =
 				typeDetection[Math.floor(Math.random() * 3)];
 			earthquakeDetection.station = station.code;
+			earthquakeDetection.time_stamp = Date.now();
 			addPWave(station.code, Date.now());
 
 			postMessage(earthquakeDetection);
-		}, 60000);
+		}, 30000);
 	} else {
 		socket.on("detection-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip
