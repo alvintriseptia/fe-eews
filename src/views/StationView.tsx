@@ -14,12 +14,9 @@ import RenderIfVisible from "react-render-if-visible";
 import { observe } from "mobx";
 import STATIONS_DATA from "@/assets/data/stations.json";
 
-interface Props {
-	controller: StationController;
-}
 const ESTIMATED_ITEM_HEIGHT = 800;
 
-class StationView extends React.Component<Props> {
+class StationView extends React.Component {
 	state = {
 		controller: {} as StationController,
 		mainController: {} as MainController,
@@ -40,14 +37,14 @@ class StationView extends React.Component<Props> {
 		selectedStation: "",
 		searchQuery: "",
 	};
-	constructor(props: Props) {
+	constructor(props) {
 		super(props);
-		this.state.controller = props.controller;
 		// bind
 		this.disableSeismogram = this.disableSeismogram.bind(this);
 		this.enableSeismogram = this.enableSeismogram.bind(this);
 		this.enableAllSeismogram = this.enableAllSeismogram.bind(this);
-
+		
+		this.state.controller = StationController.getInstance();
 		this.state.mainController = new MainController();
 	}
 

@@ -1,10 +1,10 @@
 export interface IEarthquakeHistory {
 	id: string | number;
-	title: string;
+	title?: string;
 	location: string;
 	date: string | number;
 	time: string | number;
-	station: string;
+	station?: string;
 	magnitude: string;
 	depth: string;
 	latitude: string;

@@ -1,4 +1,4 @@
-import { AnnotationsMap, action, makeObservable, observable } from "mobx";
+import { AnnotationsMap, action, intercept, makeObservable, observable, observe } from "mobx";
 import { Seismogram, Station } from "@/models/_index";
 import { IStation } from "@/entities/_index";
 import toast from "react-hot-toast";
@@ -7,13 +7,13 @@ import toast from "react-hot-toast";
  * The StationController class handles the logic for managing stations.
  */
 class StationController {
+	private static instance: StationController;
 	private station = new Station();
-	private seismogramWorker: Worker;
+	seismogramWorker: Worker;
 	seismograms: Map<string, Seismogram> = new Map([]);
 
-	constructor(seismogramWorker?: Worker) {
+	private constructor() {
 		makeObservable(this, {
-			station: observable,
 			seismograms: observable,
 			getStations: action,
 			initStations: action,
@@ -25,10 +25,14 @@ class StationController {
 			disconnectAllSeismogram: action,
 			disconnectSeismogram: action,
 		} as AnnotationsMap<this, any>);
+		this.seismogramWorker = new Worker(new URL("../workers/seismogram.ts", import.meta.url));
+	}
 
-		if (seismogramWorker) {
-			this.seismogramWorker = seismogramWorker;
+	public static getInstance(): StationController {
+		if (!StationController.instance) {
+			StationController.instance = new StationController();
 		}
+		return StationController.instance;
 	}
 
 	/**
@@ -114,9 +118,14 @@ class StationController {
 	 * @param station - The station of the seismogram.
 	 */
 	connectSeismogram(mode: string, station: string) {
-		this.seismograms
-			.get(station)
-			?.streamSeismogram(this.seismogramWorker, mode);
+		const seismogram = this.seismograms.get(station);
+		if(seismogram) {
+			seismogram.streamSeismogram(this.seismogramWorker, mode);
+		}
+	}
+
+	getLastSeismogramData(station: string) {
+		this.seismograms.get(station)?.getLastSeismogramData(this.seismogramWorker);
 	}
 
 	/**

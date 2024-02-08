@@ -17,7 +17,7 @@ export default class EarthquakeHistory implements IEarthquakeHistory {
 	latitude: string;
 	longitude: string;
 
-	async fetchEarthquakeWeekly() {
+	async fetchEarthquakeWeekly(): Promise<IEarthquakeHistory[]>{
 		try {
 			const timestamp = new Date().getTime();
 			const response = await fetch(
@@ -29,7 +29,13 @@ export default class EarthquakeHistory implements IEarthquakeHistory {
 			const earthquakes = data.features.map((earthquake) => {
 				const [long, lat, elevation] = earthquake.geometry.coordinates;
 				return {
+					id: "weekly",
 					location: earthquake.properties.place,
+					date: new Date(earthquake.properties.time).toLocaleDateString("id-ID", {
+						year: "numeric",
+						month: "2-digit",
+						day: "2-digit",
+					}),
 					time: earthquake.properties.time,
 					magnitude: parseFloat(earthquake.properties.mag).toFixed(2),
 					depth: parseFloat(earthquake.properties.depth).toFixed(2),
@@ -44,7 +50,7 @@ export default class EarthquakeHistory implements IEarthquakeHistory {
 		}
 	}
 
-	async fetchLatestFeltEarthquake() {
+	async fetchLatestFeltEarthquake(): Promise<IEarthquakeHistory | null>{
 		try {
 			const timestamp = new Date().getTime();
 			const response = await fetch(
@@ -58,6 +64,7 @@ export default class EarthquakeHistory implements IEarthquakeHistory {
 			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : timezone === 9 ? "WIT" : "";
 			time.setTime(time.getTime() - offset);
 			const earthquake = {
+				id: "latest-felt",
 				title: "Gempa Terakhir\nDirasakan",
 				location: data.info.area,
 				date: time.toLocaleDateString("id-ID", {
@@ -83,7 +90,7 @@ export default class EarthquakeHistory implements IEarthquakeHistory {
 		}
 	}
 
-	async fetchLatestEarthquake() {
+	async fetchLatestEarthquake(): Promise<IEarthquakeHistory | null>{
 		try {
 			const timestamp = new Date().getTime();
 			const response = await fetch(
@@ -100,6 +107,7 @@ export default class EarthquakeHistory implements IEarthquakeHistory {
 			const timezoneText = timezone === 7 ? "WIB" : timezone === 8 ? "WITA" : "WIT";
 			time.setTime(time.getTime() - offset);
 			return {
+				id: "latest",
 				title: "Gempa Terakhir\nRealtime M > 2",
 				location: earthquake.properties.place,
 				date: time.toLocaleDateString("id-ID", {

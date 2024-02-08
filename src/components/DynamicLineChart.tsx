@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { Layout, PlotRelayoutEvent } from "plotly.js";
 import SeismogramContext from "@/stores/SeismogramContext";
 import { SeismogramDataType } from "@/workers/seismogram";
+import StationController from "@/controllers/StationController";
+import { observe } from "mobx";
 
 const Plot = dynamic(
 	() => import("react-plotly.js").then((mod) => mod.default),
@@ -137,7 +139,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 		earthquakePredictions: [] as IEarthquakeDetection[],
 		revision: 0,
 		userDefinedRange: null,
-		seismogramWorker: null as Worker | null,
 	};
 
 	constructor(props: Props) {
@@ -165,39 +166,23 @@ export default class DynamicLineChart extends React.Component<Props> {
 	}
 
 	componentDidMount() {
-		const isMounted = true;
-		const seismogramWorker = this.context as any as Worker | null;
+		if (this.props.station) {
+			const stationController = StationController.getInstance();
 
-		const handleSeismogramWorker = (event: MessageEvent) => {
-			const { station, data } = event.data;
-			if (station !== this.state.station) {
-				return; // Ignore messages not meant for this station
-			}
-			if (!isMounted || !data) {
-				return; // Ignore messages if component is unmounted
-			}
-			this.simulateSeismogram(data);
-		};
-
-		seismogramWorker?.addEventListener("message", handleSeismogramWorker);
-
-		if (this.state.channelZ.x.length === 0) {
-			seismogramWorker?.postMessage({
-				station: this.state.station,
-				message: "lastData",
+			stationController.getLastSeismogramData(this.props.station);
+			const seismogram = stationController.seismograms.get(this.props.station);
+			observe(seismogram, "rerender", (change) => {
+				if (change.newValue > 0) {
+					this.simulateSeismogram(seismogram.seismogramData);
+				}
 			});
 		}
-
-		return () => {
-			seismogramWorker?.removeEventListener("message", handleSeismogramWorker);
-		};
 	}
 
-	
 	componentDidUpdate() {
 		const { userDefinedRange } = this.state;
 		const seismogramWorker = this.context as any as Worker | null;
-		if(userDefinedRange && seismogramWorker !== null){
+		if (userDefinedRange && seismogramWorker !== null) {
 			seismogramWorker.postMessage({
 				station: this.state.station,
 				message: "history",
