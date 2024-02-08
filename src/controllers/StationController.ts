@@ -128,6 +128,10 @@ class StationController {
 		this.seismograms.get(station)?.getLastSeismogramData(this.seismogramWorker);
 	}
 
+	getHistorySeismogramData(station: string, start: number, end: number) {
+		this.seismograms.get(station)?.getHistorySeismogramData(this.seismogramWorker, start, end);
+	}
+
 	/**
 	 * stop the seismogram worker.
 	 */

@@ -66,12 +66,25 @@ export default class Seismogram implements ISeismogram {
 		});
 	}
 
+	getHistorySeismogramData(
+		seismogramWorker: Worker,
+		start: number,
+		end: number
+	) {
+		seismogramWorker.postMessage({
+			station: this.station,
+			message: "history",
+			start_date: start,
+			end_date: end,
+		});
+	}
+
 	stopSeismogram(seismogramWorker: Worker) {
 		seismogramWorker.postMessage({
 			station: this.station,
 			message: "stop",
 		});
 
-        seismogramWorker.removeEventListener("message", this.handlerSeismogramData);
+		seismogramWorker.removeEventListener("message", this.handlerSeismogramData);
 	}
 }

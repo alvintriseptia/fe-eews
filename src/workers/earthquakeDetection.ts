@@ -30,7 +30,7 @@ const onmessage = (event: MessageEvent) => {
 		postMessage(earthquakeDetection);
 
 		setInterval(() => {
-			const station = STATIONS_DATA[Math.floor(Math.random() * 20) - 1];
+			const station = STATIONS_DATA[Math.floor(Math.random() * 18)];
 			earthquakeDetection.lat = station.latitude;
 			earthquakeDetection.long = station.longitude;
 			earthquakeDetection.detection =

@@ -172,7 +172,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 			stationController.getLastSeismogramData(this.props.station);
 			const seismogram = stationController.seismograms.get(this.props.station);
 			observe(seismogram, "rerender", (change) => {
-				if (change.newValue > 0) {
+				if (change.newValue > 0 && seismogram.seismogramData) {
 					this.simulateSeismogram(seismogram.seismogramData);
 				}
 			});
@@ -181,14 +181,13 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 	componentDidUpdate() {
 		const { userDefinedRange } = this.state;
-		const seismogramWorker = this.context as any as Worker | null;
-		if (userDefinedRange && seismogramWorker !== null) {
-			seismogramWorker.postMessage({
-				station: this.state.station,
-				message: "history",
-				start_date: new Date(userDefinedRange[0]).getTime(),
-				end_date: new Date(userDefinedRange[1]).getTime(),
-			});
+		if (userDefinedRange) {
+			const stationController = StationController.getInstance();
+			stationController.getHistorySeismogramData(
+				this.props.station,
+				new Date(userDefinedRange[0]).getTime(),
+				new Date(userDefinedRange[1]).getTime()
+			);
 		}
 	}
 
