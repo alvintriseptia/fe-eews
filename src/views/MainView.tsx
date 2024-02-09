@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import { StyleSpecification } from "maplibre-gl";
 import mapStyle from "@/assets/data/inatews_dark.json";
 import {
+	HistoryController,
 	MainController,
 	SimulationController,
 	StationController,
@@ -24,7 +25,6 @@ import {
 	Time,
 	EarthquakeRealtimeCard,
 } from "@/components/_index";
-import { NavbarProps } from "@/components/Navbar";
 import { observe } from "mobx";
 import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
 import STATIONS_DATA from "@/assets/data/stations.json";
@@ -35,13 +35,6 @@ interface Props {
 	mode: "simulation" | "realtime";
 	controller: MainController | SimulationController;
 	stationController: StationController;
-	weeklyEarthquake: IEarthquakeHistory[];
-	navbar: NavbarProps;
-	sidebarProps: {
-		latestFeltEarthquake: IEarthquakeHistory;
-		latestEarthquake: IEarthquakeHistory;
-		latestDetection: IEarthquakeDetection;
-	};
 }
 
 class MainView extends React.Component<Props> {
@@ -76,18 +69,29 @@ class MainView extends React.Component<Props> {
 		super(props);
 		this.state.controller = props.controller;
 		this.state.stationController = props.stationController;
-		this.state.weeklyEarthquake = props.weeklyEarthquake;
-		this.state.navbar = props.navbar;
-		this.state.sidebarProps = props.sidebarProps;
 	}
 
-	componentDidUpdate(prevProps: Readonly<Props>): void {
-		if (prevProps.weeklyEarthquake !== this.props.weeklyEarthquake) {
-			this.setState({ weeklyEarthquake: this.props.weeklyEarthquake });
-		}
-	}
+	async componentDidMount() {
+		document.querySelector("#loading_overlay").className = "block";
+		const detectionController = new HistoryController();
+		const weeklyEarthquake = await this.getWeeklyEarthquake();
+		const latestEarthquake =
+			(await this.state.controller.getLatestEarthquake()) as IEarthquakeHistory;
+		const latestFeltEarthquake =
+			(await this.state.controller.getLatestFeltEarthquake()) as IEarthquakeHistory;
+		const latestDetection =
+			(await detectionController.getLatestEarthquakeDetection()) as IEarthquakeDetection;
 
-	async componentDidMount(){
+		this.setState({
+			navbar: weeklyEarthquake.navbar,
+			sidebarProps: {
+				latestFeltEarthquake,
+				latestEarthquake,
+				latestDetection,
+			},
+			weeklyEarthquake: weeklyEarthquake.weeklyEarthquake,
+		});
+
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
 			id: "eews-map",
@@ -140,11 +144,45 @@ class MainView extends React.Component<Props> {
 		indexedDB.createIndexedDB().then(async () => {
 			await this.state.stationController.connectAllSeismogram(this.props.mode);
 		});
+		document.querySelector("#loading_overlay").className = "hidden";
 	}
 
 	componentWillUnmount(): void {
 		this.state.controller.disconnectEarthquakeDetection();
 		this.state.stationController.disconnectAllSeismogram();
+	}
+
+	async getWeeklyEarthquake() {
+		const weeklyEarthquake =
+			(await this.state.controller.getEarthquakeWeekly()) as IEarthquakeHistory[];
+
+		let newNavbar = {
+			totalEarthquakes: 0,
+			maximumMagnitude: 0,
+			minimumMagnitude: 100,
+		};
+		newNavbar.totalEarthquakes = weeklyEarthquake.length;
+		weeklyEarthquake.forEach((earthquake) => {
+			if (
+				newNavbar.maximumMagnitude !== undefined &&
+				Number(earthquake.magnitude) > newNavbar.maximumMagnitude
+			) {
+				newNavbar.maximumMagnitude = Number(earthquake.magnitude);
+			}
+
+			if (
+				newNavbar.minimumMagnitude !== undefined &&
+				Number(earthquake.magnitude) < newNavbar.minimumMagnitude
+			) {
+				newNavbar.minimumMagnitude = Number(earthquake.magnitude);
+			}
+		});
+		if (newNavbar.minimumMagnitude == 100) newNavbar.minimumMagnitude = 0;
+
+		return {
+			navbar: newNavbar,
+			weeklyEarthquake,
+		};
 	}
 
 	render() {
@@ -169,7 +207,8 @@ class MainView extends React.Component<Props> {
 
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&
-									this.state.earthquakeRealtimeInformation.earthquake?.time_stamp && (
+									this.state.earthquakeRealtimeInformation.earthquake
+										?.time_stamp && (
 										<EarthquakeRealtimeCard
 											{...this.state.earthquakeRealtimeInformation}
 										/>
@@ -189,7 +228,9 @@ class MainView extends React.Component<Props> {
 							value={this.state.earthquakeRealtimeInformation?.earthquake}
 						>
 							<Seismogram
-								seismogramStations={this.state.seismogramStations.map(e => e.code)}
+								seismogramStations={this.state.seismogramStations.map(
+									(e) => e.code
+								)}
 							/>
 						</EarthquakeDetectionContext.Provider>
 					</div>

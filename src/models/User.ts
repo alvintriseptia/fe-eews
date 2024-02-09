@@ -29,9 +29,7 @@ export default class User implements IUser {
 					},
 				});
 
-				if (response.status === 200) {
-					window.location.href = "/";
-				}
+				return response;
 			} else {
 				throw new Error("Terjadi kesalahan!");
 			}
@@ -50,9 +48,7 @@ export default class User implements IUser {
 				method: "POST",
 			});
 
-			if (response.status === 200) {
-				window.location.href = "/login";
-			}
+			return response;
 		} catch (error) {
 			console.error("Error signing out with Google", error);
 			throw error;

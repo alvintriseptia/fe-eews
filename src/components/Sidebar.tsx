@@ -141,7 +141,7 @@ class Sidebar extends React.Component<SidebarProps> {
     }
 
 		if (this.props.latestDetection !== prevProps.latestDetection) {
-			if(this.props.latestDetection.detection !== "warning") return;
+			if(this.props.latestDetection?.detection !== "warning") return;
 			this.setState({ latestDetection: this.props.latestDetection });
 		}
 	}

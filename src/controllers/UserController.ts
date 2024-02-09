@@ -32,7 +32,11 @@ export default class UserController {
 				return;
 			}
 
-			return await this.user.login(email, password);
+			const result = await this.user.login(email, password);
+
+			if (result.status === 200) {
+				window.location.replace("/");
+			}
 		} catch (error) {
 			// Handle login error
 			this.displayError(error?.message || "Terjadi kesalahan!");
@@ -45,7 +49,15 @@ export default class UserController {
 	 * Logs out the user.
 	 */
 	async logout() {
-		await this.user.logout();
+		try {
+			const result = await this.user.logout();
+			if (result.status === 200) {
+				window.location.replace("/login");
+			}
+		} catch (error) {
+			// Handle logout error
+			this.displayError(error?.message || "Terjadi kesalahan!");
+		}
 	}
 
 	/**
