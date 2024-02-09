@@ -1,9 +1,7 @@
 import React from "react";
 import StationView from "@/views/StationView";
-import StationController from "@/controllers/StationController";
 import Head from "next/head";
 import { NavbarProps } from "@/components/Navbar";
-import SeismogramContext from "@/stores/SeismogramContext";
 import * as indexedDB from "@/lib/indexed-db";
 
 interface Props {

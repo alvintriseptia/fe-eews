@@ -2,7 +2,6 @@ import React from "react";
 import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import dynamic from "next/dynamic";
 import { Layout, PlotRelayoutEvent } from "plotly.js";
-import SeismogramContext from "@/stores/SeismogramContext";
 import { SeismogramDataType } from "@/workers/seismogram";
 import StationController from "@/controllers/StationController";
 import { observe } from "mobx";
@@ -22,8 +21,6 @@ interface Props {
 }
 
 export default class DynamicLineChart extends React.Component<Props> {
-	static contextType = SeismogramContext;
-
 	state = {
 		station: "",
 		showTitle: true,
@@ -136,7 +133,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 				yside: "left plot",
 			},
 		} as Partial<Layout>,
-		earthquakePredictions: [] as IEarthquakeDetection[],
 		revision: 0,
 		userDefinedRange: null,
 	};

@@ -2,6 +2,7 @@ import { AnnotationsMap, action, intercept, makeObservable, observable, observe 
 import { Seismogram, Station } from "@/models/_index";
 import { IStation } from "@/entities/_index";
 import toast from "react-hot-toast";
+import STATIONS_DATA from '@/assets/data/stations.json';
 
 /**
  * The StationController class handles the logic for managing stations.
@@ -43,8 +44,7 @@ class StationController {
 		try {
 			return await this.station.fetchSavedStations();
 		} catch (error) {
-			this.displayError(error);
-			return [];
+			return STATIONS_DATA as IStation[];
 		}
 	}
 

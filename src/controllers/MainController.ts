@@ -79,18 +79,6 @@ export default class MainController {
 
 		this.affectedPWaves = [];
 		this.affectedSWaves = [];
-
-		this.earthquakeDetectionWorker = new Worker(
-			new URL("../workers/earthquakeDetection.ts", import.meta.url)
-		);
-
-		this.wavesWorker = new Worker(
-			new URL("../workers/waves.ts", import.meta.url)
-		);
-
-		this.affectedWavesWorker = new Worker(
-			new URL("../workers/affectedWaves.ts", import.meta.url)
-		);
 	}
 
 	// EXTERNAL SOURCE
@@ -120,6 +108,18 @@ export default class MainController {
 	 * Connects to the earthquake detection service.
 	 */
 	connectEarthquakeDetection(mode: string = "realtime") {
+		this.earthquakeDetectionWorker = new Worker(
+			new URL("../workers/earthquakeDetection.ts", import.meta.url)
+		);
+
+		this.wavesWorker = new Worker(
+			new URL("../workers/waves.ts", import.meta.url)
+		);
+
+		this.affectedWavesWorker = new Worker(
+			new URL("../workers/affectedWaves.ts", import.meta.url)
+		);
+		
 		this.earthquakeDetection.streamEarthquakeDetection(
 			this.earthquakeDetectionWorker,
 			mode

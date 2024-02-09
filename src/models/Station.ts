@@ -46,11 +46,20 @@ class Station implements IStation {
 	 * @returns An array of saved stations.
 	 */
 	async fetchSavedStations() {
-		const timestamp = new Date().getTime();
-		const response = await fetch(`/api/station-networks?_=${timestamp}`);
-		const data = (await response.json()) as IStation[];
+		try {
+			const timestamp = new Date().getTime();
+			const response = await fetch(`/api/station-networks?_=${timestamp}`);
+			const data = await response.json();
 
-		return data;
+			if(!data.error){
+				return data as IStation[];
+			} 
+
+			throw new Error(data.error.message)
+
+		} catch (error) {
+			throw new Error(error)
+		}
 	}
 
 	async initStations() {
@@ -84,10 +93,7 @@ class Station implements IStation {
 		}
 	}
 
-	async enableStation(
-		station: string,
-		seismograms: Map<string, Seismogram>
-	) {
+	async enableStation(station: string, seismograms: Map<string, Seismogram>) {
 		try {
 			const newSeismograms: Map<string, Seismogram> = seismograms;
 			const db_enabled_seismograms = (await indexedDB.readFromIndexedDB(
@@ -107,7 +113,7 @@ class Station implements IStation {
 
 			newSeismograms.set(station, new Seismogram(station));
 			return newSeismograms;
-		} catch (error) {			
+		} catch (error) {
 			throw new Error(error);
 		}
 	}
@@ -133,10 +139,7 @@ class Station implements IStation {
 		}
 	}
 
-	async disableStation(
-		station: string,
-		seismograms: Map<string, Seismogram>
-	) {
+	async disableStation(station: string, seismograms: Map<string, Seismogram>) {
 		try {
 			const newSeismograms: Map<string, Seismogram> = seismograms;
 			// remove from indexedDB

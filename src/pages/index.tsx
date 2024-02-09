@@ -1,10 +1,13 @@
 import React from "react";
 import MainView from "@/views/MainView";
-import { MainController, HistoryController, StationController } from "@/controllers/_index";
+import {
+	MainController,
+	HistoryController,
+	StationController,
+} from "@/controllers/_index";
 import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { NavbarProps } from "@/components/Navbar";
-import SeismogramContext from "@/stores/SeismogramContext";
 import { IEarthquakeDetection, IEarthquakeHistory } from "@/entities/_index";
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -19,7 +22,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			(await controller.getEarthquakeWeekly()) as IEarthquakeHistory[];
 		const latestDetection =
 			(await detectionController.getLatestEarthquakeDetection()) as IEarthquakeDetection;
-		
+
 		let newNavbar = {
 			totalEarthquakes: 0,
 			maximumMagnitude: 0,
@@ -43,14 +46,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
 			}
 		});
 
-		if (newNavbar.minimumMagnitude === 100) newNavbar.minimumMagnitude = 0;
+		if (newNavbar.minimumMagnitude == 100) newNavbar.minimumMagnitude = 0;
 
 		const props = {
 			navbar: newNavbar,
 			sidebarProps: {
 				latestFeltEarthquake,
 				latestEarthquake,
-				latestDetection
+				latestDetection,
 			},
 			weeklyEarthquake,
 		};
@@ -99,50 +102,23 @@ interface Props {
 }
 
 export default class Main extends React.Component<Props> {
-	state = {
-		seismogramWorker: null as Worker | null,
-		stationController: {} as StationController,
-	};
-
-	constructor(props: Props) {
-		super(props);
-		this.state = {
-			seismogramWorker: null,
-			stationController: {} as StationController,
-		};
-	}
-
-	componentDidMount() {
-		const seismogramWorker = new Worker(
-			new URL("../workers/seismogram.ts", import.meta.url)
-		);
-		this.setState({ seismogramWorker, stationController: new StationController(seismogramWorker) });
-	}
-
-	componentWillUnmount(): void {
-		if (this.state.seismogramWorker !== null) {
-			this.state.seismogramWorker.terminate();
-		}
-	}
-
 	render() {
-		if(!this.state.seismogramWorker) return (<></>)
+		if(typeof window === "undefined") return (<></>);
 		const controller = new MainController();
+		const stationController = StationController.getInstance();
 		return (
 			<>
 				<Head>
 					<title>TEWS</title>
 				</Head>
-				<SeismogramContext.Provider value={this.state.seismogramWorker}>
-					<MainView
-						mode="realtime"
-						controller={controller}
-						stationController={this.state.stationController}
-						weeklyEarthquake={this.props.weeklyEarthquake}
-						navbar={this.props.navbar}
-						sidebarProps={this.props.sidebarProps}
-					/>
-				</SeismogramContext.Provider>
+				<MainView
+					mode="realtime"
+					controller={controller}
+					stationController={stationController}
+					weeklyEarthquake={this.props.weeklyEarthquake}
+					navbar={this.props.navbar}
+					sidebarProps={this.props.sidebarProps}
+				/>
 			</>
 		);
 	}

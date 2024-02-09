@@ -14,7 +14,7 @@ const onmessage = (event: MessageEvent) => {
 		const typeDetection = ["warning", "warning", "warning"];
 		const earthquakeDetection: IEarthquakeDetection = {
 			title: "Terdeteksi Gelombang P",
-			description: "Harap perhatian, muncul deteksi gelombang P di stasiun GENI",
+			description: "Harap perhatian, muncul deteksi gelombang P di stasiun ",
 			time_stamp: Date.now(),
 			depth: 5,
 			lat: -2.5927,
@@ -31,6 +31,9 @@ const onmessage = (event: MessageEvent) => {
 
 		setInterval(() => {
 			const station = STATIONS_DATA[Math.floor(Math.random() * 18)];
+			earthquakeDetection.title = "Terdeteksi Gelombang P";
+			earthquakeDetection.description =
+				"Harap perhatian, muncul deteksi gelombang P di stasiun " + station.code;
 			earthquakeDetection.lat = station.latitude;
 			earthquakeDetection.long = station.longitude;
 			earthquakeDetection.detection =

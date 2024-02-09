@@ -77,18 +77,6 @@ export default class SimulationController {
 			"",
 			1000
 		);
-		
-		this.earthquakeDetectionWorker = new Worker(
-			new URL("../workers/earthquakeDetection.ts", import.meta.url)
-		);
-
-		this.wavesWorker = new Worker(
-			new URL("../workers/waves.ts", import.meta.url)
-		);
-		this.affectedWavesWorker = new Worker(
-			new URL("../workers/affectedWaves.ts", import.meta.url)
-		);
-
 		this.affectedPWaves = [];
 		this.affectedSWaves = [];
 	}
@@ -120,8 +108,20 @@ export default class SimulationController {
 	 * Connects to the earthquake detection service.
 	 */
 	connectEarthquakeDetection() {
+		this.earthquakeDetectionWorker = new Worker(
+			new URL("../workers/earthquakeDetection.ts", import.meta.url)
+		);
+
+		this.wavesWorker = new Worker(
+			new URL("../workers/waves.ts", import.meta.url)
+		);
+		this.affectedWavesWorker = new Worker(
+			new URL("../workers/affectedWaves.ts", import.meta.url)
+		);
+
 		this.earthquakeDetection.streamEarthquakeDetection(
-			this.earthquakeDetectionWorker
+			this.earthquakeDetectionWorker,
+			"simulation"
 		);
 
 		observe(this.earthquakeDetection, "time_stamp", (change) => {
