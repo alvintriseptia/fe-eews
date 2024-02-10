@@ -3,16 +3,16 @@ import { Layout } from "plotly.js";
 import React, { Component } from "react";
 
 const Plot = dynamic(
-  () => import("react-plotly.js").then((mod) => mod.default),
-  {
-    ssr: false,
-  }
+	() => import("react-plotly.js").then((mod) => mod.default),
+	{
+		ssr: false,
+	}
 );
 
 export type WaveChannel = {
-  x: number[];
-  y: number[];
-  name: string;
+	x: number[];
+	y: number[];
+	name: string;
 };
 
 export interface DetectionRecapContentProps {
@@ -36,12 +36,15 @@ class DetectionRecapContent extends Component<DetectionRecapContentProps> {
 		e_channel: {} as WaveChannel,
 		pwaves: [] as WaveChannel[],
 		revision: 0,
-		layout:{
+		layout: {
 			datarevision: 0,
 			xaxis: {
 				type: "date",
 				color: "#fff",
-				range: [this.props.z_channel.x[0], this.props.z_channel.x[this.props.z_channel.x.length - 1]],
+				range: [
+					this.props.z_channel.x[0],
+					this.props.z_channel.x[this.props.z_channel.x.length - 1],
+				],
 			},
 			yaxis: {
 				type: "linear",
@@ -97,7 +100,7 @@ class DetectionRecapContent extends Component<DetectionRecapContentProps> {
 				yside: "left plot",
 			},
 			showlegend: false,
-		} as Partial<Layout>
+		} as Partial<Layout>,
 	};
 
 	constructor(props: DetectionRecapContentProps) {
@@ -122,81 +125,98 @@ class DetectionRecapContent extends Component<DetectionRecapContentProps> {
 			layout.xaxis = {
 				type: "date",
 				color: "#fff",
-				range: [this.props.z_channel.x[0], this.props.z_channel.x[this.props.z_channel.x.length - 1]],
+				range: [
+					this.props.z_channel.x[0],
+					this.props.z_channel.x[this.props.z_channel.x.length - 1],
+				],
 			};
 		}
 	}
 
-  render() {
-    let date = new Date(this.props.time_stamp);
-    const time =
-      date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString("id-ID");
+	displayError() {
+		return (
+			<div className="flex justify-center items-center h-full">
+				<h5 className="text-sm text-gray-500">
+					Rekaman data seismik tidak tersedia
+				</h5>
+			</div>
+		);
+	}
 
-    return (
-      <section className="flex flex-col p-4 border-b">
-        <div className="flex justify-between mb-4 relative z-10">
-          <div>
-            <h6 className="text-tews-boulder text-xs">Lokasi</h6>
-            <p className="text-white max-width-[200px]">
-              {this.props.location}
-            </p>
-          </div>
+	render() {
+		let date = new Date(this.props.time_stamp);
+		const time =
+			date.toLocaleDateString("id-ID") + " " + date.toLocaleTimeString("id-ID");
 
-          <div>
-            <h6 className="text-tews-boulder text-xs">Waktu</h6>
-            <p className="text-white">{time}</p>
-          </div>
+		return (
+			<section className="flex flex-col p-4 border-b">
+				<div className="flex justify-between mb-4 relative z-10">
+					<div>
+						<h6 className="text-tews-boulder text-xs">Lokasi</h6>
+						<p className="text-white max-width-[200px]">
+							{this.props.location}
+						</p>
+					</div>
 
-          <div>
-            <h6 className="text-tews-boulder text-xs">Magnitude</h6>
-            <p className="text-white">
-              {this.props.magnitude?.toFixed(2) || ""}
-            </p>
-          </div>
+					<div>
+						<h6 className="text-tews-boulder text-xs">Waktu</h6>
+						<p className="text-white">{time}</p>
+					</div>
 
-          <div>
-            <h6 className="text-tews-boulder text-xs">Kedalaman</h6>
-            <p className="text-white">{this.props.depth?.toFixed(2) || ""}Km</p>
-          </div>
+					<div>
+						<h6 className="text-tews-boulder text-xs">Magnitude</h6>
+						<p className="text-white">
+							{this.props.magnitude?.toFixed(2) || ""}
+						</p>
+					</div>
 
-          <div>
-            <h6 className="text-tews-boulder text-xs">Latitude</h6>
-            <p className="text-white">
-              {this.props.latitude?.toFixed(2) || ""}
-            </p>
-          </div>
+					<div>
+						<h6 className="text-tews-boulder text-xs">Kedalaman</h6>
+						<p className="text-white">{this.props.depth?.toFixed(2) || ""}Km</p>
+					</div>
 
-          <div>
-            <h6 className="text-tews-boulder text-xs">Longitude</h6>
-            <p className="text-white">
-              {this.props.longitude?.toFixed(2) || ""}
-            </p>
-          </div>
-          <div>
-            <h6 className="text-tews-boulder text-xs">Stasiun</h6>
-            <p className="text-white">{this.props.station}</p>
-          </div>
-        </div>
+					<div>
+						<h6 className="text-tews-boulder text-xs">Latitude</h6>
+						<p className="text-white">
+							{this.props.latitude?.toFixed(2) || ""}
+						</p>
+					</div>
 
-        <div className="w-full relative -top-24 right-0">
-          <Plot
-            data={[
-              this.state.z_channel,
-              this.state.n_channel,
-              this.state.e_channel,
-              ...this.state.pwaves,
-            ]}
-            layout={this.state.layout}
-            style={{ width: "100%", height: "100%" }}
-            revision={this.state.revision}
-            config={{
-              displayModeBar: false,
-            }}
-          />
-        </div>
-      </section>
-    );
-  }
+					<div>
+						<h6 className="text-tews-boulder text-xs">Longitude</h6>
+						<p className="text-white">
+							{this.props.longitude?.toFixed(2) || ""}
+						</p>
+					</div>
+					<div>
+						<h6 className="text-tews-boulder text-xs">Stasiun</h6>
+						<p className="text-white">{this.props.station}</p>
+					</div>
+				</div>
+
+				<div className="w-full relative -top-24 right-0">
+					{this.state.z_channel.x.length === 0 ? (
+						this.displayError()
+					) : (
+						<Plot
+							data={[
+								this.state.z_channel,
+								this.state.n_channel,
+								this.state.e_channel,
+								...this.state.pwaves,
+							]}
+							layout={this.state.layout}
+							style={{ width: "100%", height: "100%" }}
+							revision={this.state.revision}
+							config={{
+								displayModeBar: false,
+							}}
+						/>
+					)}
+				</div>
+			</section>
+		);
+	}
 }
 
 export default DetectionRecapContent;

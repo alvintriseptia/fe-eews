@@ -40,18 +40,15 @@ class StationView extends React.Component {
 	constructor(props) {
 		super(props);
 		// bind
-		this.disableSeismogram = this.disableSeismogram.bind(this);
-		this.enableSeismogram = this.enableSeismogram.bind(this);
-		this.enableAllSeismogram = this.enableAllSeismogram.bind(this);
-		
+		this.disableStation = this.disableStation.bind(this);
+		this.enableStation = this.enableStation.bind(this);
+		this.enableAllStation = this.enableAllStation.bind(this);
+
 		this.state.controller = StationController.getInstance();
 		this.state.mainController = new MainController();
 	}
 
-	componentDidMount(): void {
-		this.state.controller.connectAllSeismogram("simulation");
-		this.state.mainController.connectEarthquakeDetection();
-
+	async componentDidMount() {
 		observe(this.state.mainController, "rerender", (change) => {
 			if (change.newValue) {
 				this.setState({
@@ -89,6 +86,11 @@ class StationView extends React.Component {
 				});
 			}
 		});
+
+		await this.state.controller.initStations();
+		await this.state.controller.connectAllSeismogram("simulation");
+
+		this.state.mainController.connectEarthquakeDetection();
 	}
 
 	componentWillUnmount(): void {
@@ -96,19 +98,19 @@ class StationView extends React.Component {
 		this.state.mainController.disconnectEarthquakeDetection();
 	}
 
-	async disableSeismogram(station: string) {
+	async disableStation(station: string) {
 		await this.state.controller.disableStation(station);
 		this.state.controller.disconnectSeismogram(station);
 		this.setState({ dialogOpen: false });
 	}
 
-	async enableSeismogram(station: string) {
+	async enableStation(station: string) {
 		await this.state.controller.enableStation(station);
 		this.state.controller.connectSeismogram(station, "realtime");
 		this.setState({ dialogOpen: false });
 	}
 
-	async enableAllSeismogram() {
+	async enableAllStation() {
 		await this.state.controller.enableAllStations();
 		this.state.controller.connectAllSeismogram("realtime");
 		this.setState({ dialogOpen: false });
@@ -136,7 +138,7 @@ class StationView extends React.Component {
 					title="Nonaktifkan Stasiun"
 					message={`Apakah anda yakin ingin menonaktifkan stasiun ${this.state.selectedStation}?`}
 					onCancel={() => this.setState({ dialogOpen: false })}
-					onConfirm={() => this.disableSeismogram(this.state.selectedStation)}
+					onConfirm={() => this.disableStation(this.state.selectedStation)}
 				/>
 
 				{/* CONTENT */}
@@ -228,7 +230,7 @@ class StationView extends React.Component {
 											{this.state.disabledSeismogramStations.length > 0 && (
 												<button
 													className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded ml-2 text-sm"
-													onClick={this.enableAllSeismogram}
+													onClick={this.enableAllStation}
 												>
 													Aktifkan semua
 												</button>
@@ -256,7 +258,7 @@ class StationView extends React.Component {
 											<td className="border p-2">
 												<button
 													className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-													onClick={() => this.enableSeismogram(station.code)}
+													onClick={() => this.enableStation(station.code)}
 												>
 													Aktifkan
 												</button>

@@ -94,7 +94,7 @@ class MainView extends React.Component<Props> {
 
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
-			id: "eews-map",
+			id: "tews-map",
 			mapStyle: style,
 			zoom: 5,
 			initialViewState: {
@@ -203,12 +203,12 @@ class MainView extends React.Component<Props> {
 
 					<div className="flex flex-col w-full">
 						<div className="relative h-full">
-							<div className="w-full h-full" id="eews-map"></div>
+							<div className="w-full h-full" id="tews-map"></div>
 
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&
 									this.state.earthquakeRealtimeInformation.earthquake
-										?.time_stamp && (
+										?.title && (
 										<EarthquakeRealtimeCard
 											{...this.state.earthquakeRealtimeInformation}
 										/>

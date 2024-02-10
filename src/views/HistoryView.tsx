@@ -9,12 +9,12 @@ import {
 	DetectionRecapContent,
 } from "@/components/_index";
 import { DetectionRecapContentProps as DetectionRecapContentProps } from "@/components/DetectionRecapContent";
-import RenderIfVisible from "react-render-if-visible";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import mapStyle from "@/assets/data/inatews_dark.json";
+import { StyleSpecification } from "maplibre-gl";
 
 interface Props {
 	controller: HistoryController;
-	historyDetections: IEarthquakeDetection[];
 }
 
 class HistoryView extends React.Component<Props> {
@@ -46,23 +46,38 @@ class HistoryView extends React.Component<Props> {
 	constructor(props: Props) {
 		super(props);
 		this.state.controller = props.controller;
-		this.state.historyDetections = props.historyDetections;
-
 		this.handleFilter.bind(this);
 		this.detailEarthquakeDetection.bind(this);
 		this.loadMore.bind(this);
 		this.handleScroll.bind(this);
 	}
 
-	componentDidMount(): void {
-		if (!this.state.controller.addEarthquakeDetectionLocations) return;
-		this.state.controller
-			.addEarthquakeDetectionLocations(this.state.historyDetections)
-			.then((result) => {
-				if (result) {
-					this.setState({ historyDetection: [...result] });
-				}
-			});
+	async componentDidMount() {
+		const style = mapStyle as StyleSpecification;
+		this.state.controller.showMap({
+			id: "tews-history-map",
+			mapStyle: style,
+			zoom: 5,
+			initialViewState: {
+				latitude: -2.600029,
+				longitude: 118.015776,
+			},
+		});
+
+		const start_date = new Date().getTime() - 1000 * 60 * 60 * 24 * 7; // 7 days ago
+		const end_date = new Date().getTime();
+		const response = await this.state.controller.getHistoryEarthquakeDetection(
+			start_date,
+			end_date
+		);
+
+		this.setState({
+			historyDetections: response.data,
+			totalDetection: response.total,
+			currentFilterStartDate: start_date,
+			currentFilterEndDate: end_date,
+			hasMore: response.total > 20 ? true : false,
+		});
 	}
 
 	handleScroll() {
@@ -78,14 +93,10 @@ class HistoryView extends React.Component<Props> {
 
 	async handleFilter(start_date: number, end_date: number) {
 		const newHistoryDetection =
-			await this.state.controller.filterHistoryEarthquakeDetection(
+			await this.state.controller.getHistoryEarthquakeDetection(
 				start_date,
 				end_date
 			);
-
-		this.state.controller.addEarthquakeDetectionLocations(
-			newHistoryDetection.data
-		);
 
 		this.setState({
 			historyDetections: [...newHistoryDetection.data],
@@ -211,17 +222,13 @@ class HistoryView extends React.Component<Props> {
 			return;
 		} else {
 			const newHistoryDetection =
-				await this.state.controller.filterHistoryEarthquakeDetection(
+				await this.state.controller.getHistoryEarthquakeDetection(
 					newCurrentDate.getTime() + 10,
 					this.state.currentFilterEndDate
 				);
 			if (newHistoryDetection.data.length === 0) {
 				this.setState({ hasMore: false });
 			} else {
-				this.state.controller.addEarthquakeDetectionLocations([
-					...this.state.historyDetections,
-					...newHistoryDetection.data,
-				]);
 				this.setState({
 					historyDetections: [
 						...this.state.historyDetections,
@@ -314,9 +321,16 @@ class HistoryView extends React.Component<Props> {
 						</div>
 					</div>
 
-					<div className="col-span-7">
-						<div id="tews-history-map" className={`w-full h-[48%]`}></div>
-						<div className="w-full">
+					<div className="col-span-7 relative">
+						<div id="tews-history-map" className={`w-full h-full`}></div>
+						<div className={`w-full absolute bottom-0 right-0 z-[9999] h-[450px] bg-tews-cinder transition-all duration-200 ease-in-out
+							${
+								this.state.recapDetection &&
+								this.state.recapDetection.station
+									? "translate-y-0"
+									: "translate-y-full"
+							}
+						`}>
 							{this.state.recapDetection &&
 								this.state.recapDetection.station && (
 									<DetectionRecapContent {...this.state.recapDetection} />

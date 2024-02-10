@@ -119,13 +119,14 @@ export default class MainController {
 		this.affectedWavesWorker = new Worker(
 			new URL("../workers/affectedWaves.ts", import.meta.url)
 		);
-		
+
 		this.earthquakeDetection.streamEarthquakeDetection(
 			this.earthquakeDetectionWorker,
 			mode
 		);
 
 		observe(this.earthquakeDetection, "time_stamp", (change) => {
+			this.clearEarthquakeDetection(false);
 			this.displayEarthquakeDetection(this.earthquakeDetection);
 		});
 	}
@@ -178,9 +179,6 @@ export default class MainController {
 		this.earthquakeDetectionInterval = setInterval(() => {
 			this.countdown--;
 			if (this.countdown === 0) {
-				this.notificationEarthquake.setMessage(`
-						Harap perhatian, telah terjadi gempa bumi di wilayah ${address}. Gelombang ini dideteksi oleh stasiun ${stasiun.code}. Harap segera lakukan tindakan mitigasi, terima kasih`);
-				this.notificationEarthquake.playNotification();
 				const earthquake = {
 					title: "Terjadi Gempa Bumi",
 					detection: "earthquake",
@@ -194,6 +192,11 @@ export default class MainController {
 					earthquake.detection,
 					earthquake.countdown
 				);
+
+				this.notificationEarthquake.setMessage(`
+						Harap perhatian, telah terjadi gempa bumi di wilayah ${address}. Gelombang ini dideteksi oleh stasiun ${stasiun.code}. Harap segera lakukan tindakan mitigasi, terima kasih`);
+				this.notificationEarthquake.playNotification();
+
 				this.rerender++;
 				clearInterval(this.earthquakeDetectionInterval);
 			}
@@ -267,9 +270,9 @@ export default class MainController {
 			clearTimeout(this.clearTimeout);
 			clearInterval(this.earthquakeDetectionInterval);
 		} else {
-			this.stopSimulation();
 			this.map.clearWaves();
 			this.clearTimeout = setTimeout(() => {
+				this.earthquakeDetection.setStatusDetection("", "", "", 0);
 				this.map.clearEarthquakeDetection();
 
 				if (this.affectedPWaves.length > 0) {

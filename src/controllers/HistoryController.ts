@@ -1,8 +1,6 @@
 import { EarthquakeDetection, Map } from "@/models/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
-import mapStyle from "@/assets/data/inatews_dark.json";
-import { StyleSpecification } from "maplibre-gl";
-import { IEarthquakeDetection } from "@/entities/_index";
+import { IEarthquakeDetection, IMap } from "@/entities/_index";
 import toast from "react-hot-toast";
 import { CoordinateType } from "@/types/_index";
 
@@ -17,62 +15,16 @@ interface IEarthquakeDetectionResponse {
 export default class HistoryController {
 	private earthquakeDetection = new EarthquakeDetection();
 	private map = new Map();
-	private style = mapStyle as StyleSpecification;
 
 	constructor() {
 		makeObservable(this, {
 			map: observable,
 			getHistoryEarthquakeDetection: action,
 			getLatestEarthquakeDetection: action,
-			addEarthquakeDetectionLocations: action,
-			filterHistoryEarthquakeDetection: action,
 			exportHistoryEarthquakeDetection: action,
 			getDetailEarthquakeDetection: action,
 			displayError: action,
 		} as AnnotationsMap<this, any>);
-	}
-
-	/**
-	 * Retrieves the history of earthquake detections.
-	 */
-	async getHistoryEarthquakeDetection(start_date: number) {
-		try {
-			const end_date = new Date().getTime();
-			const response =
-				await this.earthquakeDetection.fetchHistoryEarthquakeDetection(
-					start_date,
-					end_date
-				);
-
-			const earthquakeDetections =
-				response as unknown as IEarthquakeDetectionResponse | null;
-
-			if (earthquakeDetections) {
-				// get addresses
-				for (const detection of earthquakeDetections.data) {
-					const address = await this.map.getAreaName({
-						latitude: detection.lat,
-						longitude: detection.long,
-					});
-					detection.location = address;
-				}
-
-				return {
-					data: earthquakeDetections.data,
-					total: earthquakeDetections.total,
-				};
-			} else {
-				return {
-					data: [],
-					total: 0,
-				};
-			}
-		} catch (error) {
-			return {
-				data: [],
-				total: 0,
-			};
-		}
 	}
 
 	async getLatestEarthquakeDetection() {
@@ -92,7 +44,10 @@ export default class HistoryController {
 		}
 	}
 
-	async filterHistoryEarthquakeDetection(start_date: number, end_date: number) {
+	/**
+	 * Retrieves the history of earthquake detections.
+	 */
+	async getHistoryEarthquakeDetection(start_date: number, end_date: number) {
 		try {
 			document.querySelector("#loading_overlay").className = "block";
 
@@ -106,6 +61,7 @@ export default class HistoryController {
 				response as unknown as IEarthquakeDetectionResponse | null;
 			if (earthquakeDetections) {
 				// get addresses
+				this.map.addEarthquakeDetectionLocations(earthquakeDetections.data);
 				for (const detection of Object.values(earthquakeDetections.data)) {
 					const address = await this.map.getAreaName({
 						latitude: detection.lat,
@@ -132,42 +88,6 @@ export default class HistoryController {
 		} finally {
 			document.querySelector("#loading_overlay").className = "hidden";
 		}
-	}
-
-	async addEarthquakeDetectionLocations(detections: IEarthquakeDetection[]) {
-		document.querySelector("#loading_overlay").className = "block";
-		this.map.initMap({
-			id: "tews-history-map",
-			mapStyle: this.style,
-			zoom: 5,
-			initialViewState: {
-				latitude: -2.600029,
-				longitude: 118.015776,
-			},
-		});
-
-		if (detections.length) {
-			if (!detections[0].location) {
-				let result = [] as IEarthquakeDetection[];
-
-				// for (const detection of detections) {
-				// 	const address = await this.map.getAreaName({
-				// 		latitude: detection.lat,
-				// 		longitude: detection.long,
-				// 	});
-				// 	detection.location = address;
-				// 	result.push(detection);
-				// }
-				document.querySelector("#loading_overlay").className = "hidden";
-
-				this.map.addEarthquakeDetectionLocations(detections);
-				return detections;
-			}
-
-			this.map.addEarthquakeDetectionLocations(detections);
-		}
-
-		document.querySelector("#loading_overlay").className = "hidden";
 	}
 
 	/**
@@ -222,6 +142,13 @@ export default class HistoryController {
 		} finally {
 			document.querySelector("#loading_overlay").className = "hidden";
 		}
+	}
+
+	/**
+	 * Displays the map.
+	 */
+	showMap(map: IMap) {
+		this.map.initMap(map);
 	}
 
 	/**
