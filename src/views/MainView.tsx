@@ -29,7 +29,6 @@ import { observe } from "mobx";
 import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
-import * as indexedDB from "@/lib/indexed-db";
 
 interface Props {
 	mode: "simulation" | "realtime";
@@ -141,9 +140,7 @@ class MainView extends React.Component<Props> {
 			}
 		});
 
-		indexedDB.createIndexedDB().then(async () => {
-			await this.state.stationController.connectAllSeismogram(this.props.mode);
-		});
+		await this.state.stationController.connectAllSeismogram(this.props.mode);
 		document.querySelector("#loading_overlay").className = "hidden";
 	}
 

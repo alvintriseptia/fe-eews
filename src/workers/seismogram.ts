@@ -2,7 +2,7 @@ import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
 import { pWavesData } from "./earthquakeDetection";
 import { socket } from "./_index";
-import * as indexedDB from "@/lib/indexed-db";
+import IndexedDB from "@/lib/IndexedDB";
 
 const stations = STATIONS_DATA;
 const seismogramSockets = {
@@ -78,22 +78,10 @@ const onmessage = async (event: MessageEvent) => {
 	const { station, message, mode, start_date, end_date } = event.data;
 	const stationData = stations.find((s) => s.code === station);
 	if (mode === "simulation") {
-		if (indexedDB.db == null) {
-			indexedDB.openIndexedDB().then(() => {
-				simulateStationSeismogram(station);
-			});
-		} else {
-			simulateStationSeismogram(station);
-		}
+		simulateStationSeismogram(station);
 	} else {
 		if (stationData && message === "stream") {
-			if (indexedDB.db == null) {
-				indexedDB.openIndexedDB().then(() => {
-					streamStationSeismogram(station);
-				});
-			} else {
-				streamStationSeismogram(station);
-			}
+			streamStationSeismogram(station);
 		} else if (stationData && message === "stop") {
 			stopStationSeismogram(stationData.code);
 		} else if (stationData && message === "lastData") {
@@ -130,7 +118,7 @@ const onmessage = async (event: MessageEvent) => {
 					pWaves: [],
 				};
 
-				const tempDataFromIndexedDB = await indexedDB.readFromIndexedDB(
+				const tempDataFromIndexedDB = await IndexedDB.read(
 					"seismogramTempData",
 					station
 				);
@@ -152,7 +140,7 @@ const onmessage = async (event: MessageEvent) => {
 				}
 
 				// save data to indexedDB
-				await indexedDB.writeToIndexedDB({
+				await IndexedDB.write({
 					objectStore: "seismogramTempData",
 					keyPath: "station",
 					key: station,
@@ -162,7 +150,7 @@ const onmessage = async (event: MessageEvent) => {
 		);
 
 		seismogramInterval[station] = setInterval(async () => {
-			const tempData = await indexedDB.readFromIndexedDB(
+			const tempData = await IndexedDB.read(
 				"seismogramTempData",
 				station
 			);
@@ -297,7 +285,7 @@ const onmessage = async (event: MessageEvent) => {
 				}
 
 				seismogramData.set(station, data);
-				await indexedDB.writeToIndexedDB({
+				await IndexedDB.write({
 					objectStore: "seismogramTempData",
 					keyPath: "station",
 					key: station,

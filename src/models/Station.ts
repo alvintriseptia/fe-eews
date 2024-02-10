@@ -1,7 +1,7 @@
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { IStation } from "@/entities/_index";
-import * as indexedDB from "@/lib/indexed-db";
 import Seismogram from "./Seismogram";
+import IndexedDB from "@/lib/IndexedDB";
 
 const stations = STATIONS_DATA as IStation[];
 
@@ -65,7 +65,7 @@ class Station implements IStation {
 	async initStations() {
 		try {
 			const newSeismograms: Map<string, Seismogram> = new Map([]);
-			const enabled_seismograms = (await indexedDB.readFromIndexedDB(
+			const enabled_seismograms = (await IndexedDB.read(
 				"seismograms",
 				"enabled_seismograms"
 			)) as string[] | null;
@@ -73,7 +73,7 @@ class Station implements IStation {
 			// if both enabled_seismograms and disabled_seismograms are null,
 			// then save the default stations to indexedDB enabled_seismograms
 			if (!enabled_seismograms) {
-				indexedDB.writeToIndexedDB({
+				await IndexedDB.write({
 					objectStore: "seismograms",
 					keyPath: "type",
 					key: "enabled_seismograms",
@@ -96,7 +96,7 @@ class Station implements IStation {
 	async enableStation(station: string, seismograms: Map<string, Seismogram>) {
 		try {
 			const newSeismograms: Map<string, Seismogram> = seismograms;
-			const db_enabled_seismograms = (await indexedDB.readFromIndexedDB(
+			const db_enabled_seismograms = (await IndexedDB.read(
 				"seismograms",
 				"enabled_seismograms"
 			)) as string[] | null;
@@ -104,7 +104,7 @@ class Station implements IStation {
 			const current_enabled_seismograms = db_enabled_seismograms || [];
 
 			// add to indexedDB
-			await indexedDB.writeToIndexedDB({
+			await IndexedDB.write({
 				objectStore: "seismograms",
 				keyPath: "type",
 				key: "enabled_seismograms",
@@ -122,7 +122,7 @@ class Station implements IStation {
 		try {
 			const newSeismograms: Map<string, Seismogram> = new Map([]);
 			// add to indexedDB
-			await indexedDB.writeToIndexedDB({
+			await IndexedDB.write({
 				objectStore: "seismograms",
 				keyPath: "type",
 				key: "enabled_seismograms",
@@ -143,7 +143,7 @@ class Station implements IStation {
 		try {
 			const newSeismograms: Map<string, Seismogram> = seismograms;
 			// remove from indexedDB
-			await indexedDB.writeToIndexedDB({
+			await IndexedDB.write({
 				objectStore: "seismograms",
 				keyPath: "type",
 				key: "enabled_seismograms",
