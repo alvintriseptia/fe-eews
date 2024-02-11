@@ -45,7 +45,7 @@ const onmessage = (event: MessageEvent) => {
 			postMessage(earthquakeDetection);
 		}, 30000);
 	} else {
-		socket.on("detection-data-all", (message: any) => {
+		socket.on("prediction-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip
 			const date = new Date(message.time_stamp);
 			// timezone in local
