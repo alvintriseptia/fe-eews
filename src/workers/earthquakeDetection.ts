@@ -22,10 +22,10 @@ const onmessage = (event: MessageEvent) => {
 			mag: 2,
 			detection: typeDetection[Math.floor(Math.random() * 3)],
 			countdown: 10,
-			station: "GENI",
+			station: "BBJI",
 		};
 
-		addPWave("GENI", Date.now());
+		addPWave("BBJI", Date.now());
 
 		postMessage(earthquakeDetection);
 
@@ -43,7 +43,7 @@ const onmessage = (event: MessageEvent) => {
 			addPWave(station.code, Date.now());
 
 			postMessage(earthquakeDetection);
-		}, 30000);
+		}, 60000);
 	} else {
 		socket.on("prediction-data-all", (message: any) => {
 			// check timestamp, jika lebih dari 5 menit, maka diskip

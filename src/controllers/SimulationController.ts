@@ -170,9 +170,8 @@ export default class SimulationController {
 		this.nearestRegencies.sort((a, b) => a.distance! - b.distance!);
 
 		// EARTHQUAKE PREDICTION COUNTDOWN
-		this.countdown = 10;
+		this.countdown = this.earthquakeDetection.countdown;
 		this.earthquakeDetection.location = address;
-		this.earthquakeDetection.countdown = this.countdown;
 		this.rerender++;
 
 		this.earthquakeDetectionInterval = setInterval(() => {

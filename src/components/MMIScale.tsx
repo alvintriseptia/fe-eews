@@ -1,18 +1,7 @@
 import React from "react";
 
 class MMIScale extends React.Component {
-	mmiScales = [
-		"I",
-		"II",
-		"III",
-		"IV",
-		"V",
-		"VI",
-		"VII",
-		"VIII",
-		"IX",
-		"X",
-	];
+	mmiScales = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X+"];
 
 	mmiDestructions = ["Lemah", "Kuat", "Merusak"];
 
@@ -36,7 +25,7 @@ class MMIScale extends React.Component {
 				return "bg-tews-mmi-VIII";
 			case "IX":
 				return "bg-tews-mmi-IX";
-			case "X":
+			case "X+":
 				return "bg-tews-mmi-X";
 		}
 	}
@@ -44,7 +33,12 @@ class MMIScale extends React.Component {
 	render() {
 		return (
 			<div className="bg-white/40 rounded-lg p-2 text-white">
-				<h5 className="font-semibold text-xs mb-2">Skala MMI</h5>
+				<div className="flex justify-between gap-x-1 mb-2 items-center">
+					<a href="https://www.bmkg.go.id/gempabumi/skala-mmi.bmkg" target="_blank" rel="noreferrer">
+						<small className="text-xs italic text-blue-100">Pelajari lebih lanjut</small>
+					</a>
+					<h5 className="font-semibold text-xs">Skala MMI</h5>
+				</div>
 
 				<div className="flex">
 					{this.mmiScales.map((scale, index) => (

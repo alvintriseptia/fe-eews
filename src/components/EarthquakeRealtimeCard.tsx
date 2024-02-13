@@ -17,37 +17,17 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 
 	constructor(props: EarthquakeRealtimeProps) {
 		super(props);
-
-		const { formattedDate, borderColor, backgroundColor } =
-			this.setFormattedDateAndColors(props.earthquake);
 		this.state = {
 			earthquake: props.earthquake,
 			countdown: props.earthquake.countdown as number,
-			formattedDate: formattedDate,
-			borderColor: borderColor,
-			backgroundColor: backgroundColor,
+			formattedDate: this.getFormattedDate(props.earthquake),
+			borderColor: this.getBorderColor(props.earthquake),
+			backgroundColor: this.getBackgroundColor(props.earthquake),
 			intervalId: 0,
 		};
 	}
 
-	setFormattedDateAndColors(earthquake: IEarthquakeDetection) {
-		let borderColor = "border-tews-mmi-II";
-		let backgroundColor = "bg-tews-mmi-II";
-		switch (earthquake.detection.toLocaleLowerCase()) {
-			case "warning":
-				borderColor = "border-tews-swamp-green";
-				backgroundColor = "bg-tews-swamp-green";
-				break;
-			case "earthquake":
-				borderColor = "border-tews-mmi-V";
-				backgroundColor = "bg-tews-mmi-V";
-				break;
-			case "cancelled":
-				borderColor = "border-tews-mmi-X";
-				backgroundColor = "bg-tews-mmi-X";
-				break;
-		}
-
+	getFormattedDate(earthquake: IEarthquakeDetection) {
 		const date = new Date(earthquake.time_stamp);
 		let newTime = "";
 		if (date !== undefined) {
@@ -66,12 +46,39 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 				newTime += " WIT";
 			}
 		}
+		return newTime;
+	}
 
-		return {
-			formattedDate: newTime,
-			borderColor: borderColor,
-			backgroundColor: backgroundColor,
-		};
+	getBorderColor(earthquake: IEarthquakeDetection) {
+		let borderColor = "border-tews-mmi-II";
+		switch (earthquake.detection.toLocaleLowerCase()) {
+			case "warning":
+				borderColor = "border-tews-swamp-green";
+				break;
+			case "earthquake":
+				borderColor = "border-tews-mmi-V";
+				break;
+			case "cancelled":
+				borderColor = "border-tews-mmi-X";
+				break;
+		}
+		return borderColor;
+	}
+
+	getBackgroundColor(earthquake: IEarthquakeDetection) {
+		let backgroundColor = "bg-tews-mmi-II";
+		switch (earthquake.detection.toLocaleLowerCase()) {
+			case "warning":
+				backgroundColor = "bg-tews-swamp-green";
+				break;
+			case "earthquake":
+				backgroundColor = "bg-tews-mmi-V";
+				break;
+			case "cancelled":
+				backgroundColor = "bg-tews-mmi-X";
+				break;
+		}
+		return backgroundColor;
 	}
 
 	componentDidMount() {
@@ -79,35 +86,28 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 	}
 
 	componentDidUpdate(prevProps: EarthquakeRealtimeProps) {
-		console.log(this.props, prevProps);
-		if (prevProps.earthquake !== this.props.earthquake) {
-			const { formattedDate, borderColor, backgroundColor } =
-				this.setFormattedDateAndColors(this.props.earthquake);
-			this.setState({
-				earthquake: this.props.earthquake,
-				countdown: this.props.earthquake.countdown as number,
-				formattedDate: formattedDate,
-				borderColor: borderColor,
-				backgroundColor: backgroundColor,
-			});
-		} else if (this.state.countdown <= 0) {
-			this.handleCountdownFinish();
+		if (this.state.countdown == -1 && this.props.earthquake.countdown > 0) {
+			this.countdownInterval();
 		}
 	}
 
 	countdownInterval() {
+		let countdown = this.props.earthquake.countdown;
+		this.setState({
+			countdown: this.props.earthquake.countdown,
+		});
 		const interval = setInterval(() => {
-			this.setState((prevState: any) => ({
-				countdown: prevState.countdown - 1,
-			}));
+			if (countdown < 0) {
+				clearInterval(interval);
+				return;
+			}
+			countdown--;
+			this.setState({
+				countdown: countdown,
+			});
 		}, 1000);
 		this.setState({ intervalId: interval });
 	}
-
-	handleCountdownFinish() {
-		clearInterval(this.state.intervalId);
-	}
-
 	componentWillUnmount() {
 		clearInterval(this.state.intervalId);
 	}
@@ -115,12 +115,12 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 	render() {
 		return (
 			<div
-				className={`flex flex-col gap-y-1 border-4 bg-tews-cinder max-w-[350px] ${this.state.borderColor}`}
+				className={`flex flex-col gap-y-1 border-4 bg-tews-cinder max-w-[350px] ${this.getBorderColor(this.props.earthquake)}`}
 			>
 				<h2
-					className={`${this.state.backgroundColor} w-full font-semibold text-white`}
+					className={`${this.getBackgroundColor(this.props.earthquake)} w-full font-semibold text-white`}
 				>
-					{this.state.earthquake.title}
+					{this.props.earthquake.title}
 				</h2>
 				<div className="px-2 pb-2 flex flex-col gap-y-2 text-xs">
 					<p className="text-white mb-2 max-w-[400px]">
@@ -130,7 +130,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 					<div className="flex justify-between items-center gap-x-3">
 						<span className="text-tews-silver">Tanggal</span>
 						<h4 className="text-white font-semibold">
-							{this.state.formattedDate}
+							{this.getFormattedDate(this.state.earthquake)}
 						</h4>
 					</div>
 

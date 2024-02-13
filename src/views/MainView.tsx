@@ -205,9 +205,9 @@ class MainView extends React.Component<Props> {
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&
 									this.state.earthquakeRealtimeInformation.earthquake
-										?.title && (
+										?.time_stamp && (
 										<EarthquakeRealtimeCard
-											{...this.state.earthquakeRealtimeInformation}
+											earthquake={this.state.earthquakeRealtimeInformation.earthquake}
 										/>
 									)}
 							</section>

@@ -1,5 +1,5 @@
 import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
-import { AnnotationsMap, makeObservable, observable } from "mobx";
+import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 
 export default class EarthquakeDetection implements IEarthquakeDetection {
 	title: string;
@@ -31,6 +31,8 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 
 		makeObservable(this, {
 			time_stamp: observable,
+			setEarthquakeDetection: action,
+			setStatusDetection: action,
 		} as AnnotationsMap<this, any>);
 	}
 
