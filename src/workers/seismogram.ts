@@ -101,6 +101,7 @@ const onmessage = async (event: MessageEvent) => {
 		seismogramSockets[station].on(
 			`waves-data-${station}`,
 			async (data: any) => {
+				console.log("get websocket data ", station, data);
 				// get data from indexedDB
 				let tempData = {
 					channelZ: {
@@ -127,10 +128,16 @@ const onmessage = async (event: MessageEvent) => {
 					tempData = tempDataFromIndexedDB;
 				}
 
+				// get x last data from tempData
+				const lastData = tempData.channelZ.x.length > 0 ? tempData.channelZ.x[tempData.channelZ.x.length - 1] : 0;
 				// loop object data
 				for (const key in data) {
 					const value = data[key];
 					const time = new Date(parseInt(key.split("/")[1]));
+					if(time.getTime() <= lastData){
+						console.log("skipped", time.getTime(), station);
+						continue
+					};
 					tempData.channelZ.x.push(time.getTime());
 					tempData.channelZ.y.push(value.Z);
 					tempData.channelN.x.push(time.getTime());
