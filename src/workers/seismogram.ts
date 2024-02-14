@@ -54,7 +54,7 @@ const seismogramHistoryData = new Map<string, SeismogramDataType>(
 	])
 );
 
-const SAMPLING_RATE = 20;
+const SAMPLING_RATE = 60;
 const FREQUENCY_UPDATE = 3000;
 const BUFFER = 3600;
 let isFetching = false;
@@ -129,15 +129,19 @@ const onmessage = async (event: MessageEvent) => {
 				}
 
 				// get x last data from tempData
-				let lastTimeData = tempData.channelZ.x.length > 0 ? tempData.channelZ.x[tempData.channelZ.x.length - 1] : 0;
+				let lastTimeData =
+					tempData.channelZ.x.length > 0
+						? tempData.channelZ.x[tempData.channelZ.x.length - 1]
+						: 0;
+				const skippedData = [];
 				// loop object data
 				for (const key in data) {
 					const value = data[key];
 					const time = new Date(parseInt(key.split("/")[1]));
-					if(time.getTime() <= lastTimeData){
-						console.log("skipped", time.getTime(), station);
-						continue
-					};
+					if (time.getTime() <= lastTimeData) {
+						skippedData.push(time.getTime());
+						continue;
+					}
 					lastTimeData = time.getTime();
 					tempData.channelZ.x.push(time.getTime());
 					tempData.channelZ.y.push(value.Z);
@@ -145,6 +149,14 @@ const onmessage = async (event: MessageEvent) => {
 					tempData.channelN.y.push(value.N);
 					tempData.channelE.x.push(time.getTime());
 					tempData.channelE.y.push(value.E);
+				}
+
+				if (skippedData.length > 0) {
+					console.log(
+						"skippedData " + skippedData.length,
+						skippedData,
+						station
+					);
 				}
 
 				// save data to indexedDB
@@ -158,10 +170,7 @@ const onmessage = async (event: MessageEvent) => {
 		);
 
 		seismogramInterval[station] = setInterval(async () => {
-			const tempData = await IndexedDB.read(
-				"seismogramTempData",
-				station
-			);
+			const tempData = await IndexedDB.read("seismogramTempData", station);
 			const data = seismogramData.get(station);
 			if (!tempData || tempData.channelZ.x.length === 0) return;
 			const currentLength = data.currentIndex;
@@ -220,13 +229,39 @@ const onmessage = async (event: MessageEvent) => {
 					)
 				);
 
-				data.channelZ.x.push(...newData.channelZ.x);
-				data.channelZ.y.push(...newData.channelZ.y);
-				data.channelN.x.push(...newData.channelN.x);
-				data.channelN.y.push(...newData.channelN.y);
-				data.channelE.x.push(...newData.channelE.x);
-				data.channelE.y.push(...newData.channelE.y);
-				data.currentIndex += (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000;
+				// revalidate new data with last time of data
+				let lastTimeData =
+					data.channelZ.x.length > 0
+						? data.channelZ.x[data.channelZ.x.length - 1]
+						: 0;
+				const skippedData = [];
+				// loop object data
+				for (let i = 0; i < newData.channelZ.x.length; i++) {
+					data.currentIndex++;
+					const time = newData.channelZ.x[i];
+					if (time <= lastTimeData) {
+						skippedData.push({
+							time: time,
+							lastTimeData: lastTimeData,
+						});
+						continue;
+					}
+					lastTimeData = time;
+					data.channelZ.x.push(newData.channelZ.x[i]);
+					data.channelZ.y.push(newData.channelZ.y[i]);
+					data.channelN.x.push(newData.channelN.x[i]);
+					data.channelN.y.push(newData.channelN.y[i]);
+					data.channelE.x.push(newData.channelE.x[i]);
+					data.channelE.y.push(newData.channelE.y[i]);
+				}
+
+				if (skippedData.length > 0) {
+					console.log(
+						"skippedData " + skippedData.length,
+						skippedData,
+						station
+					);
+				}
 
 				// check if there is p wave
 				let pWave = pWavesData.get(station);
@@ -470,33 +505,28 @@ const onmessage = async (event: MessageEvent) => {
 	) {
 		if (isFetching) return;
 
-		isFetching = true;
 		const historyData = seismogramHistoryData.get(station);
 		const currentData = seismogramData.get(station);
 
-		// start_date not more than current date and not in range of currentData and historyData
+		console.log("check start_date", start_date, Date.now());
 		if (start_date > Date.now()) return;
+
 		if (new Date(start_date).getDate() !== new Date().getDate()) return;
 
 		if (currentData.channelZ.x.length > 0) {
 			if (
 				start_date >= currentData.channelZ.x[0] &&
 				end_date <= currentData.channelZ.x[currentData.channelZ.x.length - 1]
-			) {
-				isFetching = false;
-				return;
-			}
+			) return;
 			if (
 				start_date > currentData.channelZ.x[currentData.channelZ.x.length - 1]
-			) {
-				isFetching = false;
-				return;
-			}
+			)return;
 
 			if (end_date > currentData.channelZ.x[0]) {
 				end_date = currentData.channelZ.x[0] - 50;
 			}
 		}
+
 		if (historyData.channelZ.x.length > 0) {
 			if (
 				start_date >= historyData.channelZ.x[0] &&
@@ -512,11 +542,17 @@ const onmessage = async (event: MessageEvent) => {
 				return;
 			}
 		}
-
+		isFetching = true;
+		console.log("get history data");
 		const response = await fetch(
 			`http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`
 		);
 		let data = await response.json();
+		if(data.message) {
+			isFetching = false;
+			return;
+		}
+		console.log("result history data", station, data);
 
 		// dummy, data
 		// const data = {};

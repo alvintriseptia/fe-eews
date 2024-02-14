@@ -175,10 +175,15 @@ export default class DynamicLineChart extends React.Component<Props> {
 		}
 	}
 
-	componentDidUpdate() {
+	componentDidUpdate(prevProps: Props, prevState: any) {
 		const { userDefinedRange } = this.state;
-		if (userDefinedRange) {
+		if (prevState.userDefinedRange !== userDefinedRange) {
 			const stationController = StationController.getInstance();
+			console.log(
+				"Getting history data " + this.props.station,
+				new Date(userDefinedRange[0]).getTime(),
+				new Date(userDefinedRange[1]).getTime()
+			);
 			stationController.getHistorySeismogramData(
 				this.props.station,
 				new Date(userDefinedRange[0]).getTime(),
@@ -193,14 +198,13 @@ export default class DynamicLineChart extends React.Component<Props> {
 		if (userDefinedRange) {
 			layout.xaxis.range = userDefinedRange;
 		} else {
-			const now = Date.now();
-			const last = channelZ.x[channelZ.x.length - 1];
-			const first = channelZ.x[0];
-			const diff = last - first;
-			if (diff > 60000) {
-				layout.xaxis.range = [now - 60000, now];
-			} else {
+			if (channelZ.x.length > 0) {
+				const last = channelZ.x[channelZ.x.length - 1];
+				const first = channelZ.x[0];
 				layout.xaxis.range = [first, last];
+			} else {
+				const now = Date.now();
+				layout.xaxis.range = [now - 60000, now];
 			}
 		}
 
@@ -229,20 +233,24 @@ export default class DynamicLineChart extends React.Component<Props> {
 	handleRelayout = (event: PlotRelayoutEvent) => {
 		if (event["xaxis.showspikes"] === false) {
 			const { channelZ, layout } = this.state;
-			const now = Date.now();
-			const last = channelZ.x[channelZ.x.length - 1];
-			const first = channelZ.x[0];
-			const diff = last - first;
-			if (diff > 60000) {
-				layout.xaxis.range = [now - 60000, now];
-			} else {
+			if (channelZ.length > 0) {
+				const last = channelZ.x[channelZ.x.length - 1];
+				const first = channelZ.x[0];
 				layout.xaxis.range = [first, last];
+				this.setState({
+					revision: this.state.revision + 1,
+					userDefinedRange: null,
+				});
+				layout.datarevision = this.state.revision + 1;
+			} else {
+				const now = Date.now();
+				layout.xaxis.range = [now - 60000, now];
+				this.setState({
+					revision: this.state.revision + 1,
+					userDefinedRange: null,
+				});
+				layout.datarevision = this.state.revision + 1;
 			}
-			this.setState({
-				revision: this.state.revision + 1,
-				userDefinedRange: null,
-			});
-			layout.datarevision = this.state.revision + 1;
 		}
 		// Check if the x-axis range has been manually adjusted by the user
 		else if (event["xaxis.range[0]"] && event["xaxis.range[1]"]) {
