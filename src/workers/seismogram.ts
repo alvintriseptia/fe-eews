@@ -129,15 +129,16 @@ const onmessage = async (event: MessageEvent) => {
 				}
 
 				// get x last data from tempData
-				const lastData = tempData.channelZ.x.length > 0 ? tempData.channelZ.x[tempData.channelZ.x.length - 1] : 0;
+				let lastTimeData = tempData.channelZ.x.length > 0 ? tempData.channelZ.x[tempData.channelZ.x.length - 1] : 0;
 				// loop object data
 				for (const key in data) {
 					const value = data[key];
 					const time = new Date(parseInt(key.split("/")[1]));
-					if(time.getTime() <= lastData){
+					if(time.getTime() <= lastTimeData){
 						console.log("skipped", time.getTime(), station);
 						continue
 					};
+					lastTimeData = time.getTime();
 					tempData.channelZ.x.push(time.getTime());
 					tempData.channelZ.y.push(value.Z);
 					tempData.channelN.x.push(time.getTime());
