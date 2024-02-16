@@ -178,18 +178,17 @@ export default class DynamicLineChart extends React.Component<Props> {
 	componentDidUpdate(prevProps: Props, prevState: any) {
 		const { userDefinedRange } = this.state;
 		if (prevState.userDefinedRange !== userDefinedRange) {
-			const stationController = StationController.getInstance();
-			console.log(
-				"Getting history data " + this.props.station,
-				new Date(userDefinedRange[0]).getTime(),
-				new Date(userDefinedRange[1]).getTime()
-			);
-			stationController.getHistorySeismogramData(
+			this.getHistoryData(
 				this.props.station,
 				new Date(userDefinedRange[0]).getTime(),
 				new Date(userDefinedRange[1]).getTime()
 			);
 		}
+	}
+
+	getHistoryData(station: string, start: number, end: number){
+		const stationController = StationController.getInstance();
+		stationController.getHistorySeismogramData(station, start, end);
 	}
 
 	simulateSeismogram(data: SeismogramDataType) {
