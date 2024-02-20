@@ -10,53 +10,61 @@ const socket = SocketTEWS.getInstance().getSocket();
 
 const onmessage = (event: MessageEvent) => {
 	const { data } = event;
+	if (data.type == "earthquake") {
+		if (data.mode === "simulation") {
+			const typeDetection = ["warning", "warning", "warning"];
+			const earthquakeDetection: IEarthquakeDetection = {
+				title: "Terdeteksi Gelombang P",
+				description: "Harap perhatian, muncul deteksi gelombang P di stasiun ",
+				time_stamp: Date.now(),
+				depth: 5,
+				lat: -2.5927,
+				long: 140.1678,
+				mag: 2,
+				detection: typeDetection[Math.floor(Math.random() * 3)],
+				countdown: 10,
+				station: "BBJI",
+			};
 
-	if (data.mode === "simulation") {
-		const typeDetection = ["warning", "warning", "warning"];
-		const earthquakeDetection: IEarthquakeDetection = {
-			title: "Terdeteksi Gelombang P",
-			description: "Harap perhatian, muncul deteksi gelombang P di stasiun ",
-			time_stamp: Date.now(),
-			depth: 5,
-			lat: -2.5927,
-			long: 140.1678,
-			mag: 2,
-			detection: typeDetection[Math.floor(Math.random() * 3)],
-			countdown: 10,
-			station: "BBJI",
-		};
-
-		addPWave("BBJI", Date.now());
-
-		setInterval(() => {
-			const station = STATIONS_DATA[Math.floor(Math.random() * 18)];
-			earthquakeDetection.title = "Terdeteksi Gelombang P";
-			earthquakeDetection.description =
-				"Harap perhatian, muncul deteksi gelombang P di stasiun " + station.code;
-			earthquakeDetection.lat = station.latitude;
-			earthquakeDetection.long = station.longitude;
-			earthquakeDetection.detection =
-				typeDetection[Math.floor(Math.random() * 3)];
-			earthquakeDetection.station = station.code;
-			earthquakeDetection.time_stamp = Date.now();
+			addPWave("BBJI", Date.now());
 
 			postMessage(earthquakeDetection);
-		}, 60000);
-	} else {
-		socket.on("prediction-data-all", (message: any) => {
-			// check timestamp, jika lebih dari 5 menit, maka diskip
-			const date = new Date(message.time_stamp);
-			// timezone in local
-			const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-			date.setTime(date.getTime() - timezoneOffset);
-			const now = new Date();
-			const diff = now.getTime() - date.getTime();
-			if (diff > 300000) return;
 
-			postMessage(message);
+			setInterval(() => {
+				const station = STATIONS_DATA[Math.floor(Math.random() * 18)];
+				earthquakeDetection.title = "Terdeteksi Gelombang P";
+				earthquakeDetection.description =
+					"Harap perhatian, muncul deteksi gelombang P di stasiun " +
+					station.code;
+				earthquakeDetection.lat = station.latitude;
+				earthquakeDetection.long = station.longitude;
+				earthquakeDetection.detection =
+					typeDetection[Math.floor(Math.random() * 3)];
+				earthquakeDetection.station = station.code;
+				earthquakeDetection.time_stamp = Date.now();
 
-			addPWave(message.station, message.time_stamp);
-		});
+				console.log(station.code, Date.now());
+				addPWave(station.code, Date.now());
+
+				postMessage(earthquakeDetection);
+			}, 60000);
+		} else {
+			console.log("Listening to prediction-data-all");
+			socket.on("prediction-data-all", (message: any) => {
+				// check timestamp, jika lebih dari 5 menit, maka diskip
+				const date = new Date(message.time_stamp);
+				// timezone in local
+				const timezoneOffset = new Date().getTimezoneOffset() * 60000;
+				date.setTime(date.getTime() - timezoneOffset);
+				const now = new Date();
+				const diff = now.getTime() - date.getTime();
+				if (diff > 300000) return;
+
+				postMessage(message);
+
+				addPWave(message.station, message.time_stamp);
+			});
+		}
 	}
 
 	function addPWave(station: string, creation_date: number) {
@@ -70,15 +78,13 @@ const onmessage = (event: MessageEvent) => {
 			showlegend: false,
 			xaxis: "x",
 		};
+		const data = pWavesData.get(station);
 
 		const date = new Date(creation_date);
 		pWaveTemp.x.push(date.getTime());
 		pWaveTemp.y.push(0);
 		pWaveTemp.x.push(date.getTime());
 		pWaveTemp.y.push(20000);
-
-		const data = pWavesData.get(station);
-
 		data.push(pWaveTemp);
 	}
 };

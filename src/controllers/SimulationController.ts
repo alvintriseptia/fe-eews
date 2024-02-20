@@ -160,7 +160,10 @@ export default class SimulationController {
 		//calculate distance between wave center and province center
 		this.nearestRegencies.forEach((regency: RegionType) => {
 			const distance = turf.distance(
-				turf.point([this.earthquakeDetection.long, this.earthquakeDetection.lat]),
+				turf.point([
+					this.earthquakeDetection.long,
+					this.earthquakeDetection.lat,
+				]),
 				turf.point([regency.longitude, regency.latitude])
 			);
 			regency.distance = distance;
@@ -205,6 +208,7 @@ export default class SimulationController {
 				longitude: this.earthquakeDetection.long,
 				latitude: this.earthquakeDetection.lat,
 			},
+			type: "waves",
 		});
 
 		this.wavesWorker.onmessage = (event: MessageEvent) => {
@@ -220,6 +224,7 @@ export default class SimulationController {
 				sWave: sWave,
 				sWaveImpacted: this.affectedSWaves,
 				earthquakeDetection: this.earthquakeDetection,
+				type: "affectedWaves",
 			});
 		};
 
@@ -310,6 +315,7 @@ export default class SimulationController {
 		if (this.wavesWorker) {
 			this.wavesWorker.postMessage({
 				command: "stop",
+				type: "waves",
 			});
 		}
 	}

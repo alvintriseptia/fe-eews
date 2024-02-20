@@ -60,6 +60,7 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 	streamEarthquakeDetection(earthquakeDetectionWorker: Worker, mode: string = "realtime") {
 		earthquakeDetectionWorker.postMessage({
 			mode: mode,
+			type: "earthquake"
 		});
 
 		earthquakeDetectionWorker.onmessage = async (event: MessageEvent) => {
@@ -67,6 +68,9 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 			const date = new Date(data.time_stamp);
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
 			date.setTime(date.getTime() - offset);
+
+			//validasi jika data adalah stasiun yang sama dan masih dalam rentang satu menit, maka dilewatkan
+			if (this.station === data.station && this.time_stamp + 60000 > date.getTime()) return;
 
 			const earthquakeDetection: IEarthquakeDetection = {
 				title: "Terdeteksi Gelombang P",

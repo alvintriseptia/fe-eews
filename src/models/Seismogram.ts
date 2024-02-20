@@ -44,6 +44,7 @@ export default class Seismogram implements ISeismogram {
 			station: this.station,
 			message: "stream",
 			mode: mode,
+			type: "seismogram"
 		});
 
 		this.handlerSeismogramData = (event) => {
@@ -65,6 +66,7 @@ export default class Seismogram implements ISeismogram {
 		seismogramWorker.postMessage({
 			station: this.station,
 			message: "lastData",
+			type: "seismogram"
 		});
 	}
 
@@ -78,6 +80,7 @@ export default class Seismogram implements ISeismogram {
 			message: "history",
 			start_date: start,
 			end_date: end,
+			type: "seismogram"
 		});
 	}
 
@@ -85,6 +88,7 @@ export default class Seismogram implements ISeismogram {
 		seismogramWorker.postMessage({
 			station: this.station,
 			message: "stop",
+			type: "seismogram"
 		});
 
 		seismogramWorker.removeEventListener("message", this.handlerSeismogramData);

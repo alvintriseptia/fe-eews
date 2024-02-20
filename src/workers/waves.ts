@@ -8,22 +8,24 @@ const updateFrequency = 2000;
 let isOnMessageWaves = false;
 
 const onmessage = (event: MessageEvent) => {
-	const { command, earthquakeEpicenter } = event.data;
-	if (command === "stop") {
-		sWaveRadius = 0;
-		pWaveRadius = 0;
-		isOnMessageWaves = false;
-		clearInterval(waveInterval);
-		return;
-	}
-
-	if (command === "start") {
-		sWaveRadius = 0;
-		pWaveRadius = 0;
-		waveInterval = setInterval(() => {
-			if (isOnMessageWaves) return;
-			runWave(earthquakeEpicenter);
-		}, updateFrequency);
+	const { command, earthquakeEpicenter, type } = event.data;
+	if(type == "waves") {
+		if (command === "stop") {
+			sWaveRadius = 0;
+			pWaveRadius = 0;
+			isOnMessageWaves = false;
+			clearInterval(waveInterval);
+			return;
+		}
+	
+		if (command === "start") {
+			sWaveRadius = 0;
+			pWaveRadius = 0;
+			waveInterval = setInterval(() => {
+				if (isOnMessageWaves) return;
+				runWave(earthquakeEpicenter);
+			}, updateFrequency);
+		}
 	}
 
 	function runWave(center: CoordinateType) {

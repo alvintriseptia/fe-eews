@@ -115,7 +115,6 @@ export default class MainController {
 		this.affectedWavesWorker = new Worker(
 			new URL("../workers/affectedWaves.ts", import.meta.url)
 		);
-
 		this.earthquakeDetection.streamEarthquakeDetection(
 			this.earthquakeDetectionWorker,
 			mode
@@ -210,6 +209,7 @@ export default class MainController {
 				longitude: earthquakeDetection.long,
 				latitude: earthquakeDetection.lat,
 			},
+			type: "waves",
 		});
 
 		this.wavesWorker.onmessage = (event: MessageEvent) => {
@@ -225,6 +225,7 @@ export default class MainController {
 				sWave: sWave,
 				sWaveImpacted: this.affectedSWaves,
 				earthquakeDetection: this.earthquakeDetection,
+				type: "affectedWaves",
 			});
 		};
 
@@ -317,6 +318,7 @@ export default class MainController {
 		if (this.wavesWorker) {
 			this.wavesWorker.postMessage({
 				command: "stop",
+				type: "waves",
 			});
 		}
 	}

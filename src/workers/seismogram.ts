@@ -76,24 +76,31 @@ export type SeismogramTempDataType = {
 };
 
 const onmessage = async (event: MessageEvent) => {
-	const { station, message, mode, start_date, end_date } = event.data;
+	const { station, message, mode, start_date, end_date, type } = event.data;
 	const stationData = stations.find((s) => s.code === station);
-	if (mode === "simulation") {
-		simulateStationSeismogram(station);
-	} else {
-		if (stationData && message === "stream") {
-			streamStationSeismogram(station);
-		} else if (stationData && message === "stop") {
-			stopStationSeismogram(stationData.code);
-		} else if (stationData && message === "lastData") {
-			// batching per 500 data
-			const data = seismogramData.get(station);
-			postMessage({
-				station: station,
-				data: data,
-			});
-		} else if (stationData && message === "history" && start_date && end_date) {
-			getHistoryStationSeismogram(station, start_date, end_date);
+	if (type == "seismogram") {
+		if (mode === "simulation") {
+			simulateStationSeismogram(station);
+		} else {
+			if (stationData && message === "stream") {
+				streamStationSeismogram(station);
+			} else if (stationData && message === "stop") {
+				stopStationSeismogram(stationData.code);
+			} else if (stationData && message === "lastData") {
+				// batching per 500 data
+				const data = seismogramData.get(station);
+				postMessage({
+					station: station,
+					data: data,
+				});
+			} else if (
+				stationData &&
+				message === "history" &&
+				start_date &&
+				end_date
+			) {
+				getHistoryStationSeismogram(station, start_date, end_date);
+			}
 		}
 	}
 
@@ -438,6 +445,7 @@ const onmessage = async (event: MessageEvent) => {
 							yaxis: "y6",
 						}
 					);
+					console.log("pWave", data);
 
 					pWave.splice(i, 1);
 				}
@@ -518,10 +526,12 @@ const onmessage = async (event: MessageEvent) => {
 			if (
 				start_date >= currentData.channelZ.x[0] &&
 				end_date <= currentData.channelZ.x[currentData.channelZ.x.length - 1]
-			) return;
+			)
+				return;
 			if (
 				start_date > currentData.channelZ.x[currentData.channelZ.x.length - 1]
-			)return;
+			)
+				return;
 
 			if (end_date > currentData.channelZ.x[0]) {
 				end_date = currentData.channelZ.x[0] - 50;
@@ -549,7 +559,7 @@ const onmessage = async (event: MessageEvent) => {
 			`http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`
 		);
 		let data = await response.json();
-		if(data.message) {
+		if (data.message) {
 			isFetching = false;
 			return;
 		}

@@ -12,6 +12,7 @@ export default class SocketTEWS {
 
     public static getInstance(): SocketTEWS {
         if (!SocketTEWS.instance) {
+            console.log("Creating SocketTEWS instance");
             SocketTEWS.instance = new SocketTEWS();
         }
         return SocketTEWS.instance;
