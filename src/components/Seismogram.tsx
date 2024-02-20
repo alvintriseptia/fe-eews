@@ -6,7 +6,7 @@ import React, { Component } from "react";
 import DynamicLineChart from "./DynamicLineChart";
 import RenderIfVisible from "react-render-if-visible";
 
-const ESTIMATED_ITEM_HEIGHT = 500;
+const ESTIMATED_ITEM_HEIGHT = 300;
 
 interface SeismogramProps {
 	seismogramStations: string[];

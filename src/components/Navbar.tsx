@@ -37,14 +37,14 @@ class Navlink extends React.Component<NavlinkProps> {
 
 	render() {
 		return (
-			<Link href={this.state.link}>
+			<a href={this.state.link}>
 				<button
 					className={`px-3 py-2 flex gap-x-2  text-base rounded-lg items-center ${this.state.backgroundColor} ${this.state.fontStyle} hover:bg-tews-boulder transition-all`}
 				>
 					{this.state.icon}
 					<span>{this.state.label}</span>
 				</button>
-			</Link>
+			</a>
 		);
 	}
 }

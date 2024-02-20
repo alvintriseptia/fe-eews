@@ -14,7 +14,6 @@ import {
 	observable,
 	observe,
 } from "mobx";
-import STATIONS_DATA from "@/assets/data/stations.json";
 import REGENCIES_DATA from "@/assets/data/regencies.json";
 import * as turf from "@turf/turf";
 
@@ -33,7 +32,7 @@ export default class MainController {
 	earthquakeDetection = new EarthquakeDetection();
 	rerender = 0;
 	private clearTimeout: NodeJS.Timeout;
-
+	private stations = [] as IStation[];
 	private wavesWorker: Worker;
 	private affectedWavesWorker: Worker;
 	private affectedPWaves: RegionType[];
@@ -104,9 +103,6 @@ export default class MainController {
 		return await this.earthquakeHistory.fetchLatestFeltEarthquake();
 	}
 
-	/**
-	 * Connects to the earthquake detection service.
-	 */
 	connectEarthquakeDetection(mode: string = "realtime") {
 		this.earthquakeDetectionWorker = new Worker(
 			new URL("../workers/earthquakeDetection.ts", import.meta.url)
@@ -126,16 +122,21 @@ export default class MainController {
 		);
 
 		observe(this.earthquakeDetection, "time_stamp", (change) => {
-			this.clearEarthquakeDetection(false);
 			this.displayEarthquakeDetection(this.earthquakeDetection);
 		});
 	}
 
 	async displayEarthquakeDetection(earthquakeDetection: IEarthquakeDetection) {
 		// GET RANDOM STATION (TESTING)
-		const stasiun = STATIONS_DATA.find(
+		const stasiun = this.stations.find(
 			(station) => station.code === earthquakeDetection.station
 		);
+
+		if (!stasiun) {
+			return;
+		}
+
+		this.clearEarthquakeDetection(false);
 
 		// EARTHQUAKE PREDICTION LOCATION
 		this.map.addEarthquakeDetection(
@@ -274,6 +275,7 @@ export default class MainController {
 			this.clearTimeout = setTimeout(() => {
 				this.earthquakeDetection.setStatusDetection("", "", "", 0);
 				this.map.clearEarthquakeDetection();
+				this.rerender++;
 
 				if (this.affectedPWaves.length > 0) {
 					this.affectedPWaves = [];
@@ -293,6 +295,7 @@ export default class MainController {
 	 * Displays the stations on the map.
 	 */
 	showStations(stations: IStation[]) {
+		this.stations = stations;
 		this.map.addStations(stations);
 	}
 

@@ -50,13 +50,13 @@ export default class ModalDialog extends Component<ModalDialogProps> {
 							<p className="mb-8">{this.props.message}</p>
 							<div className="flex justify-end">
 								<button
-									className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded mr-2"
+									className="bg-tews-mmi-X text-white px-4 py-2 rounded mr-2"
 									onClick={this.handleCancel}
 								>
 									Cancel
 								</button>
 								<button
-									className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+									className="bg-tews-mmi-III text-white px-4 py-2 rounded"
 									onClick={this.handleConfirm}
 								>
 									Confirm

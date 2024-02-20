@@ -14,7 +14,7 @@ import RenderIfVisible from "react-render-if-visible";
 import { observe } from "mobx";
 import STATIONS_DATA from "@/assets/data/stations.json";
 
-const ESTIMATED_ITEM_HEIGHT = 800;
+const ESTIMATED_ITEM_HEIGHT = 400;
 
 class StationView extends React.Component {
 	state = {
@@ -88,7 +88,7 @@ class StationView extends React.Component {
 		});
 
 		await this.state.controller.initStations();
-		await this.state.controller.connectAllSeismogram("simulation");
+		await this.state.controller.connectAllSeismogram("realtime");
 
 		this.state.mainController.connectEarthquakeDetection();
 	}
@@ -127,19 +127,23 @@ class StationView extends React.Component {
 		});
 	}
 
+	setSection(section: string) {
+		this.setState({ tab: section });
+	}
+
 	render() {
 		return (
 			<main>
 				{/* NAVBAR */}
 				<Navbar {...this.state.navbar} />
 
-				<ModalDialog
+				{/* <ModalDialog
 					open={this.state.dialogOpen}
 					title="Nonaktifkan Stasiun"
 					message={`Apakah anda yakin ingin menonaktifkan stasiun ${this.state.selectedStation}?`}
 					onCancel={() => this.setState({ dialogOpen: false })}
 					onConfirm={() => this.disableStation(this.state.selectedStation)}
-				/>
+				/> */}
 
 				{/* CONTENT */}
 				<section className="h-full mt-10 overflow-x-hidden">
@@ -151,7 +155,7 @@ class StationView extends React.Component {
 									? "bg-tews-mmi-III"
 									: "bg-tews-mmi-III/25"
 							}`}
-							onClick={() => this.setState({ tab: "enabled" })}
+							onClick={() => this.setSection("enabled")}
 						>
 							Stasiun Aktif
 						</button>
@@ -161,7 +165,7 @@ class StationView extends React.Component {
 									? "bg-tews-mmi-III"
 									: "bg-tews-mmi-III/25"
 							}`}
-							onClick={() => this.setState({ tab: "disabled" })}
+							onClick={() => this.setSection("disabled")}
 						>
 							Stasiun Tidak Aktif
 						</button>
@@ -181,41 +185,37 @@ class StationView extends React.Component {
 								/>
 							</div>
 
-							{this.state.filteredSeismogramStations.map((station, index) => {
-								return (
-									<RenderIfVisible
-										defaultHeight={ESTIMATED_ITEM_HEIGHT}
-										key={index}
-									>
-										<div className="relative">
-											{/* button disabled and title */}
-											<div className="flex gap-x-4 items-center relative z-20 translate-x-20">
-												<h3 className="text-white text-lg font-semibold">
-													Sensor {station.code}
-												</h3>
-												<button
-													className="bg-red-500 text-white px-4 py-2 rounded-md text-xs"
-													onClick={() => {
-														this.setState({
-															dialogOpen: true,
-															selectedStation: station.code,
-														});
-													}}
-												>
-													Nonaktifkan
-												</button>
-											</div>
+							<div className="flex flex-wrap">
+								{this.state.filteredSeismogramStations.map((station, index) => {
+									return (
+										<div key={index}>
+											<RenderIfVisible defaultHeight={ESTIMATED_ITEM_HEIGHT}>
+												<div className="relative">
+													{/* button disabled and title */}
+													<div className="flex gap-x-4 items-center relative z-20 translate-x-20">
+														<h3 className="text-white text-lg font-semibold">
+															Sensor {station.code}
+														</h3>
+														<button
+															className="bg-tews-mmi-X text-white px-4 py-2 rounded-md text-xs"
+															onClick={() => this.disableStation(station.code)}
+														>
+															Nonaktifkan
+														</button>
+													</div>
 
-											<DynamicLineChart
-												station={station.code}
-												width={"100%"}
-												height={800}
-												showTitle={false}
-											/>
+													<DynamicLineChart
+														station={station.code}
+														width={600}
+														height={350}
+														showTitle={false}
+													/>
+												</div>
+											</RenderIfVisible>
 										</div>
-									</RenderIfVisible>
-								);
-							})}
+									);
+								})}
+							</div>
 						</EarthquakeDetectionContext.Provider>
 					) : (
 						<table className="w-full border-collapse">
@@ -229,7 +229,7 @@ class StationView extends React.Component {
 											<span>Aksi</span>
 											{this.state.disabledSeismogramStations.length > 0 && (
 												<button
-													className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded ml-2 text-sm"
+													className="bg-tews-blue text-white font-bold py-1 px-2 rounded ml-2 text-sm"
 													onClick={this.enableAllStation}
 												>
 													Aktifkan semua
@@ -257,7 +257,7 @@ class StationView extends React.Component {
 											<td className="border p-2">{station.description}</td>
 											<td className="border p-2">
 												<button
-													className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+													className="bg-tews-blue text-white font-bold py-2 px-4 rounded"
 													onClick={() => this.enableStation(station.code)}
 												>
 													Aktifkan

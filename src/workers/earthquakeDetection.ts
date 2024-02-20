@@ -1,11 +1,12 @@
 import { IEarthquakeDetection } from "@/entities/_index";
 import { SeismogramPlotType } from "@/types/_index";
 import STATIONS_DATA from "@/assets/data/stations.json";
-import { socket } from "./_index";
+import SocketTEWS from "@/lib/socketTEWS";
 
 export const pWavesData = new Map<string, SeismogramPlotType[]>(
 	STATIONS_DATA.map((s) => [s.code, [] as SeismogramPlotType[]])
 );
+const socket = SocketTEWS.getInstance().getSocket();
 
 const onmessage = (event: MessageEvent) => {
 	const { data } = event;
@@ -27,8 +28,6 @@ const onmessage = (event: MessageEvent) => {
 
 		addPWave("BBJI", Date.now());
 
-		postMessage(earthquakeDetection);
-
 		setInterval(() => {
 			const station = STATIONS_DATA[Math.floor(Math.random() * 18)];
 			earthquakeDetection.title = "Terdeteksi Gelombang P";
@@ -40,7 +39,6 @@ const onmessage = (event: MessageEvent) => {
 				typeDetection[Math.floor(Math.random() * 3)];
 			earthquakeDetection.station = station.code;
 			earthquakeDetection.time_stamp = Date.now();
-			addPWave(station.code, Date.now());
 
 			postMessage(earthquakeDetection);
 		}, 60000);

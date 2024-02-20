@@ -30,6 +30,7 @@ module.exports = {
 					"venom-green": "#838C00",
 					"paris-green": "#5ACA9C",
 					"dark": "#1F222A",
+					"blue": "#04389D",
 				},
 			},
 		},

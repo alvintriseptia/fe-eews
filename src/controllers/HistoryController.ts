@@ -1,4 +1,4 @@
-import { EarthquakeDetection, Map } from "@/models/_index";
+import { EarthquakeDetection, Map, Seismogram } from "@/models/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 import { IEarthquakeDetection, IMap } from "@/entities/_index";
 import toast from "react-hot-toast";
@@ -15,6 +15,7 @@ interface IEarthquakeDetectionResponse {
 export default class HistoryController {
 	private earthquakeDetection = new EarthquakeDetection();
 	private map = new Map();
+	private seismogram = new Seismogram();
 
 	constructor() {
 		makeObservable(this, {
@@ -110,7 +111,7 @@ export default class HistoryController {
 			const end_date = date.getTime() + 1 * 60 * 1000;
 
 			const response =
-				await this.earthquakeDetection.fetchSeismogramEarthquakeDetection(
+				await this.seismogram.fetchSeismogramEarthquakeDetection(
 					station,
 					start_date,
 					end_date

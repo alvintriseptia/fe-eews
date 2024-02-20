@@ -1,9 +1,10 @@
 import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
 import { pWavesData } from "./earthquakeDetection";
-import { socket } from "./_index";
 import IndexedDB from "@/lib/IndexedDB";
+import SocketTEWS from "@/lib/socketTEWS";
 
+const socket = SocketTEWS.getInstance().getSocket();
 const stations = STATIONS_DATA;
 const seismogramSockets = {
 	...stations.map((s) => [s.code, null]),

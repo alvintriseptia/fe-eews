@@ -464,7 +464,7 @@ class TEWSMap implements IMap {
 
 		// update sourcePWave
 		if (sourcePWave) {
-			sourcePWave.setData(sWave);
+			sourcePWave.setData(pWave);
 		}
 
 		// get source
@@ -472,7 +472,7 @@ class TEWSMap implements IMap {
 
 		// update sourceSWave
 		if (sourceSWave) {
-			sourceSWave.setData(pWave);
+			sourceSWave.setData(sWave);
 		}
 	}
 

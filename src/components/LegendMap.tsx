@@ -42,7 +42,7 @@ class LegendMap extends React.Component {
 				</button>
 
 				{this.state.open && (
-					<div className="absolute top-10 right-0 bg-tews-cinder p-2 flex flex-col gap-y-2">
+					<div className="absolute top-10 right-4 bg-tews-cinder p-2 flex flex-col gap-y-2 w-40 overflow-x-hidden">
 						{legends.map((legend, index) => (
 							<div key={index} dangerouslySetInnerHTML={{ __html: legend }} />
 						))}

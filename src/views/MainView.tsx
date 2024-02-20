@@ -80,17 +80,6 @@ class MainView extends React.Component<Props> {
 			(await this.state.controller.getLatestFeltEarthquake()) as IEarthquakeHistory;
 		const latestDetection =
 			(await detectionController.getLatestEarthquakeDetection()) as IEarthquakeDetection;
-
-		this.setState({
-			navbar: weeklyEarthquake.navbar,
-			sidebarProps: {
-				latestFeltEarthquake,
-				latestEarthquake,
-				latestDetection,
-			},
-			weeklyEarthquake: weeklyEarthquake.weeklyEarthquake,
-		});
-
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
 			id: "tews-map",
@@ -105,6 +94,19 @@ class MainView extends React.Component<Props> {
 		// Get saved stations
 		const stations = await this.state.stationController.getStations();
 		this.state.controller.showStations(stations);
+		
+
+		this.setState({
+			navbar: weeklyEarthquake.navbar,
+			sidebarProps: {
+				latestFeltEarthquake,
+				latestEarthquake,
+				latestDetection,
+			},
+			weeklyEarthquake: weeklyEarthquake.weeklyEarthquake,
+			seismogramStations: stations,
+		});
+
 
 		// setInterval(() => {
 		// 	this.state.stationController.getStations().then((stations) => {
@@ -205,7 +207,9 @@ class MainView extends React.Component<Props> {
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&
 									this.state.earthquakeRealtimeInformation.earthquake
-										?.time_stamp && (
+										?.time_stamp && this.state.earthquakeRealtimeInformation.earthquake
+										?.title
+										&& (
 										<EarthquakeRealtimeCard
 											earthquake={this.state.earthquakeRealtimeInformation.earthquake}
 										/>

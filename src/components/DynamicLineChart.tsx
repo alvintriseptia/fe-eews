@@ -118,7 +118,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 				zeroline: false,
 				showticklabels: false,
 			},
-			height: 500,
+			height: 350,
 			width: 500,
 			paper_bgcolor: "#0D121C",
 			plot_bgcolor: "transparent",
@@ -177,7 +177,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 
 	componentDidUpdate(prevProps: Props, prevState: any) {
 		const { userDefinedRange } = this.state;
-		if (prevState.userDefinedRange !== userDefinedRange) {
+		if (prevState.userDefinedRange !== userDefinedRange && userDefinedRange) {
 			this.getHistoryData(
 				this.props.station,
 				new Date(userDefinedRange[0]).getTime(),
@@ -186,7 +186,7 @@ export default class DynamicLineChart extends React.Component<Props> {
 		}
 	}
 
-	getHistoryData(station: string, start: number, end: number){
+	getHistoryData(station: string, start: number, end: number) {
 		const stationController = StationController.getInstance();
 		stationController.getHistorySeismogramData(station, start, end);
 	}
@@ -261,18 +261,18 @@ export default class DynamicLineChart extends React.Component<Props> {
 	render() {
 		return (
 			<div
-				className={`p-4 pt-0 relative transition-all duration-200 ease-in-out -translate-y-20`}
+				className={`p-4 pt-0 relative transition-all duration-200 ease-in-out`}
 				style={{
 					height: this.state.layout.height,
 					width: this.state.layout.width,
 				}}
 			>
 				{this.state.showTitle && (
-					<h3 className="text-white text-lg font-semibold mb-2 text-center relative translate-y-20 z-10">
+					<h3 className="text-white text-lg font-semibold mb-2 text-center relative z-10">
 						Sensor {this.state.station}
 					</h3>
 				)}
-				<div>
+				<div className="relative -translate-y-16">
 					<Plot
 						data={[
 							this.state.channelZ,

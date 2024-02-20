@@ -14,7 +14,7 @@ export const pWaveLayer: FillLayer = {
   id: 'pWave',
   type: 'fill',
   paint: {
-    'fill-outline-color': '#0000ff',
+    'fill-outline-color': '#00b7ff',
     "fill-color": "transparent",
   }
 };
