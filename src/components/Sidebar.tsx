@@ -72,7 +72,7 @@ class EarthquakeInfo extends React.Component<IEarthquakeHistory> {
 
             <div>
               <span className="text-gray-400 text-xs mb-1">Kedalaman</span>
-              <h4 className="text-white text-sm">{this.props.depth}</h4>
+              <h4 className="text-white text-sm">{this.props.depth} km</h4>
             </div>
           </div>
 
