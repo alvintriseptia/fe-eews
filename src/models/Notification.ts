@@ -26,11 +26,10 @@ export default class Notification implements INotification {
 
 	playNotification() {
 		if (this.isPlayingNotification()) return;
-
 		this.sound = new Audio(this.audio);
+		this.speech = new SpeechSynthesisUtterance();
 		this.sound.autoplay = true;
 		if (this.message) {
-			this.speech = new SpeechSynthesisUtterance();
 			this.speech.lang = "id-ID";
 			this.speech.text = this.message;
 			this.speech.volume = 1;

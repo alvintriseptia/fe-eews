@@ -185,7 +185,7 @@ class StationView extends React.Component {
 								/>
 							</div>
 
-							<div className="flex flex-wrap">
+							<div className="flex flex-wrap justify-center">
 								{this.state.filteredSeismogramStations.map((station, index) => {
 									return (
 										<div key={index}>

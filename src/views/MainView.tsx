@@ -94,7 +94,6 @@ class MainView extends React.Component<Props> {
 		// Get saved stations
 		const stations = await this.state.stationController.getStations();
 		this.state.controller.showStations(stations);
-		
 
 		this.setState({
 			navbar: weeklyEarthquake.navbar,
@@ -106,7 +105,6 @@ class MainView extends React.Component<Props> {
 			weeklyEarthquake: weeklyEarthquake.weeklyEarthquake,
 			seismogramStations: stations,
 		});
-
 
 		// setInterval(() => {
 		// 	this.state.stationController.getStations().then((stations) => {
@@ -120,13 +118,19 @@ class MainView extends React.Component<Props> {
 
 		observe(this.state.controller, "rerender", (change) => {
 			if (change.newValue) {
+				const date = new Date(this.state.controller.earthquakeDetection.time_stamp);
+				const offset = new Date().getTimezoneOffset() * 60 * 1000;
+				date.setTime(date.getTime() + (offset * 2));
 				this.setState({
 					earthquakeRealtimeInformation: {
 						earthquake: this.state.controller.earthquakeDetection,
 					},
 					sidebarProps: {
 						...this.state.sidebarProps,
-						latestDetection: this.state.controller.earthquakeDetection,
+						latestDetection: {
+							...this.state.controller.earthquakeDetection,
+							time_stamp: date.getTime(),
+						},
 					},
 				});
 			}
@@ -207,11 +211,13 @@ class MainView extends React.Component<Props> {
 							<section className="absolute bottom-3 left-2 z-20">
 								{this.state.earthquakeRealtimeInformation &&
 									this.state.earthquakeRealtimeInformation.earthquake
-										?.time_stamp && this.state.earthquakeRealtimeInformation.earthquake
-										?.title
-										&& (
+										?.time_stamp &&
+									this.state.earthquakeRealtimeInformation.earthquake
+										?.title && (
 										<EarthquakeRealtimeCard
-											earthquake={this.state.earthquakeRealtimeInformation.earthquake}
+											earthquake={
+												this.state.earthquakeRealtimeInformation.earthquake
+											}
 										/>
 									)}
 							</section>

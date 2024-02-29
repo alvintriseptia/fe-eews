@@ -27,23 +27,23 @@ const onmessage = (event: MessageEvent) => {
 			}, updateFrequency);
 		}
 	}
-
-	function runWave(center: CoordinateType) {
-		isOnMessageWaves = true;
-		sWaveRadius += Math.random() * 2 + 6;
-		pWaveRadius += (Math.random() * 2) + 10;
-        
-		const centerPoint = turf.point([center.longitude, center.latitude]);
-		const options = { steps: 25 };
-		const sWavePolygon = turf.circle(centerPoint, sWaveRadius, options);
-		const pWavePolygon = turf.circle(centerPoint, pWaveRadius, options);
-
-		postMessage({
-			sWave: sWavePolygon,
-            pWave: pWavePolygon,
-		});
-		isOnMessageWaves = false;
-	}
 };
+
+function runWave(center: CoordinateType) {
+	isOnMessageWaves = true;
+	sWaveRadius += Math.random() * 2 + 6;
+	pWaveRadius += (Math.random() * 2) + 10;
+	
+	const centerPoint = turf.point([center.longitude, center.latitude]);
+	const options = { steps: 25 };
+	const sWavePolygon = turf.circle(centerPoint, sWaveRadius, options);
+	const pWavePolygon = turf.circle(centerPoint, pWaveRadius, options);
+
+	postMessage({
+		sWave: sWavePolygon,
+		pWave: pWavePolygon,
+	});
+	isOnMessageWaves = false;
+}
 
 addEventListener("message", onmessage);

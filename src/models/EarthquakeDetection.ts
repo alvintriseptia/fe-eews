@@ -63,7 +63,7 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 			type: "earthquake"
 		});
 
-		earthquakeDetectionWorker.onmessage = async (event: MessageEvent) => {
+		const onmessage = async (event: MessageEvent) => {
 			const { data } = event;
 			const date = new Date(data.time_stamp);
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
@@ -88,6 +88,8 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 
 			this.setEarthquakeDetection(earthquakeDetection);
 		};
+
+		earthquakeDetectionWorker.addEventListener("message", onmessage);
 	}
 
 	async fetchLatestEarthquakeDetection() {

@@ -88,7 +88,7 @@ class TEWSMap implements IMap {
 					source: "pWave",
 					type: "fill",
 					paint: {
-						"fill-outline-color": "#0000ff",
+						"fill-outline-color": "#00b7ff",
 						"fill-color": "transparent",
 					},
 				});
@@ -460,19 +460,19 @@ class TEWSMap implements IMap {
 
 	simulateWaves(pWave: any, sWave: any) {
 		// get source
-		const sourcePWave = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
-
-		// update sourcePWave
-		if (sourcePWave) {
-			sourcePWave.setData(pWave);
-		}
-
-		// get source
-		const sourceSWave = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+		const sourceSWave = this.map.getSource("sWave") as maplibregl.GeoJSONSource;
 
 		// update sourceSWave
 		if (sourceSWave) {
-			sourceSWave.setData(sWave);
+			sourceSWave.setData(pWave);
+		}
+
+		// get source
+		const sourcePWave = this.map.getSource("pWave") as maplibregl.GeoJSONSource;
+
+		// update sourcePWave
+		if (sourcePWave) {
+			sourcePWave.setData(sWave);
 		}
 	}
 

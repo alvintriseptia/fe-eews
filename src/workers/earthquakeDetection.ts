@@ -1,12 +1,10 @@
 import { IEarthquakeDetection } from "@/entities/_index";
-import { SeismogramPlotType } from "@/types/_index";
 import STATIONS_DATA from "@/assets/data/stations.json";
-import SocketTEWS from "@/lib/socketTEWS";
+import Socket from "@/lib/socket";
+import IndexedDB from "@/lib/IndexedDB";
+const socket = Socket.getInstance().getSocket();
 
-export const pWavesData = new Map<string, SeismogramPlotType[]>(
-	STATIONS_DATA.map((s) => [s.code, [] as SeismogramPlotType[]])
-);
-const socket = SocketTEWS.getInstance().getSocket();
+console.log("Worker earthquakeDetection is running");
 
 const onmessage = (event: MessageEvent) => {
 	const { data } = event;
@@ -43,11 +41,10 @@ const onmessage = (event: MessageEvent) => {
 				earthquakeDetection.station = station.code;
 				earthquakeDetection.time_stamp = Date.now();
 
-				console.log(station.code, Date.now());
 				addPWave(station.code, Date.now());
 
 				postMessage(earthquakeDetection);
-			}, 60000);
+			}, 30000);
 		} else {
 			console.log("Listening to prediction-data-all");
 			socket.on("prediction-data-all", (message: any) => {
@@ -66,27 +63,57 @@ const onmessage = (event: MessageEvent) => {
 			});
 		}
 	}
-
-	function addPWave(station: string, creation_date: number) {
-		const pWaveTemp = {
-			x: [] as Array<number>,
-			y: [] as Array<number>,
-			line: {
-				color: "#FF0000",
-				width: 2,
-			},
-			showlegend: false,
-			xaxis: "x",
-		};
-		const data = pWavesData.get(station);
-
-		const date = new Date(creation_date);
-		pWaveTemp.x.push(date.getTime());
-		pWaveTemp.y.push(0);
-		pWaveTemp.x.push(date.getTime());
-		pWaveTemp.y.push(20000);
-		data.push(pWaveTemp);
-	}
 };
+
+async function addPWave(station: string, creation_date: number) {
+	const pWaveTemp = {
+		x: [] as Array<number>,
+		y: [] as Array<number>,
+		line: {
+			color: "#FF0000",
+			width: 2,
+		},
+		showlegend: false,
+		xaxis: "x",
+	};
+
+	let tempData = {
+		channelZ: {
+			x: [],
+			y: [],
+		},
+		channelN: {
+			x: [],
+			y: [],
+		},
+		channelE: {
+			x: [],
+			y: [],
+		},
+		pWaves: [],
+	};
+
+	const tempDataFromIndexedDB = await IndexedDB.read(
+		"seismogramTempData",
+		station
+	);
+
+	if (tempDataFromIndexedDB !== null) {
+		tempData = tempDataFromIndexedDB;
+	}
+
+	const date = new Date(creation_date);
+	pWaveTemp.x.push(date.getTime());
+	pWaveTemp.y.push(0);
+	pWaveTemp.x.push(date.getTime());
+	pWaveTemp.y.push(20000);
+	tempData.pWaves.push(pWaveTemp);
+	await IndexedDB.write({
+		objectStore: "seismogramTempData",
+		keyPath: "station",
+		key: station,
+		data: tempData,
+	});
+}
 
 addEventListener("message", onmessage);

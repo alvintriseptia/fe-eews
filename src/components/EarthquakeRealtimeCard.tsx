@@ -33,7 +33,7 @@ export default class EarthquakeRealtimeCard extends React.Component<EarthquakeRe
 		if (date !== undefined) {
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
 			const timezone = -(date.getTimezoneOffset() / 60);
-			date.setTime(date.getTime() - offset);
+			date.setTime(date.getTime() + offset);
 			newTime =
 				date.toLocaleDateString("id-ID") +
 				" " +
