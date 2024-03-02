@@ -106,11 +106,27 @@ class MainView extends React.Component<Props> {
 			seismogramStations: stations,
 		});
 
-		// setInterval(() => {
-		// 	this.state.stationController.getStations().then((stations) => {
-		// 		this.state.controller.showStations(stations);
-		// 	});
-		// }, 60000);
+		setInterval(() => {
+			this.state.stationController.getStations().then((stations) => {
+				this.state.controller.showStations(stations);
+			});
+
+			const latestEarthquake = this.state.controller.getLatestEarthquake();
+			const latestFeltEarthquake =
+				this.state.controller.getLatestFeltEarthquake();
+
+			Promise.all([latestEarthquake, latestFeltEarthquake]).then(
+				([latestEarthquake, latestFeltEarthquake]) => {
+					this.setState({
+						sidebarProps: {
+							...this.state.sidebarProps,
+							latestFeltEarthquake,
+							latestEarthquake,
+						},
+					});
+				}
+			);
+		}, 60000);
 
 		setTimeout(() => {
 			this.state.controller.connectEarthquakeDetection(this.props.mode);
@@ -118,9 +134,11 @@ class MainView extends React.Component<Props> {
 
 		observe(this.state.controller, "rerender", (change) => {
 			if (change.newValue) {
-				const date = new Date(this.state.controller.earthquakeDetection.time_stamp);
+				const date = new Date(
+					this.state.controller.earthquakeDetection.time_stamp
+				);
 				const offset = new Date().getTimezoneOffset() * 60 * 1000;
-				date.setTime(date.getTime() + (offset * 2));
+				date.setTime(date.getTime() + offset * 2);
 				this.setState({
 					earthquakeRealtimeInformation: {
 						earthquake: this.state.controller.earthquakeDetection,
