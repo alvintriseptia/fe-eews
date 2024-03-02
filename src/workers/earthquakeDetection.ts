@@ -24,26 +24,26 @@ const onmessage = (event: MessageEvent) => {
 				station: "BBJI",
 			};
 
-			addPWave("BBJI", Date.now());
+			addPWave("BBJI", Date.now(), earthquakeDetection);
 
 			postMessage(earthquakeDetection);
 
 			setInterval(() => {
-				const station = STATIONS_DATA[Math.floor(Math.random() * 18)];
-				earthquakeDetection.title = "Terdeteksi Gelombang P";
-				earthquakeDetection.description =
-					"Harap perhatian, muncul deteksi gelombang P di stasiun " +
-					station.code;
-				earthquakeDetection.lat = station.latitude;
-				earthquakeDetection.long = station.longitude;
-				earthquakeDetection.detection =
-					typeDetection[Math.floor(Math.random() * 3)];
-				earthquakeDetection.station = station.code;
-				earthquakeDetection.time_stamp = Date.now();
+				for (let i = 0; i < 3; i++) {
+					const station = STATIONS_DATA[Math.floor(Math.random() * 18)];
+					earthquakeDetection.title = "Terdeteksi Gelombang P";
+					earthquakeDetection.description =
+						"Harap perhatian, muncul deteksi gelombang P di stasiun " +
+						station.code;
+					earthquakeDetection.lat = station.latitude;
+					earthquakeDetection.long = station.longitude;
+					earthquakeDetection.detection =
+						typeDetection[Math.floor(Math.random() * 3)];
+					earthquakeDetection.station = station.code;
+					earthquakeDetection.time_stamp = Date.now();
 
-				addPWave(station.code, Date.now());
-
-				postMessage(earthquakeDetection);
+					addPWave(station.code, Date.now(), earthquakeDetection);
+				}
 			}, 30000);
 		} else {
 			console.log("Listening to prediction-data-all");
@@ -57,63 +57,71 @@ const onmessage = (event: MessageEvent) => {
 				const diff = now.getTime() - date.getTime();
 				if (diff > 300000) return;
 
-				postMessage(message);
-
-				addPWave(message.station, message.time_stamp);
+				addPWave(message.station, message.time_stamp, message);
 			});
 		}
 	}
-};
 
-async function addPWave(station: string, creation_date: number) {
-	const pWaveTemp = {
-		x: [] as Array<number>,
-		y: [] as Array<number>,
-		line: {
-			color: "#FF0000",
-			width: 2,
-		},
-		showlegend: false,
-		xaxis: "x",
-	};
-
-	let tempData = {
-		channelZ: {
-			x: [],
-			y: [],
-		},
-		channelN: {
-			x: [],
-			y: [],
-		},
-		channelE: {
-			x: [],
-			y: [],
-		},
-		pWaves: [],
-	};
-
-	const tempDataFromIndexedDB = await IndexedDB.read(
-		"seismogramTempData",
-		station
-	);
-
-	if (tempDataFromIndexedDB !== null) {
-		tempData = tempDataFromIndexedDB;
+	async function addPWave(station: string, creation_date: number, earthquakeDetection: object) {
+		const pWaveTemp = {
+			x: [] as Array<number>,
+			y: [] as Array<number>,
+			line: {
+				color: "#FF0000",
+				width: 2,
+			},
+			showlegend: false,
+			xaxis: "x",
+		};
+	
+		let tempData = {
+			channelZ: {
+				x: [],
+				y: [],
+			},
+			channelN: {
+				x: [],
+				y: [],
+			},
+			channelE: {
+				x: [],
+				y: [],
+			},
+			pWaves: [],
+		};
+	
+		const tempDataFromIndexedDB = await IndexedDB.read(
+			"seismogramTempData",
+			station
+		);
+	
+		if (tempDataFromIndexedDB !== null) {
+			tempData = tempDataFromIndexedDB;
+		}
+	
+		//check jika data terakhir dengan data yang baru kurang dari 5 detik, tidak perlu postMessage
+		if (tempData.pWaves.length > 0) {
+			const lastData = tempData.pWaves[tempData.pWaves.length - 1];
+			const lastDate = lastData.x[lastData.x.length - 1];
+			const diff = creation_date - lastDate;
+			if (diff > 5000){
+				postMessage(earthquakeDetection);
+			}
+		}
+	
+		const date = new Date(creation_date);
+		pWaveTemp.x.push(date.getTime());
+		pWaveTemp.y.push(0);
+		pWaveTemp.x.push(date.getTime());
+		pWaveTemp.y.push(20000);
+		tempData.pWaves.push(pWaveTemp);
+		await IndexedDB.write({
+			objectStore: "seismogramTempData",
+			keyPath: "station",
+			key: station,
+			data: tempData,
+		});
 	}
-
-	const date = new Date(creation_date);
-	pWaveTemp.x.push(date.getTime());
-	pWaveTemp.y.push(0);
-	pWaveTemp.x.push(date.getTime());
-	pWaveTemp.y.push(20000);
-	tempData.pWaves.push(pWaveTemp);
-	await IndexedDB.write({
-		objectStore: "seismogramTempData",
-		keyPath: "station",
-		key: station,
-		data: tempData,
-	});
-}
+};
 
 addEventListener("message", onmessage);
