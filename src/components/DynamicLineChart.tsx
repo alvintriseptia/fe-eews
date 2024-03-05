@@ -24,7 +24,6 @@ export default class DynamicLineChart extends React.Component<Props> {
 	state = {
 		station: "",
 		showTitle: true,
-		prevContextValue: null,
 		waveData: [] as ISeismogram[],
 		samplingRate: 80,
 		channelZ: {
