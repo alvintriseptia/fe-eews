@@ -134,21 +134,13 @@ class MainView extends React.Component<Props> {
 
 		observe(this.state.controller, "rerender", (change) => {
 			if (change.newValue) {
-				const date = new Date(
-					this.state.controller.earthquakeDetection.time_stamp
-				);
-				const offset = new Date().getTimezoneOffset() * 60 * 1000;
-				date.setTime(date.getTime() + offset * 2);
 				this.setState({
 					earthquakeRealtimeInformation: {
 						earthquake: this.state.controller.earthquakeDetection,
 					},
 					sidebarProps: {
 						...this.state.sidebarProps,
-						latestDetection: {
-							...this.state.controller.earthquakeDetection,
-							time_stamp: date.getTime(),
-						},
+						latestDetection: this.state.controller.earthquakeDetection,
 					},
 				});
 			}
