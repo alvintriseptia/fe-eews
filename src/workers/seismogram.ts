@@ -117,7 +117,7 @@ const onmessage = async (event: MessageEvent) => {
 async function streamStationSeismogram(station: string) {
 	seismogramSockets[station] = socket;
 	seismogramSockets[station].on(`waves-data-${station}`, async (data: any) => {
-		console.log("get websocket data ", station, data);
+		// console.log("get websocket data ", station, data);
 		// get data from indexedDB
 		let tempData = {
 			channelZ: {

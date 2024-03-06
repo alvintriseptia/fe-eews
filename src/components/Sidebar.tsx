@@ -19,7 +19,9 @@ class EarthquakeInfo extends React.Component<IEarthquakeHistory> {
     ) {
       const dateObj = new Date(this.props.date);
       const offset = new Date().getTimezoneOffset() * 60 * 1000;
-      dateObj.setTime(dateObj.getTime() - offset);
+      if(this.props.id != "latest-detection"){
+        dateObj.setTime(dateObj.getTime() - offset);
+      }
       const timezone = -(new Date().getTimezoneOffset() / 60);
       const timezoneText =
         timezone === 7

@@ -66,8 +66,10 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 		const onmessage = async (event: MessageEvent) => {
 			const { data } = event;
 			const date = new Date(data.time_stamp);
-			const offset = new Date().getTimezoneOffset() * 60 * 1000;
-			date.setTime(date.getTime() - offset);
+			// const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			// date.setTime(date.getTime() - offset);
+
+			console.log(data, date.getTime(), this.station);
 
 			//validasi jika data adalah stasiun yang sama dan masih dalam rentang satu menit, maka dilewatkan
 			if (this.station === data.station && this.time_stamp + 60000 > date.getTime()) return;
