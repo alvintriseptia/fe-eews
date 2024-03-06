@@ -59,10 +59,11 @@ export default class HistoryController {
 				);
 
 			const earthquakeDetections =
-				response as unknown as IEarthquakeDetectionResponse | null;
-			if (earthquakeDetections) {
+				response as IEarthquakeDetectionResponse | null;
+
+			if (earthquakeDetections != null) {
 				// get addresses
-				this.map.addEarthquakeDetectionLocations(earthquakeDetections.data);
+				this.map.addEarthquakeDetectionLocations(Object.values(earthquakeDetections.data));
 				for (const detection of Object.values(earthquakeDetections.data)) {
 					const address = await this.map.getAreaName({
 						latitude: detection.lat,
@@ -110,12 +111,11 @@ export default class HistoryController {
 			// 1 minute after
 			const end_date = date.getTime() + 1 * 60 * 1000;
 
-			const response =
-				await this.seismogram.fetchSeismogramEarthquakeDetection(
-					station,
-					start_date,
-					end_date
-				);
+			const response = await this.seismogram.fetchSeismogramEarthquakeDetection(
+				station,
+				start_date,
+				end_date
+			);
 			if (!response) {
 				return;
 			}
