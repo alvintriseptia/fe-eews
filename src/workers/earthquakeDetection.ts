@@ -51,10 +51,13 @@ const onmessage = (event: MessageEvent) => {
 				// check timestamp, jika lebih dari 5 menit, maka diskip
 				const date = new Date(message.time_stamp);
 				// timezone in local
-				const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-				date.setTime(date.getTime() - timezoneOffset);
+				// const offset = new Date().getTimezoneOffset() * 60 * 1000;
+				// date.setTime(date.getTime() - offset);
 				const now = new Date();
 				const diff = now.getTime() - date.getTime();
+
+				console.log(now, date, diff, message.station)
+
 				if (diff > 300000) return;
 
 				addPWave(message.station, message.time_stamp, message);
@@ -107,6 +110,8 @@ const onmessage = (event: MessageEvent) => {
 			if (diff > 5000){
 				postMessage(earthquakeDetection);
 			}
+		}else{
+			postMessage(earthquakeDetection);
 		}
 	
 		const date = new Date(creation_date);
