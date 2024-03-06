@@ -3,13 +3,7 @@ import { SeismogramPlotType } from "@/types/_index";
 // import { pWavesData } from "./earthquakeDetection";
 import IndexedDB from "@/lib/IndexedDB";
 import Socket from "@/lib/socket";
-export const pWavesData = new Map<string, SeismogramPlotType[]>(
-	STATIONS_DATA.map((s) => [s.code, [] as SeismogramPlotType[]])
-);
 
-// setInterval(() => {
-// 	console.log(pWavesData, "seismogram")
-// }, 2000);
 console.log("Worker seismogram is running");
 
 const socket = Socket.getInstance().getSocket();
@@ -271,18 +265,19 @@ async function streamStationSeismogram(station: string) {
 			}
 
 			// check if there is p wave
-			let pWave = tempData.pWaves;
-			if (pWave.length > 0) {
-				for (let i = 0; i < pWave.length; i++) {
+			const pWaveData = await IndexedDB.read("pWavesTempData", station);
+			let pWaves = pWaveData?.pWaves || [];
+			if (pWaves.length > 0) {
+				for (let i = 0; i < pWaves.length; i++) {
 					// if the p wave time is not range channelZ time, then skipped
 					if (
-						pWave[i].x[0] < data.channelZ.x[0] ||
-						pWave[i].x[0] > data.channelZ.x[data.channelZ.x.length - 1]
+						pWaves[i].x[0] < data.channelZ.x[0] ||
+						pWaves[i].x[0] > data.channelZ.x[data.channelZ.x.length - 1]
 					) {
 						continue;
 					}
 
-					const pWaveTemp = pWave[i];
+					const pWaveTemp = pWaves[i];
 					data.pWaves.push(
 						{
 							...pWaveTemp,
@@ -298,9 +293,8 @@ async function streamStationSeismogram(station: string) {
 						}
 					);
 
-					pWave.splice(i, 1);
+					pWaves.splice(i, 1);
 				}
-				pWavesData.set(station, pWave);
 			}
 
 			// if the current length waves is more than BUFFER, then remove the first BUFFER / 2
@@ -327,11 +321,10 @@ async function streamStationSeismogram(station: string) {
 					const pWaveTime = pWave.x[0];
 					return pWaveTime >= startTime && pWaveTime <= endTime;
 				});
-				pWave = pWave.filter((pWave) => {
+				pWaves = pWaves.filter((pWave) => {
 					const pWaveTime = pWave.x[0];
 					return pWaveTime >= startTime && pWaveTime <= endTime;
 				});
-				pWavesData.set(station, pWave);
 			}
 
 			seismogramData.set(station, data);
@@ -340,6 +333,14 @@ async function streamStationSeismogram(station: string) {
 				keyPath: "station",
 				key: station,
 				data: tempData,
+			});
+			await IndexedDB.write({
+				objectStore: "pWavesTempData",
+				keyPath: "station",
+				key: station,
+				data: {
+					pWaves: pWaves,
+				},
 			});
 
 			postMessage({
@@ -419,19 +420,20 @@ function simulateStationSeismogram(station: string) {
 		}
 
 		// check if there is p wave
-		const pWave = tempData?.pWaves || [];
+		const pWaveData = await IndexedDB.read("pWavesTempData", station);
+		let pWaves = pWaveData?.pWaves || [];
 		// console.log(station, pWave)
-		if (pWave.length > 0) {
-			for (let i = 0; i < pWave.length; i++) {
+		if (pWaves.length > 0) {
+			for (let i = 0; i < pWaves.length; i++) {
 				// if the p wave time is not range channelZ time, then skipped
 				if (
-					pWave[i].x[0] < data.channelZ.x[0] ||
-					pWave[i].x[0] > data.channelZ.x[data.channelZ.x.length - 1]
+					pWaves[i].x[0] < data.channelZ.x[0] ||
+					pWaves[i].x[0] > data.channelZ.x[data.channelZ.x.length - 1]
 				) {
 					continue;
 				}
 
-				const pWaveTemp = pWave[i];
+				const pWaveTemp = pWaves[i];
 				data.pWaves.push(
 					{
 						...pWaveTemp,
@@ -446,11 +448,10 @@ function simulateStationSeismogram(station: string) {
 						yaxis: "y6",
 					}
 				);
-				// console.log("pWave", data);
+				// console.log("pWaves", data);
 
-				pWave.splice(i, 1);
+				pWaves.splice(i, 1);
 			}
-			pWavesData.set(station, pWave);
 		}
 
 		// if the current length waves is more than BUFFER, then remove the first BUFFER / 2
@@ -468,6 +469,19 @@ function simulateStationSeismogram(station: string) {
 			data.pWaves = data.pWaves.filter((pWave) => {
 				const pWaveTime = pWave.x[0];
 				return pWaveTime >= startTime && pWaveTime <= endTime;
+			});
+			pWaves = pWaves.filter((pWave) => {
+				const pWaveTime = pWave.x[0];
+				return pWaveTime >= startTime && pWaveTime <= endTime;
+			});
+
+			await IndexedDB.write({
+				objectStore: "pWavesTempData",
+				keyPath: "station",
+				key: station,
+				data: {
+					pWaves: pWaves,
+				},
 			});
 		}
 

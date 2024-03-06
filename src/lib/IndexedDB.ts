@@ -21,11 +21,19 @@ class IndexedDB {
 				);
 				const store = transaction.objectStore("seismogramTempData");
 				store.clear();
+
+				const transactionPWave = IndexedDB.db.transaction(
+					["pWavesTempData"],
+					"readwrite"
+				);
+				const storePWave = transactionPWave.objectStore("pWavesTempData");
+				storePWave.clear();
 			};
 
 			request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
 				const db = (event.target as IDBOpenDBRequest).result;
 				db.createObjectStore("seismogramTempData", { keyPath: "station" });
+				db.createObjectStore("pWavesTempData", { keyPath: "station" });
 				db.createObjectStore("seismograms", { keyPath: "type" });
 			};
 		});
@@ -77,6 +85,7 @@ class IndexedDB {
 				};
 
 				request.onsuccess = (event_1: Event) => {
+					console.log("Data written to IndexedDB")
 					resolve((event_1.target as IDBRequest).result);
 				};
 			}) as Promise<any>;

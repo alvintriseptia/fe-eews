@@ -78,23 +78,11 @@ const onmessage = (event: MessageEvent) => {
 		};
 	
 		let tempData = {
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
 			pWaves: [],
 		};
 	
 		const tempDataFromIndexedDB = await IndexedDB.read(
-			"seismogramTempData",
+			"pWavesTempData",
 			station
 		);
 	
@@ -121,7 +109,7 @@ const onmessage = (event: MessageEvent) => {
 		pWaveTemp.y.push(20000);
 		tempData.pWaves.push(pWaveTemp);
 		await IndexedDB.write({
-			objectStore: "seismogramTempData",
+			objectStore: "pWavesTempData",
 			keyPath: "station",
 			key: station,
 			data: tempData,
