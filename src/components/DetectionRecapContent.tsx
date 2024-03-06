@@ -194,7 +194,7 @@ class DetectionRecapContent extends Component<DetectionRecapContentProps> {
 					</div>
 				</div>
 
-				<div className="w-full relative -top-24 right-0">
+				<div className="w-full relative -top-20 right-0">
 					{this.state.z_channel.x.length === 0 ? (
 						this.displayError()
 					) : (

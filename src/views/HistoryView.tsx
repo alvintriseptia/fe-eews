@@ -321,20 +321,16 @@ class HistoryView extends React.Component<Props> {
 						</div>
 					</div>
 
-					<div className="col-span-7 relative">
-						<div id="tews-history-map" className={`w-full h-full`}></div>
-						<div className={`w-full absolute bottom-0 right-0 z-[9999] h-[450px] bg-tews-cinder transition-all duration-200 ease-in-out
-							${
-								this.state.recapDetection &&
-								this.state.recapDetection.station
-									? "translate-y-0"
-									: "translate-y-full"
-							}
-						`}>
-							{this.state.recapDetection &&
-								this.state.recapDetection.station && (
-									<DetectionRecapContent {...this.state.recapDetection} />
-								)}
+					<div className="col-span-7">
+						<div className="flex flex-col h-full">
+							<div id="tews-history-map" className={`w-full flex-1`}></div>
+							<div className={`w-full relative h-[410px] bg-tews-cinder transition-all duration-200 ease-in-out`}
+							>
+								{this.state.recapDetection &&
+									this.state.recapDetection.station && (
+										<DetectionRecapContent {...this.state.recapDetection} />
+									)}
+							</div>
 						</div>
 					</div>
 				</section>
