@@ -273,6 +273,10 @@ export default class MainController {
 			clearInterval(this.earthquakeDetectionInterval);
 		} else {
 			this.map.clearWaves();
+			clearTimeout(this.clearTimeout);
+			clearInterval(this.earthquakeDetectionInterval);		
+			this.earthquakeDetection.countdown = 0;
+			this.rerender++;
 			this.clearTimeout = setTimeout(() => {
 				this.earthquakeDetection.setStatusDetection("", "", "", 0);
 				this.map.clearEarthquakeDetection();

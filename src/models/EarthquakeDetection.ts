@@ -71,8 +71,8 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 
 			console.log(data, date.getTime(), this.station);
 
-			//validasi jika data adalah stasiun yang sama dan masih dalam rentang satu menit, maka dilewatkan
-			if (this.station === data.station && this.time_stamp + 60000 > date.getTime()) return;
+			//validasi jika data  masih dalam rentang 5 detik, maka dilewatkan
+			if (this.time_stamp + 5000 > date.getTime()) return;
 
 			const earthquakeDetection: IEarthquakeDetection = {
 				title: "Terdeteksi Gelombang P",

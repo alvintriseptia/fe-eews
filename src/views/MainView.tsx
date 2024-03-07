@@ -78,8 +78,8 @@ class MainView extends React.Component<Props> {
 			(await this.state.controller.getLatestEarthquake()) as IEarthquakeHistory;
 		const latestFeltEarthquake =
 			(await this.state.controller.getLatestFeltEarthquake()) as IEarthquakeHistory;
-		const latestDetection =
-			(await detectionController.getLatestEarthquakeDetection()) as IEarthquakeDetection;
+		const latestDetection = {}
+			//(await detectionController.getLatestEarthquakeDetection()) as IEarthquakeDetection;
 		const style = mapStyle as StyleSpecification;
 		this.state.controller.showMap({
 			id: "tews-map",
