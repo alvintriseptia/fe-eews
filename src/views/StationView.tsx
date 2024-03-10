@@ -189,7 +189,7 @@ class StationView extends React.Component {
 								{this.state.filteredSeismogramStations.map((station, index) => {
 									return (
 										<div key={index}>
-											<RenderIfVisible defaultHeight={ESTIMATED_ITEM_HEIGHT}>
+											{/* <RenderIfVisible defaultHeight={ESTIMATED_ITEM_HEIGHT}> */}
 												<div className="relative">
 													{/* button disabled and title */}
 													<div className="flex gap-x-4 items-center relative z-20 translate-x-20">
@@ -211,7 +211,7 @@ class StationView extends React.Component {
 														showTitle={false}
 													/>
 												</div>
-											</RenderIfVisible>
+											{/* </RenderIfVisible> */}
 										</div>
 									);
 								})}

@@ -3,7 +3,7 @@ import React from "react";
 
 class LegendMap extends React.Component {
 	state = {
-		open: false
+		open: false,
 	};
 
 	render() {
@@ -21,21 +21,42 @@ class LegendMap extends React.Component {
 			</div>
 		`;
 
-		const hypocenterLegend = `
+		const epicenterLegend = `
 			<div class="flex items-center gap-x-2">
 				<div class="font-bold text-xl text-red-500 drop-shadow-[2px_2px_0_rgba(255,255,255,0.8)]">
 					&#x2715;
 				</div>
-				<p class="text-sm text-white">Hypocenter</p>
+				<p class="text-sm text-white">Epicenter</p>
 			</div>
 		`;
 
-		const legends = [pWaveLegend, sWaveLegend, hypocenterLegend];
+		const stationNetworks = {
+			green: "<10s",
+			yellow: "<1m",
+			orange: "<3m",
+			red: "<30m",
+			grey: "<1d",
+			black: ">1d",
+		};
+
+		let stationNetworksLegend = `<div class="text-white"> Latency </div>`;
+		for (const [key, value] of Object.entries(stationNetworks)) {
+			stationNetworksLegend += `
+			<div class="flex items-center gap-x-2">
+				<div class="station-marker" style="${key == "black" ? "border-bottom: 16px solid #333" : `border-bottom: 16px solid ${key}`}"></div>
+				<div class="station-marker__code text-white text-sm text-center">${value}</div>
+			</div>
+			`;
+		}
+
+		const legends = [pWaveLegend, sWaveLegend, epicenterLegend, stationNetworksLegend];
 
 		return (
 			<section className="absolute right-4 top-12 z-30">
 				<button
-					className={`bg-white hover:bg-gray-300 transition-all duration-200 ease-in-out rounded-md p-1 ${this.state.open && 'bg-gray-300'}`}
+					className={`bg-white hover:bg-gray-300 transition-all duration-200 ease-in-out rounded-md p-1 ${
+						this.state.open && "bg-gray-300"
+					}`}
 					onClick={() => this.setState({ open: !this.state.open })}
 				>
 					<InformationCircleIcon className="w-6 h-6" />
