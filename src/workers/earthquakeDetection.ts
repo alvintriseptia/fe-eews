@@ -1,6 +1,6 @@
 import { IEarthquakeDetection } from "@/entities/_index";
 import STATIONS_DATA from "@/assets/data/stations.json";
-import Socket from "@/lib/socket";
+import Socket from "@/lib/Socket";
 import IndexedDB from "@/lib/IndexedDB";
 const socket = Socket.getInstance().getSocket();
 

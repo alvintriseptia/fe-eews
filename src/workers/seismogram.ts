@@ -2,7 +2,7 @@ import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
 // import { pWavesData } from "./earthquakeDetection";
 import IndexedDB from "@/lib/IndexedDB";
-import Socket from "@/lib/socket";
+import Socket from "@/lib/Socket";
 
 console.log("Worker seismogram is running");
 

@@ -456,6 +456,17 @@ class TEWSMap implements IMap {
 		if (this.stationMarker) {
 			this.stationMarker.remove();
 		}
+
+		this.map.flyTo({
+			center: [this.initialViewState.longitude, this.initialViewState.latitude],
+			zoom: this.zoom,
+			speed: 1.4,
+			curve: 1,
+			easing(t) {
+				return t;
+			},
+			essential: true,
+		});
 	}
 
 	simulateWaves(pWave: any, sWave: any) {
@@ -531,11 +542,13 @@ class TEWSMap implements IMap {
 				${eq.mag?.toFixed(1)}
 			</div>
 			`;
-
+			const date = new Date(eq.time_stamp)
+			const offset = new Date().getTimezoneOffset() * 60 * 1000;
+			date.setTime(date.getTime() - offset);
 			const popupInnerEl = `
 			<div class="text-xs">
 				<div>Magnitude: ${eq.mag?.toFixed(1)}</div>
-				<div>${new Date(eq.time_stamp).toLocaleString()}</div>
+				<div>${date.toLocaleString()}</div>
 				<div>${eq.location || ""}</div>	
 			</div>
 			`;
