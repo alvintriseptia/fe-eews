@@ -11,7 +11,7 @@ export default class Stasiun extends React.Component {
 		return (
 			<>
 				<Head>
-					<title>TEWS</title>
+					<title>TEWS | Stasiun</title>
 				</Head>
 				<StationView />
 			</>
