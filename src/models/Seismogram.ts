@@ -116,9 +116,9 @@ export default class Seismogram implements ISeismogram {
 			for (const obj of Object.entries(data) as any) {
 				const key = obj[0];
 				const dataValue = obj[1];
-				const offset = - (new Date().getTimezoneOffset() * 60 * 1000);
+				// const offset = - (new Date().getTimezoneOffset() * 60 * 1000);
 				const date = new Date(parseInt(key));
-				date.setTime(date.getTime() - offset);
+				// date.setTime(date.getTime() - offset);
 				const seismogramData = {
 					creation_date: date.getTime(),
 					z_channel: dataValue.Z,

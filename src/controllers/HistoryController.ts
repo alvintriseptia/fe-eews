@@ -3,6 +3,7 @@ import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 import { IEarthquakeDetection, IMap } from "@/entities/_index";
 import toast from "react-hot-toast";
 import { CoordinateType } from "@/types/_index";
+import { clearGlobalAppDefaultCred } from "firebase-admin/lib/app/credential-factory";
 
 interface IEarthquakeDetectionResponse {
 	data: IEarthquakeDetection[];
@@ -106,6 +107,7 @@ export default class HistoryController {
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
 			const date = new Date(time_stamp);
 			date.setTime(date.getTime() - offset);
+			console.log(date);
 			// 1 minute before
 			const start_date = date.getTime() - 1 * 60 * 1000;
 			// 1 minute after

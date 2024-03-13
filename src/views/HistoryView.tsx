@@ -164,6 +164,8 @@ class HistoryView extends React.Component<Props> {
     });
 
     let date = new Date(earthquake.time_stamp);
+    const offset = -(date.getTimezoneOffset() / 60);
+    date.setHours(date.getHours() + offset);
     const pWaveTemp = {
       x: [date.getTime(), date.getTime()],
       y: [0, 5000],
