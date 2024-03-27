@@ -3,7 +3,7 @@ import { IStation } from "@/entities/_index";
 import Seismogram from "./Seismogram";
 import IndexedDB from "@/lib/IndexedDB";
 
-const stations = STATIONS_DATA as IStation[];
+// let stations = [] as IStation[];
 
 /**
  * Represents a Station.
@@ -40,6 +40,29 @@ class Station implements IStation {
 	creation_date: string;
 	elevation: number;
 	description: string;
+	stations: IStation[]
+
+	getStations() {
+		return this.stations;
+	}
+
+	async initStationsFromDB() {
+		try {
+			const response = await fetch(`http://localhost:3333/stations`);
+			const jsonData = await response.json();
+			console.log("Station.ts.initStationsFromDB")
+
+			if(!jsonData.error){
+				this.stations = jsonData.data as IStation[];
+				return;
+			} 
+
+			throw new Error(jsonData.error.message)
+
+		} catch (error) {
+			throw new Error(error)
+		} 
+	}
 
 	/**
 	 * Fetches all saved stations from local storage.
@@ -70,6 +93,21 @@ class Station implements IStation {
 				"enabled_seismograms"
 			)) as string[] | null;
 
+			if (!this.stations) {
+				const indexStation = (await IndexedDB.read("stations", "stations")) as IStation[];
+				if (!indexStation) {
+					await this.initStationsFromDB()
+					await IndexedDB.write({
+						objectStore: "stations",
+						keyPath: "stations",
+						key: "stations",
+						data: this.stations
+					});
+				} else {
+					this.stations = indexStation
+				}
+			}
+
 			// if both enabled_seismograms and disabled_seismograms are null,
 			// then save the default stations to indexedDB enabled_seismograms
 			if (!enabled_seismograms) {
@@ -77,7 +115,7 @@ class Station implements IStation {
 					objectStore: "seismograms",
 					keyPath: "type",
 					key: "enabled_seismograms",
-					data: stations.map((s) => s.code),
+					data: this.stations.map((s) => s.code),
 				});
 			}
 
@@ -126,10 +164,10 @@ class Station implements IStation {
 				objectStore: "seismograms",
 				keyPath: "type",
 				key: "enabled_seismograms",
-				data: stations.map((s) => s.code),
+				data: this.stations.map((s) => s.code),
 			});
 
-			for (let station of stations) {
+			for (let station of this.stations) {
 				newSeismograms.set(station.code, new Seismogram(station.code));
 			}
 

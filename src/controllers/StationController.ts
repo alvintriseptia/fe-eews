@@ -65,6 +65,14 @@ class StationController {
 		}
 	}
 
+	async getDBStation() {
+		if (this.seismograms.size === 0) {
+			await this.initStations();
+		}
+	
+		return this.station.stations;
+	}
+
 	async initStations() {
 		try {
 			const newSeismograms = await this.station.initStations();

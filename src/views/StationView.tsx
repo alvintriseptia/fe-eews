@@ -59,9 +59,13 @@ class StationView extends React.Component {
 			}
 		});
 
-		observe(this.state.controller, "seismograms", (change) => {
+		observe(this.state.controller, "seismograms", async (change) => {
+			const stations = await this.state.controller.getDBStation()
+			console.log(stations)
 			if (change.newValue) {
-				let newFilteredSeismogramStations = STATIONS_DATA.filter((station) => {
+				console.log("Change")
+				console.log(change.newValue)
+				let newFilteredSeismogramStations = stations.filter((station) => {
 					return change.newValue.has(station.code);
 				});
 
@@ -76,11 +80,11 @@ class StationView extends React.Component {
 				}
 
 				this.setState({
-					seismogramStations: STATIONS_DATA.filter((station) => {
+					seismogramStations: stations.filter((station) => {
 						return change.newValue.has(station.code);
 					}),
 					filteredSeismogramStations: newFilteredSeismogramStations,
-					disabledSeismogramStations: STATIONS_DATA.filter((station) => {
+					disabledSeismogramStations: stations.filter((station) => {
 						return !change.newValue.has(station.code);
 					}),
 				});
@@ -89,7 +93,7 @@ class StationView extends React.Component {
 
 		await this.state.controller.initStations();
 		await this.state.controller.connectAllSeismogram("realtime");
-
+		
 		this.state.mainController.connectEarthquakeDetection();
 	}
 

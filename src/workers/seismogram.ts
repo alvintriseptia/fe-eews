@@ -3,59 +3,67 @@ import { SeismogramPlotType } from "@/types/_index";
 // import { pWavesData } from "./earthquakeDetection";
 import IndexedDB from "@/lib/IndexedDB";
 import Socket from "@/lib/Socket";
+import Station from "@/models/Station";
 
 console.log("Worker seismogram is running");
 
 const socket = Socket.getInstance().getSocket();
-const stations = STATIONS_DATA;
-const seismogramSockets = {
-	...stations.map((s) => [s.code, null]),
-};
-const seismogramInterval = {
-	...stations.map((s) => [s.code, null]),
-};
-const seismogramData = new Map<string, SeismogramDataType>(
-	stations.map((s) => [
-		s.code,
-		{
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
-			pWaves: [],
-			currentIndex: 0,
-		},
-	])
-);
-const seismogramHistoryData = new Map<string, SeismogramDataType>(
-	stations.map((s) => [
-		s.code,
-		{
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
-			pWaves: [],
-			currentIndex: 0,
-		},
-	])
-);
+// const stations = STATIONS_DATA;
+// const seismogramSockets = {
+// 	...stations.map((s) => [s.code, null]),
+// };
+// const seismogramInterval = {
+// 	...stations.map((s) => [s.code, null]),
+// };
+// const seismogramData = new Map<string, SeismogramDataType>(
+// 	stations.map((s) => [
+// 		s.code,
+// 		{
+// 			channelZ: {
+// 				x: [],
+// 				y: [],
+// 			},
+// 			channelN: {
+// 				x: [],
+// 				y: [],
+// 			},
+// 			channelE: {
+// 				x: [],
+// 				y: [],
+// 			},
+// 			pWaves: [],
+// 			currentIndex: 0,
+// 		},
+// 	])
+// );
+// const seismogramHistoryData = new Map<string, SeismogramDataType>(
+// 	stations.map((s) => [
+// 		s.code,
+// 		{
+// 			channelZ: {
+// 				x: [],
+// 				y: [],
+// 			},
+// 			channelN: {
+// 				x: [],
+// 				y: [],
+// 			},
+// 			channelE: {
+// 				x: [],
+// 				y: [],
+// 			},
+// 			pWaves: [],
+// 			currentIndex: 0,
+// 		},
+// 	])
+// );
+
+
+let stations = [];
+let seismogramSockets = {};
+let seismogramInterval = {};
+let seismogramData = new Map();
+let seismogramHistoryData = new Map();
 
 const SAMPLING_RATE = 60;
 const FREQUENCY_UPDATE = 3000;
@@ -78,7 +86,33 @@ export type SeismogramTempDataType = {
 };
 
 const onmessage = async (event: MessageEvent) => {
-	const { station, message, mode, start_date, end_date, type } = event.data;
+	// Init station data
+	const stationModel = new Station();
+	await stationModel.initStations()
+	stations = stationModel.getStations()
+
+	// Initialize seismogramSockets, seismogramInterval, seismogramData, and seismogramHistoryData
+	stations.forEach(s => {
+		seismogramSockets[s.code] = null;
+		seismogramInterval[s.code] = null;
+		seismogramData.set(s.code, {
+			channelZ: { x: [], y: [] },
+			channelN: { x: [], y: [] },
+			channelE: { x: [], y: [] },
+			pWaves: [],
+			currentIndex: 0,
+		});
+		seismogramHistoryData.set(s.code, {
+			channelZ: { x: [], y: [] },
+			channelN: { x: [], y: [] },
+			channelE: { x: [], y: [] },
+			pWaves: [],
+			currentIndex: 0,
+		});
+	});
+
+
+	const { station, message, mode, start_date, end_date, type } = event.data;	
 	const stationData = stations.find((s) => s.code === station);
 
 	if (type == "seismogram") {
@@ -111,8 +145,8 @@ const onmessage = async (event: MessageEvent) => {
 async function streamStationSeismogram(station: string) {
 	seismogramSockets[station] = socket;
 	seismogramSockets[station].on(`waves-data-${station}`, async (data: any) => {
-		// console.log("get websocket data ", station, data);
 		// get data from indexedDB
+		console.log(data)
 		let tempData = {
 			channelZ: {
 				x: [],
@@ -147,6 +181,7 @@ async function streamStationSeismogram(station: string) {
 		// loop object data
 		for (const key in data) {
 			const value = data[key];
+			// console.log(new Date(parseInt(key.split("/")[1])));
 			const time = new Date(parseInt(key.split("/")[1]));
 			if (time.getTime() <= lastTimeData) {
 				skippedData.push(time.getTime());
