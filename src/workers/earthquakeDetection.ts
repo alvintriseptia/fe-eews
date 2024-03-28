@@ -51,16 +51,16 @@ const onmessage = (event: MessageEvent) => {
 				// check timestamp, jika lebih dari 5 menit, maka diskip
 				const date = new Date(message.time_stamp);
 				// timezone in local
-				const offset = new Date().getTimezoneOffset() * 60 * 1000;
-				date.setTime(date.getTime() - offset);
+				// const offset = new Date().getTimezoneOffset() * 60 * 1000;
+				// date.setTime(date.getTime() - offset);
 				const now = new Date();
-				const diff = now.getTime() - date.getTime();
+				// const diff = now.getTime() - date.getTime();
+				const diff = 0;
 				message.time_stamp = date.getTime();
 
 				console.log(now, date, diff, message.station)
 
 				if (diff > 300000) return;
-
 				addPWave(message.station, date.getTime(), message);
 			});
 		}

@@ -63,8 +63,6 @@ class StationView extends React.Component {
 			const stations = await this.state.controller.getDBStation()
 			console.log(stations)
 			if (change.newValue) {
-				console.log("Change")
-				console.log(change.newValue)
 				let newFilteredSeismogramStations = stations.filter((station) => {
 					return change.newValue.has(station.code);
 				});
