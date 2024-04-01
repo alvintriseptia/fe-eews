@@ -8,6 +8,11 @@ import IndexedDB from "@/lib/IndexedDB";
 /**
  * Represents a Station.
  */
+// Get API host
+require('dotenv').config(); 
+const apiHost = process.env.API_PORT || "localhost"
+const apiPort = process.env.API_PORT || "3333";
+
 class Station implements IStation {
 	ch1: string;
 	ch2: string;
@@ -48,7 +53,7 @@ class Station implements IStation {
 
 	async initStationsFromDB() {
 		try {
-			const response = await fetch(`http://localhost:3333/stations`);
+			const response = await fetch(`http://${apiHost}:${apiPort}/stations`);
 			const jsonData = await response.json();
 
 			if(!jsonData.error){

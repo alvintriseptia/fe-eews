@@ -1,6 +1,11 @@
 import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 
+// Get API host
+require('dotenv').config(); 
+const apiHost = process.env.API_PORT || "localhost"
+const apiPort = process.env.API_PORT || "3333";
+
 export default class EarthquakeDetection implements IEarthquakeDetection {
 	title: string;
 	description: string;
@@ -113,7 +118,7 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 
 	async fetchHistoryEarthquakeDetection(start_date: number, end_date: number) {
 		try {
-			const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}&limit=20`;
+			const url = `http://${apiHost}:${apiPort}/history?start_date=${start_date}&end_date=${end_date}&limit=20`;
 
 			const response = await fetch(url);
 			const data = await response.json();
@@ -134,7 +139,7 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 			// ubah milliseconds menjadi format unix
 			start_date = Math.floor(start_date);
 			end_date = Math.floor(end_date);
-			const url = `http://localhost:3333/export?start_date=${start_date}&end_date=${end_date}`;
+			const url = `http://${apiHost}:${apiPort}/export?start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
 

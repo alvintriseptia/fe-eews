@@ -13,6 +13,7 @@
     "@heroicons/react": "^2.0.18",
     "@turf/turf": "^6.5.0",
     "cookies-next": "^2.1.2",
+    "dotenv": "^16.4.5",
     "firebase": "^10.7.0",
     "firebase-admin": "^11.11.1",
     "maplibre-gl": "^3.6.1",
@@ -38,6 +39,7 @@
     "eslint": "8.54.0",
     "eslint-config-next": "^12.3.4",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.5"
+    "tailwindcss": "^3.3.5",
+    "typescript": "5.4.3"
   }
 }
