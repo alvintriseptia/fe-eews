@@ -6,8 +6,8 @@ const MAX_INT = 2147483647;
 
 // Get API host
 require('dotenv').config(); 
-const apiHost = process.env.API_PORT || "localhost"
-const apiPort = process.env.API_PORT || "3333";
+const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost"
+const apiPort = process.env.NEXT_PUBLIC_API_PORT || "3333";
 
 export default class Seismogram implements ISeismogram {
 	creation_date: number;
@@ -108,7 +108,7 @@ export default class Seismogram implements ISeismogram {
 			// to unix
 			start_date = start_date;
 			end_date = end_date;
-			const url = `http://${apiHost}:${apiPort}/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
+			const url = `${apiHost}:${apiPort}/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
 

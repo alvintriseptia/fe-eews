@@ -16,8 +16,8 @@ let seismogramHistoryData = new Map();
 
 // Get API host
 require('dotenv').config(); 
-const apiHost = process.env.API_PORT || "localhost"
-const apiPort = process.env.API_PORT || "3333";
+const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost"
+const apiPort = process.env.NEXT_PUBLIC_API_PORT || "3333";
 
 const SAMPLING_RATE = 60;
 const FREQUENCY_UPDATE = 3000;
@@ -557,7 +557,7 @@ async function getHistoryStationSeismogram(
 	isFetching = true;
 	console.log("get history data");
 	const response = await fetch(
-		`http://${apiHost}:${apiPort}/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`
+		`${apiHost}:${apiPort}/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`
 	);
 	let data = await response.json();
 	if (data.message) {
