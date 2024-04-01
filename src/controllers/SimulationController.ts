@@ -6,6 +6,7 @@ import {
 	Map as TEWSMap,
 	Notification,
 	Seismogram,
+	Station
 } from "@/models/_index";
 import { CoordinateType, RegionType } from "@/types/_index";
 import {
@@ -24,6 +25,7 @@ import * as turf from "@turf/turf";
  */
 export default class SimulationController {
 	private earthquakeHistory = new EarthquakeHistory();
+	private station = new Station();
 	private notificationEarthquakeDetection = new Notification();
 	private notificationEarthquake = new Notification();
 	private notificationSWaveAffected = new Notification();
@@ -132,7 +134,7 @@ export default class SimulationController {
 
 	async displayEarthquakeDetection() {
 		// GET RANDOM STATION (TESTING)
-		const stasiun = STATIONS_DATA.find(
+		const stasiun = this.station.getStationData().find(
 			(station) => station.code === this.earthquakeDetection.station
 		);
 

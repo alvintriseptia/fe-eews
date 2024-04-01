@@ -42,7 +42,7 @@ class Station implements IStation {
 	description: string;
 	stations: IStation[]
 
-	getStations() {
+	getStationData() {
 		return this.stations;
 	}
 
@@ -50,7 +50,6 @@ class Station implements IStation {
 		try {
 			const response = await fetch(`http://localhost:3333/stations`);
 			const jsonData = await response.json();
-			console.log("Station.ts.initStationsFromDB")
 
 			if(!jsonData.error){
 				this.stations = jsonData.data as IStation[];
@@ -95,7 +94,10 @@ class Station implements IStation {
 
 			if (!this.stations) {
 				const indexStation = (await IndexedDB.read("stations", "stations")) as IStation[];
-				if (!indexStation) {
+				const expiry = (await IndexedDB.read("stations", "expiry") ?? Date.now() - 5 * 1000) as number;
+				
+				if (!indexStation || expiry <= Date.now()) {
+					console.log("Pulling station data from database...")
 					await this.initStationsFromDB()
 					await IndexedDB.write({
 						objectStore: "stations",
@@ -103,7 +105,24 @@ class Station implements IStation {
 						key: "stations",
 						data: this.stations
 					});
+
+					const expirySeconds = 60;
+					await IndexedDB.write({
+						objectStore: "stations",
+						keyPath: "stations",
+						key: "expiry",
+						data: Date.now() + (expirySeconds * 1000)
+					});
+
+					await IndexedDB.write({
+						objectStore: "seismograms",
+						keyPath: "type",
+						key: "enabled_seismograms",
+						data: this.stations.map((s) => s.code),
+					});
+					console.log("Done!")
 				} else {
+					console.log("Expired at: " + new Date(expiry))
 					this.stations = indexStation
 				}
 			}

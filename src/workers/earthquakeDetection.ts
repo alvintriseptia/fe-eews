@@ -58,8 +58,6 @@ const onmessage = (event: MessageEvent) => {
 				const diff = 0;
 				message.time_stamp = date.getTime();
 
-				console.log(now, date, diff, message.station)
-
 				if (diff > 300000) return;
 				addPWave(message.station, date.getTime(), message);
 			});

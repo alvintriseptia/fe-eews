@@ -62,7 +62,6 @@ class MainView extends React.Component<Props> {
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		countdown: 0,
 		seismogramStations: [] as IStation[],
-		stations: STATIONS_DATA as IStation[],
 	};
 	constructor(props: Props) {
 		super(props);
@@ -146,10 +145,11 @@ class MainView extends React.Component<Props> {
 			}
 		});
 
-		observe(this.state.stationController, "seismograms", (change) => {
+		observe(this.state.stationController, "seismograms", async (change) => {
 			if (change.newValue) {
+				const stations = await this.state.stationController.getStations();
 				this.setState({
-					seismogramStations: STATIONS_DATA.filter((station) => {
+					seismogramStations: stations.filter((station) => {
 						return change.newValue.has(station.code);
 					}),
 				});

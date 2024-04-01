@@ -70,7 +70,7 @@ class StationController {
 			await this.initStations();
 		}
 	
-		return this.station.stations;
+		return this.station.getStationData();
 	}
 
 	async initStations() {

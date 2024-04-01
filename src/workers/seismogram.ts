@@ -8,57 +8,6 @@ import Station from "@/models/Station";
 console.log("Worker seismogram is running");
 
 const socket = Socket.getInstance().getSocket();
-// const stations = STATIONS_DATA;
-// const seismogramSockets = {
-// 	...stations.map((s) => [s.code, null]),
-// };
-// const seismogramInterval = {
-// 	...stations.map((s) => [s.code, null]),
-// };
-// const seismogramData = new Map<string, SeismogramDataType>(
-// 	stations.map((s) => [
-// 		s.code,
-// 		{
-// 			channelZ: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			channelN: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			channelE: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			pWaves: [],
-// 			currentIndex: 0,
-// 		},
-// 	])
-// );
-// const seismogramHistoryData = new Map<string, SeismogramDataType>(
-// 	stations.map((s) => [
-// 		s.code,
-// 		{
-// 			channelZ: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			channelN: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			channelE: {
-// 				x: [],
-// 				y: [],
-// 			},
-// 			pWaves: [],
-// 			currentIndex: 0,
-// 		},
-// 	])
-// );
-
-
 let stations = [];
 let seismogramSockets = {};
 let seismogramInterval = {};
@@ -89,7 +38,7 @@ const onmessage = async (event: MessageEvent) => {
 	// Init station data
 	const stationModel = new Station();
 	await stationModel.initStations()
-	stations = stationModel.getStations()
+	stations = stationModel.getStationData()
 
 	// Initialize seismogramSockets, seismogramInterval, seismogramData, and seismogramHistoryData
 	stations.forEach(s => {
@@ -146,7 +95,6 @@ async function streamStationSeismogram(station: string) {
 	seismogramSockets[station] = socket;
 	seismogramSockets[station].on(`waves-data-${station}`, async (data: any) => {
 		// get data from indexedDB
-		console.log(data)
 		let tempData = {
 			channelZ: {
 				x: [],

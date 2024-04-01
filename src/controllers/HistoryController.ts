@@ -84,6 +84,7 @@ export default class HistoryController {
 				};
 			}
 		} catch (error) {
+			console.log(error)
 			return {
 				data: [],
 				total: 0,
@@ -107,7 +108,6 @@ export default class HistoryController {
 			const offset = new Date().getTimezoneOffset() * 60 * 1000;
 			const date = new Date(time_stamp);
 			date.setTime(date.getTime() - offset);
-			console.log(date);
 			// 1 minute before
 			const start_date = date.getTime() - 1 * 60 * 1000;
 			// 1 minute after
