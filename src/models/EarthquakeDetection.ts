@@ -2,7 +2,6 @@ import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 
 // Get API host
-require('dotenv').config(); 
 const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost"
 const apiPort = process.env.NEXT_PUBLIC_API_PORT || "3333";
 
