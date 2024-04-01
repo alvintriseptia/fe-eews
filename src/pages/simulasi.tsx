@@ -111,9 +111,9 @@ export default class Simulation extends React.Component<Props> {
 					mode="simulation"
 					controller={controller}
 					stationController={stationController}
-					weeklyEarthquake={this.props.weeklyEarthquake}
-					navbar={this.props.navbar}
-					sidebarProps={this.props.sidebarProps}
+					// weeklyEarthquake={this.props.weeklyEarthquake}
+					// navbar={this.props.navbar}
+					// sidebarProps={this.props.sidebarProps}
 				/>
 			</>
 		);
