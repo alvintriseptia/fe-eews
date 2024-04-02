@@ -76,7 +76,7 @@ class StationController {
 		}
 	}
 
-	async enableStation(station: string) {
+	async enableStation(mode: string, station: string) {
 		try {
 			const newSeismograms = await this.station.enableStation(
 				station,
@@ -84,6 +84,7 @@ class StationController {
 			);
 			if (newSeismograms) {
 				this.seismograms = new Map(newSeismograms);
+				this.connectSeismogram(mode, station);
 				toast.success(`Stasiun ${station} telah diaktifkan`);
 			}
 		} catch (error) {
@@ -91,11 +92,12 @@ class StationController {
 		}
 	}
 
-	async enableAllStations() {
+	async enableAllStations(mode: string) {
 		try {
 			const newSeismograms = await this.station.enableAllStations();
 			if (newSeismograms) {
 				this.seismograms = new Map(newSeismograms);
+				this.connectAllSeismogram(mode);
 				toast.success("Semua stasiun telah diaktifkan");
 			}
 		} catch (error) {
@@ -107,9 +109,10 @@ class StationController {
 		try {
 			const newSeismograms = await this.station.disableStation(
 				station,
-				this.seismograms
+				new Map(this.seismograms)
 			);
 			if (newSeismograms) {
+				this.disconnectSeismogram(station);
 				this.seismograms = new Map(newSeismograms);
 				toast.success(`Stasiun ${station} telah dinonaktifkan`);
 			}

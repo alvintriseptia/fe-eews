@@ -2,6 +2,7 @@ import { IEarthquakeDetection } from "@/entities/_index";
 import STATIONS_DATA from "@/assets/data/stations.json";
 import Socket from "@/lib/Socket";
 import IndexedDB from "@/lib/IndexedDB";
+import { SeismogramPlotType } from "@/types/_index";
 const socket = Socket.getInstance().getSocket();
 
 console.log("Worker earthquakeDetection is running");
@@ -57,7 +58,7 @@ const onmessage = (event: MessageEvent) => {
 				const diff = now.getTime() - date.getTime();
 				message.time_stamp = date.getTime();
 
-				console.log(now, date, diff, message.station)
+				console.log(now, date, diff, message.station);
 
 				if (diff > 300000) return;
 
@@ -66,49 +67,41 @@ const onmessage = (event: MessageEvent) => {
 		}
 	}
 
-	async function addPWave(station: string, creation_date: number, earthquakeDetection: object) {
-		const pWaveTemp = {
-			x: [] as Array<number>,
-			y: [] as Array<number>,
-			line: {
-				color: "#FF0000",
-				width: 2,
-			},
-			showlegend: false,
-			xaxis: "x",
-		};
-	
+	async function addPWave(
+		station: string,
+		creation_date: number,
+		earthquakeDetection: object
+	) {
 		let tempData = {
-			pWaves: [],
+			pWaves: [] as SeismogramPlotType[],
 		};
-	
+
 		const tempDataFromIndexedDB = await IndexedDB.read(
 			"pWavesTempData",
 			station
 		);
-	
+
 		if (tempDataFromIndexedDB !== null) {
 			tempData = tempDataFromIndexedDB;
 		}
-	
+
 		//check jika data terakhir dengan data yang baru kurang dari 5 detik, tidak perlu postMessage
 		if (tempData.pWaves.length > 0) {
 			const lastData = tempData.pWaves[tempData.pWaves.length - 1];
-			const lastDate = lastData.x[lastData.x.length - 1];
+			const lastDate = lastData.x;
 			const diff = creation_date - lastDate;
-			if (diff > 5000){
+			if (diff > 5000) {
 				postMessage(earthquakeDetection);
 			}
-		}else{
+		} else {
 			postMessage(earthquakeDetection);
 		}
-	
+
 		const date = new Date(creation_date);
-		pWaveTemp.x.push(date.getTime());
-		pWaveTemp.y.push(0);
-		pWaveTemp.x.push(date.getTime());
-		pWaveTemp.y.push(20000);
-		tempData.pWaves.push(pWaveTemp);
+		tempData.pWaves.push({
+			x: date.getTime(),
+			y: 0,
+		});
 		await IndexedDB.write({
 			objectStore: "pWavesTempData",
 			keyPath: "station",

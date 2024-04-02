@@ -18,18 +18,9 @@ const seismogramData = new Map<string, SeismogramDataType>(
 	stations.map((s) => [
 		s.code,
 		{
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
+			channelZ: [],
+			channelN: [],
+			channelE: [],
 			pWaves: [],
 			currentIndex: 0,
 		},
@@ -39,42 +30,33 @@ const seismogramHistoryData = new Map<string, SeismogramDataType>(
 	stations.map((s) => [
 		s.code,
 		{
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
+			channelZ: [],
+			channelN: [],
+			channelE: [],
 			pWaves: [],
 			currentIndex: 0,
 		},
 	])
 );
 
-const SAMPLING_RATE = 60;
-const FREQUENCY_UPDATE = 3000;
-const BUFFER = 3600;
+const SAMPLING_RATE = 5;
+const FREQUENCY_UPDATE = 1000;
+const BUFFER = 12000;
 let isFetching = false;
 
 export type SeismogramDataType = {
-	channelZ: SeismogramPlotType;
-	channelN: SeismogramPlotType;
-	channelE: SeismogramPlotType;
-	pWaves: any[];
+	channelZ: SeismogramPlotType[];
+	channelN: SeismogramPlotType[];
+	channelE: SeismogramPlotType[];
+	pWaves: SeismogramPlotType[];
 	currentIndex: number;
 };
 
 export type SeismogramTempDataType = {
-	channelZ: SeismogramPlotType;
-	channelN: SeismogramPlotType;
-	channelE: SeismogramPlotType;
-	pWaves: any[];
+	channelZ: SeismogramPlotType[];
+	channelN: SeismogramPlotType[];
+	channelE: SeismogramPlotType[];
+	pWaves: SeismogramPlotType[];
 };
 
 const onmessage = async (event: MessageEvent) => {
@@ -83,7 +65,11 @@ const onmessage = async (event: MessageEvent) => {
 
 	if (type == "seismogram") {
 		if (mode === "simulation") {
-			simulateStationSeismogram(station);
+			if (stationData && message === "stop") {
+				stopStationSeismogram(stationData.code);
+			} else {
+				simulateStationSeismogram(station);
+			}
 		} else {
 			if (stationData && message === "stream") {
 				streamStationSeismogram(station);
@@ -114,19 +100,10 @@ async function streamStationSeismogram(station: string) {
 		// console.log("get websocket data ", station, data);
 		// get data from indexedDB
 		let tempData = {
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
-			pWaves: [],
+			channelZ: [] as SeismogramPlotType[],
+			channelN: [] as SeismogramPlotType[],
+			channelE: [] as SeismogramPlotType[],
+			pWaves: [] as SeismogramPlotType[],
 		};
 
 		const tempDataFromIndexedDB = await IndexedDB.read(
@@ -140,8 +117,8 @@ async function streamStationSeismogram(station: string) {
 
 		// get x last data from tempData
 		let lastTimeData =
-			tempData.channelZ.x.length > 0
-				? tempData.channelZ.x[tempData.channelZ.x.length - 1]
+			tempData.channelZ.length > 0
+				? tempData.channelZ[tempData.channelZ.length - 1].x
 				: 0;
 		const skippedData = [];
 		// loop object data
@@ -153,12 +130,18 @@ async function streamStationSeismogram(station: string) {
 				continue;
 			}
 			lastTimeData = time.getTime();
-			tempData.channelZ.x.push(time.getTime());
-			tempData.channelZ.y.push(value.Z);
-			tempData.channelN.x.push(time.getTime());
-			tempData.channelN.y.push(value.N);
-			tempData.channelE.x.push(time.getTime());
-			tempData.channelE.y.push(value.E);
+			tempData.channelZ.push({
+				x: time.getTime(),
+				y: value.Z,
+			});
+			tempData.channelN.push({
+				x: time.getTime(),
+				y: value.N,
+			});
+			tempData.channelE.push({
+				x: time.getTime(),
+				y: value.E,
+			});
 		}
 
 		if (skippedData.length > 0) {
@@ -181,54 +164,27 @@ async function streamStationSeismogram(station: string) {
 		const currentLength = data.currentIndex;
 
 		const newData = {
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
-			pWaves: [],
+			channelZ: [] as SeismogramPlotType[],
+			channelN: [] as SeismogramPlotType[],
+			channelE: [] as SeismogramPlotType[],
+			pWaves: [] as SeismogramPlotType[],
 		};
 
-		if (currentLength < tempData.channelZ.x.length) {
-			newData.channelZ.x.push(
-				...tempData.channelZ.x.slice(
+		if (currentLength < tempData.channelZ.length) {
+			newData.channelZ.push(
+				...tempData.channelZ.slice(
 					currentLength,
 					currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000
 				)
 			);
-			newData.channelZ.y.push(
-				...tempData.channelZ.y.slice(
+			newData.channelN.push(
+				...tempData.channelN.slice(
 					currentLength,
 					currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000
 				)
 			);
-			newData.channelN.x.push(
-				...tempData.channelN.x.slice(
-					currentLength,
-					currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000
-				)
-			);
-			newData.channelN.y.push(
-				...tempData.channelN.y.slice(
-					currentLength,
-					currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000
-				)
-			);
-			newData.channelE.x.push(
-				...tempData.channelE.x.slice(
-					currentLength,
-					currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000
-				)
-			);
-			newData.channelE.y.push(
-				...tempData.channelE.y.slice(
+			newData.channelE.push(
+				...tempData.channelE.slice(
 					currentLength,
 					currentLength + (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000
 				)
@@ -236,14 +192,14 @@ async function streamStationSeismogram(station: string) {
 
 			// revalidate new data with last time of data
 			let lastTimeData =
-				data.channelZ.x.length > 0
-					? data.channelZ.x[data.channelZ.x.length - 1]
+				data.channelZ.length > 0
+					? data.channelZ[data.channelZ.length - 1].x
 					: 0;
 			const skippedData = [];
 			// loop object data
-			for (let i = 0; i < newData.channelZ.x.length; i++) {
+			for (let i = 0; i < newData.channelZ.length; i++) {
 				data.currentIndex++;
-				const time = newData.channelZ.x[i];
+				const time = newData.channelZ[i].x;
 				if (time <= lastTimeData) {
 					skippedData.push({
 						time: time,
@@ -252,12 +208,18 @@ async function streamStationSeismogram(station: string) {
 					continue;
 				}
 				lastTimeData = time;
-				data.channelZ.x.push(newData.channelZ.x[i]);
-				data.channelZ.y.push(newData.channelZ.y[i]);
-				data.channelN.x.push(newData.channelN.x[i]);
-				data.channelN.y.push(newData.channelN.y[i]);
-				data.channelE.x.push(newData.channelE.x[i]);
-				data.channelE.y.push(newData.channelE.y[i]);
+				data.channelZ.push({
+					x: time,
+					y: newData.channelZ[i].y,
+				});
+				data.channelN.push({
+					x: time,
+					y: newData.channelN[i].y,
+				});
+				data.channelE.push({
+					x: time,
+					y: newData.channelE[i].y,
+				});
 			}
 
 			if (skippedData.length > 0) {
@@ -266,13 +228,13 @@ async function streamStationSeismogram(station: string) {
 
 			// check if there is p wave
 			const pWaveData = await IndexedDB.read("pWavesTempData", station);
-			let pWaves = pWaveData?.pWaves || [];
+			let pWaves = pWaveData?.pWaves || ([] as SeismogramPlotType[]);
 			if (pWaves.length > 0) {
 				for (let i = 0; i < pWaves.length; i++) {
 					// if the p wave time is not range channelZ time, then skipped
 					if (
-						pWaves[i].x[0] < data.channelZ.x[0] ||
-						pWaves[i].x[0] > data.channelZ.x[data.channelZ.x.length - 1]
+						pWaves[i].x[0] < data.channelZ[0] ||
+						pWaves[i].x[0] > data.channelZ[data.channelZ.length - 1].x
 					) {
 						continue;
 					}
@@ -280,16 +242,16 @@ async function streamStationSeismogram(station: string) {
 					const pWaveTemp = pWaves[i];
 					data.pWaves.push(
 						{
-							...pWaveTemp,
-							yaxis: "y4",
+							x: pWaveTemp.x,
+							y: -100000,
 						},
 						{
-							...pWaveTemp,
-							yaxis: "y5",
+							x: pWaveTemp.x,
+							y: 100000,
 						},
 						{
-							...pWaveTemp,
-							yaxis: "y6",
+							x: null,
+							y: null,
 						}
 					);
 
@@ -298,31 +260,25 @@ async function streamStationSeismogram(station: string) {
 			}
 
 			// if the current length waves is more than BUFFER, then remove the first BUFFER / 2
-			if (data.channelZ.x.length > BUFFER) {
-				data.channelZ.x.splice(0, BUFFER / 2);
-				data.channelZ.y.splice(0, BUFFER / 2);
-				data.channelN.x.splice(0, BUFFER / 2);
-				data.channelN.y.splice(0, BUFFER / 2);
-				data.channelE.x.splice(0, BUFFER / 2);
-				data.channelE.y.splice(0, BUFFER / 2);
+			if (data.channelZ.length > BUFFER) {
+				data.channelZ.splice(0, BUFFER / 2);
+				data.channelN.splice(0, BUFFER / 2);
+				data.channelE.splice(0, BUFFER / 2);
 
-				tempData.channelZ.x.splice(0, BUFFER / 2);
-				tempData.channelZ.y.splice(0, BUFFER / 2);
-				tempData.channelN.x.splice(0, BUFFER / 2);
-				tempData.channelN.y.splice(0, BUFFER / 2);
-				tempData.channelE.x.splice(0, BUFFER / 2);
-				tempData.channelE.y.splice(0, BUFFER / 2);
+				tempData.channelZ.splice(0, BUFFER / 2);
+				tempData.channelN.splice(0, BUFFER / 2);
+				tempData.channelE.splice(0, BUFFER / 2);
 				data.currentIndex = 0;
 
 				// pwaves
-				const startTime = data.channelZ.x[0];
-				const endTime = data.channelZ.x[data.channelZ.x.length - 1];
+				const startTime = data.channelZ[0].x;
+				const endTime = data.channelZ[data.channelZ.length - 1].x;
 				data.pWaves = data.pWaves.filter((pWave) => {
-					const pWaveTime = pWave.x[0];
+					const pWaveTime = pWave.x;
 					return pWaveTime >= startTime && pWaveTime <= endTime;
 				});
 				pWaves = pWaves.filter((pWave) => {
-					const pWaveTime = pWave.x[0];
+					const pWaveTime = pWave.x;
 					return pWaveTime >= startTime && pWaveTime <= endTime;
 				});
 			}
@@ -345,107 +301,79 @@ async function streamStationSeismogram(station: string) {
 
 			postMessage({
 				station: station,
-				data: {
-					channelZ: {
-						x: seismogramHistoryData
-							.get(station)
-							.channelZ.x.concat(seismogramData.get(station).channelZ.x),
-						y: seismogramHistoryData
-							.get(station)
-							.channelZ.y.concat(seismogramData.get(station).channelZ.y),
-					},
-					channelN: {
-						x: seismogramHistoryData
-							.get(station)
-							.channelN.x.concat(seismogramData.get(station).channelN.x),
-						y: seismogramHistoryData
-							.get(station)
-							.channelN.y.concat(seismogramData.get(station).channelN.y),
-					},
-					channelE: {
-						x: seismogramHistoryData
-							.get(station)
-							.channelE.x.concat(seismogramData.get(station).channelE.x),
-						y: seismogramHistoryData
-							.get(station)
-							.channelE.y.concat(seismogramData.get(station).channelE.y),
-					},
-					pWaves: seismogramHistoryData
-						.get(station)
-						.pWaves.concat(seismogramData.get(station).pWaves),
-				},
+				data: data,
 			});
 		}
 	}, FREQUENCY_UPDATE);
 }
 
 function stopStationSeismogram(station: string) {
-	seismogramSockets[station].disconnect();
-	seismogramSockets[station] = null;
+	if (seismogramSockets[station]) {
+		seismogramSockets[station]?.disconnect();
+		seismogramSockets[station] = null;
+	}
 
-	clearInterval(seismogramInterval[station]);
-	seismogramInterval[station] = null;
+	if (seismogramInterval[station]) {
+		clearInterval(seismogramInterval[station]);
+		seismogramInterval[station] = null;
+	}
 
 	seismogramData[station] = {
-		channelZ: {
-			x: [],
-			y: [],
-		} as SeismogramPlotType,
-		channelN: {
-			x: [],
-			y: [],
-		} as SeismogramPlotType,
-		channelE: {
-			x: [],
-			y: [],
-		} as SeismogramPlotType,
+		channelZ: [] as SeismogramPlotType[],
+		channelN: [] as SeismogramPlotType[],
+		channelE: [] as SeismogramPlotType[],
 		pWaves: [] as SeismogramPlotType[],
 	};
 }
 
 function simulateStationSeismogram(station: string) {
 	seismogramInterval[station] = setInterval(async () => {
-		const tempData = await IndexedDB.read("seismogramTempData", station);
 		const data = seismogramData.get(station);
 		let time = Date.now();
 		for (let i = 0; i < (SAMPLING_RATE * FREQUENCY_UPDATE) / 1000; i++) {
-			data.channelZ.x.push(time);
-			data.channelZ.y.push(Math.random() * 2000 + 500);
-			data.channelN.x.push(time);
-			data.channelN.y.push(Math.random() * 1000 + 200);
-			data.channelE.x.push(time);
-			data.channelE.y.push(Math.random() * 500 + 100);
+			data.channelZ.push({
+				x: time,
+				y: Math.random() * 2000 + 500,
+			});
+			data.channelN.push({
+				x: time,
+				y: Math.random() * 2000 + 500,
+			});
+			data.channelE.push({
+				x: time,
+				y: Math.random() * 2000 + 500,
+			});
 
 			time += 1000 / SAMPLING_RATE;
 		}
 
 		// check if there is p wave
 		const pWaveData = await IndexedDB.read("pWavesTempData", station);
-		let pWaves = pWaveData?.pWaves || [];
+		let pWaves = pWaveData?.pWaves || ([] as SeismogramPlotType[]);
 		// console.log(station, pWave)
 		if (pWaves.length > 0) {
 			for (let i = 0; i < pWaves.length; i++) {
 				// if the p wave time is not range channelZ time, then skipped
 				if (
-					pWaves[i].x[0] < data.channelZ.x[0] ||
-					pWaves[i].x[0] > data.channelZ.x[data.channelZ.x.length - 1]
+					pWaves[i].x[0] < data.channelZ[0].x ||
+					pWaves[i].x[0] > data.channelZ[data.channelZ.length - 1].x
 				) {
 					continue;
 				}
 
-				const pWaveTemp = pWaves[i];
+				const pWaveTemp = pWaves[i] as SeismogramPlotType;
 				data.pWaves.push(
 					{
-						...pWaveTemp,
-						yaxis: "y4",
+						x: pWaveTemp.x,
+						y: -100000,
 					},
 					{
-						...pWaveTemp,
-						yaxis: "y5",
+						x: pWaveTemp.x,
+						y: 100000,
 					},
 					{
-						...pWaveTemp,
-						yaxis: "y6",
+						x: null,
+						y: null,
 					}
 				);
 				// console.log("pWaves", data);
@@ -455,23 +383,20 @@ function simulateStationSeismogram(station: string) {
 		}
 
 		// if the current length waves is more than BUFFER, then remove the first BUFFER / 2
-		if (data.channelZ.x.length > BUFFER) {
-			data.channelZ.x.splice(0, BUFFER / 2);
-			data.channelZ.y.splice(0, BUFFER / 2);
-			data.channelN.x.splice(0, BUFFER / 2);
-			data.channelN.y.splice(0, BUFFER / 2);
-			data.channelE.x.splice(0, BUFFER / 2);
-			data.channelE.y.splice(0, BUFFER / 2);
+		if (data.channelZ.length > BUFFER) {
+			data.channelZ.splice(0, BUFFER / 2);
+			data.channelN.splice(0, BUFFER / 2);
+			data.channelE.splice(0, BUFFER / 2);
 
 			// pwaves
-			const startTime = data.channelZ.x[0];
-			const endTime = data.channelZ.x[data.channelZ.x.length - 1];
+			const startTime = data.channelZ[0].x;
+			const endTime = data.channelZ[data.channelZ.length - 1].x;
 			data.pWaves = data.pWaves.filter((pWave) => {
-				const pWaveTime = pWave.x[0];
+				const pWaveTime = pWave.x;
 				return pWaveTime >= startTime && pWaveTime <= endTime;
 			});
 			pWaves = pWaves.filter((pWave) => {
-				const pWaveTime = pWave.x[0];
+				const pWaveTime = pWave.x;
 				return pWaveTime >= startTime && pWaveTime <= endTime;
 			});
 
@@ -489,35 +414,7 @@ function simulateStationSeismogram(station: string) {
 
 		postMessage({
 			station: station,
-			data: {
-				channelZ: {
-					x: seismogramHistoryData
-						.get(station)
-						.channelZ.x.concat(seismogramData.get(station).channelZ.x),
-					y: seismogramHistoryData
-						.get(station)
-						.channelZ.y.concat(seismogramData.get(station).channelZ.y),
-				},
-				channelN: {
-					x: seismogramHistoryData
-						.get(station)
-						.channelN.x.concat(seismogramData.get(station).channelN.x),
-					y: seismogramHistoryData
-						.get(station)
-						.channelN.y.concat(seismogramData.get(station).channelN.y),
-				},
-				channelE: {
-					x: seismogramHistoryData
-						.get(station)
-						.channelE.x.concat(seismogramData.get(station).channelE.x),
-					y: seismogramHistoryData
-						.get(station)
-						.channelE.y.concat(seismogramData.get(station).channelE.y),
-				},
-				pWaves: seismogramHistoryData
-					.get(station)
-					.pWaves.concat(seismogramData.get(station).pWaves),
-			},
+			data: data,
 		});
 	}, FREQUENCY_UPDATE);
 }
@@ -537,31 +434,29 @@ async function getHistoryStationSeismogram(
 
 	if (new Date(start_date).getDate() !== new Date().getDate()) return;
 
-	if (currentData.channelZ.x.length > 0) {
+	if (currentData.channelZ.length > 0) {
 		if (
-			start_date >= currentData.channelZ.x[0] &&
-			end_date <= currentData.channelZ.x[currentData.channelZ.x.length - 1]
+			start_date >= currentData.channelZ[0].x &&
+			end_date <= currentData.channelZ[currentData.channelZ.length - 1].x
 		)
 			return;
-		if (start_date > currentData.channelZ.x[currentData.channelZ.x.length - 1])
+		if (start_date > currentData.channelZ[currentData.channelZ.length - 1].x)
 			return;
 
-		if (end_date > currentData.channelZ.x[0]) {
-			end_date = currentData.channelZ.x[0] - 50;
+		if (end_date > currentData.channelZ[0].x) {
+			end_date = currentData.channelZ[0].x - 50;
 		}
 	}
 
-	if (historyData.channelZ.x.length > 0) {
+	if (historyData.channelZ.length > 0) {
 		if (
-			start_date >= historyData.channelZ.x[0] &&
-			end_date <= historyData.channelZ.x[historyData.channelZ.x.length - 1]
+			start_date >= historyData.channelZ[0].x &&
+			end_date <= historyData.channelZ[historyData.channelZ.length - 1].x
 		) {
 			isFetching = false;
 			return;
 		}
-		if (
-			start_date > historyData.channelZ.x[historyData.channelZ.x.length - 1]
-		) {
+		if (start_date > historyData.channelZ[historyData.channelZ.length - 1].x) {
 			isFetching = false;
 			return;
 		}
@@ -601,18 +496,9 @@ async function getHistoryStationSeismogram(
 
 	if (Object.keys(data).length > 0) {
 		const newSeismogramData = {
-			channelZ: {
-				x: [],
-				y: [],
-			},
-			channelN: {
-				x: [],
-				y: [],
-			},
-			channelE: {
-				x: [],
-				y: [],
-			},
+			channelZ: [],
+			channelN: [],
+			channelE: [],
 			pWaves: [],
 			currentIndex: 0,
 		};
@@ -623,12 +509,18 @@ async function getHistoryStationSeismogram(
 			// const offset = -(new Date().getTimezoneOffset() * 60 * 1000);
 			// date.setTime(date.getTime() - offset);
 
-			newSeismogramData.channelZ.x.push(date.getTime());
-			newSeismogramData.channelZ.y.push(dataValue.Z);
-			newSeismogramData.channelN.x.push(date.getTime());
-			newSeismogramData.channelN.y.push(dataValue.N);
-			newSeismogramData.channelE.x.push(date.getTime());
-			newSeismogramData.channelE.y.push(dataValue.E);
+			newSeismogramData.channelZ.push({
+				x: date.getTime(),
+				y: dataValue.Z,
+			});
+			newSeismogramData.channelN.push({
+				x: date.getTime(),
+				y: dataValue.N,
+			});
+			newSeismogramData.channelE.push({
+				x: date.getTime(),
+				y: dataValue.E,
+			});
 		}
 
 		seismogramHistoryData.set(station, newSeismogramData);
@@ -640,26 +532,26 @@ async function getHistoryStationSeismogram(
 			channelZ: {
 				x: seismogramHistoryData
 					.get(station)
-					.channelZ.x.concat(seismogramData.get(station).channelZ.x),
+					.channelZ.concat(seismogramData.get(station).channelZ),
 				y: seismogramHistoryData
 					.get(station)
-					.channelZ.y.concat(seismogramData.get(station).channelZ.y),
+					.channelZ.concat(seismogramData.get(station).channelZ),
 			},
 			channelN: {
 				x: seismogramHistoryData
 					.get(station)
-					.channelN.x.concat(seismogramData.get(station).channelN.x),
+					.channelN.concat(seismogramData.get(station).channelN),
 				y: seismogramHistoryData
 					.get(station)
-					.channelN.y.concat(seismogramData.get(station).channelN.y),
+					.channelN.concat(seismogramData.get(station).channelN),
 			},
 			channelE: {
 				x: seismogramHistoryData
 					.get(station)
-					.channelE.x.concat(seismogramData.get(station).channelE.x),
+					.channelE.concat(seismogramData.get(station).channelE),
 				y: seismogramHistoryData
 					.get(station)
-					.channelE.y.concat(seismogramData.get(station).channelE.y),
+					.channelE.concat(seismogramData.get(station).channelE),
 			},
 			pWaves: seismogramHistoryData
 				.get(station)

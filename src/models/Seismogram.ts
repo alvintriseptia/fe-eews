@@ -13,24 +13,15 @@ export default class Seismogram implements ISeismogram {
 
 	handlerSeismogramData: (event: MessageEvent) => void;
 	seismogramData: SeismogramDataType = {
-		channelZ: {
-			x: [],
-			y: [],
-		},
-		channelN: {
-			x: [],
-			y: [],
-		},
-		channelE: {
-			x: [],
-			y: [],
-		},
+		channelZ: [],
+		channelN: [],
+		channelE: [],
 		pWaves: [],
 		currentIndex: 0,
 	};
 	rerender: number = 0;
 	constructor(station?: string) {
-		if(station) {
+		if (station) {
 			this.station = station;
 		}
 
@@ -44,7 +35,7 @@ export default class Seismogram implements ISeismogram {
 			station: this.station,
 			message: "stream",
 			mode: mode,
-			type: "seismogram"
+			type: "seismogram",
 		});
 
 		this.handlerSeismogramData = (event) => {
@@ -66,7 +57,7 @@ export default class Seismogram implements ISeismogram {
 		seismogramWorker.postMessage({
 			station: this.station,
 			message: "lastData",
-			type: "seismogram"
+			type: "seismogram",
 		});
 	}
 
@@ -80,7 +71,7 @@ export default class Seismogram implements ISeismogram {
 			message: "history",
 			start_date: start,
 			end_date: end,
-			type: "seismogram"
+			type: "seismogram",
 		});
 	}
 
@@ -88,7 +79,7 @@ export default class Seismogram implements ISeismogram {
 		seismogramWorker.postMessage({
 			station: this.station,
 			message: "stop",
-			type: "seismogram"
+			type: "seismogram",
 		});
 
 		seismogramWorker.removeEventListener("message", this.handlerSeismogramData);
@@ -116,7 +107,7 @@ export default class Seismogram implements ISeismogram {
 			for (const obj of Object.entries(data) as any) {
 				const key = obj[0];
 				const dataValue = obj[1];
-				const offset = - (new Date().getTimezoneOffset() * 60 * 1000);
+				const offset = -(new Date().getTimezoneOffset() * 60 * 1000);
 				const date = new Date(parseInt(key));
 				date.setTime(date.getTime() - offset);
 				const seismogramData = {
@@ -128,7 +119,6 @@ export default class Seismogram implements ISeismogram {
 
 				seismogram.push(seismogramData);
 			}
-
 
 			return seismogram;
 		} catch (error) {

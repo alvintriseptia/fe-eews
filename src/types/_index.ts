@@ -20,6 +20,6 @@ export type RegionType = {
 
 
 export type SeismogramPlotType = {
-	x: number[];
-	y: number[];
+	x: number;
+	y: number;
 }

@@ -4,6 +4,9 @@ import { MainController, StationController } from "@/controllers/_index";
 import { IStation } from "@/entities/_index";
 import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
 import {
+	CanvasLineChart,
+	CanvasList,
+	CanvasTimeChart,
 	DynamicLineChart,
 	ModalDialog,
 	Navbar,
@@ -14,7 +17,7 @@ import RenderIfVisible from "react-render-if-visible";
 import { observe } from "mobx";
 import STATIONS_DATA from "@/assets/data/stations.json";
 
-const ESTIMATED_ITEM_HEIGHT = 400;
+const ESTIMATED_ITEM_HEIGHT = 110;
 
 class StationView extends React.Component {
 	state = {
@@ -88,7 +91,7 @@ class StationView extends React.Component {
 		});
 
 		await this.state.controller.initStations();
-		await this.state.controller.connectAllSeismogram("realtime");
+		await this.state.controller.connectAllSeismogram("simulation");
 
 		this.state.mainController.connectEarthquakeDetection();
 	}
@@ -100,19 +103,16 @@ class StationView extends React.Component {
 
 	async disableStation(station: string) {
 		await this.state.controller.disableStation(station);
-		this.state.controller.disconnectSeismogram(station);
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableStation(station: string) {
-		await this.state.controller.enableStation(station);
-		this.state.controller.connectSeismogram(station, "realtime");
+		await this.state.controller.enableStation("simulation", station);
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableAllStation() {
-		await this.state.controller.enableAllStations();
-		this.state.controller.connectAllSeismogram("realtime");
+		await this.state.controller.enableAllStations("simulation");
 		this.setState({ dialogOpen: false });
 	}
 
@@ -184,38 +184,12 @@ class StationView extends React.Component {
 									onChange={(e) => this.searchStation(e.target.value)}
 								/>
 							</div>
-
-							<div className="flex flex-wrap justify-center">
-								{this.state.filteredSeismogramStations.map((station, index) => {
-									return (
-										<div key={index}>
-											{/* <RenderIfVisible defaultHeight={ESTIMATED_ITEM_HEIGHT}> */}
-												<div className="relative">
-													{/* button disabled and title */}
-													<div className="flex gap-x-4 items-center relative z-20 translate-x-20">
-														<h3 className="text-white text-lg font-semibold">
-															Sensor {station.code}
-														</h3>
-														<button
-															className="bg-tews-mmi-X text-white px-4 py-2 rounded-md text-xs"
-															onClick={() => this.disableStation(station.code)}
-														>
-															Nonaktifkan
-														</button>
-													</div>
-
-													<DynamicLineChart
-														station={station.code}
-														width={600}
-														height={350}
-														showTitle={false}
-													/>
-												</div>
-											{/* </RenderIfVisible> */}
-										</div>
-									);
-								})}
-							</div>
+							<CanvasList
+								seismograms={
+									this.state.filteredSeismogramStations
+								}
+								onDisableStation={this.disableStation}
+							/>
 						</EarthquakeDetectionContext.Provider>
 					) : (
 						<table className="w-full border-collapse">

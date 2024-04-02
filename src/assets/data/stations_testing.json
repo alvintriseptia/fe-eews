@@ -111,16 +111,6 @@
   },
   {
     "network": "IA",
-    "code": "BBSI",
-    "description": "Station BBSI (Station Bau Bau, Buton)",
-    "creation_date": "2015-12-20T00:00:00.000000Z",
-    "elevation": 95,
-    "latitude": -5.4879,
-    "longitude": 122.5706,
-    "termination_date": ""
-  },
-  {
-    "network": "IA",
     "code": "BJI",
     "description": "Station BJI (Station Banjarnegara, Indonesia)",
     "creation_date": "2005-01-01T00:00:00.000000Z",
@@ -627,16 +617,6 @@
     "elevation": 1293,
     "latitude": -6.8266,
     "longitude": 107.61756,
-    "termination_date": ""
-  },
-  {
-    "network": "IA",
-    "code": "LEM",
-    "description": "Station LEM (Station Lembang, Indonesia)",
-    "creation_date": "2010-09-29T16:55:00.000000Z",
-    "elevation": 1200,
-    "latitude": -6.82325,
-    "longitude": 107.6143,
     "termination_date": ""
   },
   {
@@ -1441,16 +1421,6 @@
   },
   {
     "network": "IA",
-    "code": "TPRI",
-    "description": "Station TPRI (Station Tanjung Pinang, Sumatra)",
-    "creation_date": "2015-12-14T00:00:00.000000Z",
-    "elevation": 41.46,
-    "latitude": 0.9193,
-    "longitude": 104.5208,
-    "termination_date": ""
-  },
-  {
-    "network": "IA",
     "code": "TPTI",
     "description": "Station TPTI (Station Tapaktuan, Indonesia (CN))",
     "creation_date": "2006-01-01T00:00:00.000000Z",
@@ -1560,16 +1530,6 @@
     "termination_date": ""
   },
   {
-    "network": "IA",
-    "code": "YOGI",
-    "description": "Station YOGI (Station Yogyakarta, Indonesia (CN))",
-    "creation_date": "2006-01-01T00:00:00.000000Z",
-    "elevation": 171,
-    "latitude": -7.817,
-    "longitude": 110.295,
-    "termination_date": ""
-  },
-  {
     "network": "GE",
     "code": "KBS",
     "description": "Station KBS (Ny-Alesund, Spitzbergen, Norway)",
@@ -1581,49 +1541,9 @@
   },
   {
     "network": "GE",
-    "code": "KBS",
-    "description": "Station KBS (Ny-Alesund, Spitzbergen, Norway)",
-    "creation_date": "1995-09-13T12:00:00.000000Z",
-    "elevation": 90,
-    "latitude": 78.9154,
-    "longitude": 11.9385,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "KBS",
-    "description": "Station KBS (Ny-Alesund, Spitzbergen, Norway)",
-    "creation_date": "2009-09-28T00:00:00.000000Z",
-    "elevation": 90,
-    "latitude": 78.9154,
-    "longitude": 11.9385,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "KBS",
-    "description": "Station KBS (Ny-Alesund, Spitzbergen, Norway)",
-    "creation_date": "2010-06-08T00:00:00.000000Z",
-    "elevation": 90,
-    "latitude": 78.9154,
-    "longitude": 11.9385,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "SFJD",
     "description": "Station SFJD (Sondre Stromfjord, Greenland)",
     "creation_date": "2005-01-31T16:00:00.000000Z",
-    "elevation": 330,
-    "latitude": 66.9961,
-    "longitude": -50.62076,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "SFJD",
-    "description": "Station SFJD (Sondre Stromfjord, Greenland)",
-    "creation_date": "2008-09-20T00:00:00.000000Z",
     "elevation": 330,
     "latitude": 66.9961,
     "longitude": -50.62076,
@@ -1647,26 +1567,6 @@
     "elevation": 2960,
     "latitude": -22.6127,
     "longitude": -68.9111,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "LVC",
-    "description": "Station LVC (Limon Verde, Chile)",
-    "creation_date": "2009-04-10T00:00:00.000000Z",
-    "elevation": 2960,
-    "latitude": -22.6127,
-    "longitude": -68.9111,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "APE",
-    "description": "Station APE (GEOFON Station Apirathos, Naxos)",
-    "creation_date": "2000-07-18T00:00:00.000000Z",
-    "elevation": 620,
-    "latitude": 37.0689,
-    "longitude": 25.5306,
     "termination_date": ""
   },
   {
@@ -1782,28 +1682,8 @@
   {
     "network": "GE",
     "code": "EIL",
-    "description": "Station EIL (GII/GEOFON Station Eilat, Israel)",
-    "creation_date": "1996-07-18T00:00:00.000000Z",
-    "elevation": 210,
-    "latitude": 29.6699,
-    "longitude": 34.9512,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "EIL",
     "description": "Station EIL (GII Station Eilat, Israel)",
     "creation_date": "2005-11-13T00:00:00.000000Z",
-    "elevation": 210,
-    "latitude": 29.6699,
-    "longitude": 34.9512,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "EIL",
-    "description": "Station EIL (GEOFON Station Eilat, Israel)",
-    "creation_date": "2008-05-23T00:00:00.000000Z",
     "elevation": 210,
     "latitude": 29.6699,
     "longitude": 34.9512,
@@ -1871,16 +1751,6 @@
   },
   {
     "network": "GE",
-    "code": "GVD",
-    "description": "Station GVD (NOA/GEOFON Station Gavdos, Greece)",
-    "creation_date": "2003-09-12T00:00:00.000000Z",
-    "elevation": 170,
-    "latitude": 34.83914,
-    "longitude": 24.08738,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "HLG",
     "description": "Station HLG (UKiel/GEOFON Station Helgoland, Germany)",
     "creation_date": "2001-12-14T00:00:00.000000Z",
@@ -1901,16 +1771,6 @@
   },
   {
     "network": "GE",
-    "code": "ILTH",
-    "description": "Station ILTH (GEOFON/DIAS Station Belurgan, Co Louth, Ireland)",
-    "creation_date": "2014-07-29T00:00:00.000000Z",
-    "elevation": 21,
-    "latitude": 54.0279,
-    "longitude": -6.3362,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "IMMV",
     "description": "Station IMMV (NOA/GEOFON Station Iera Moni Varipetrou, Greece)",
     "creation_date": "2010-07-14T00:00:00.000000Z",
@@ -1927,16 +1787,6 @@
     "elevation": 1100,
     "latitude": 37.8433,
     "longitude": 30.5093,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "JER",
-    "description": "Station JER (GII/GEOFON Station Jerusalem, Israel)",
-    "creation_date": "1996-05-09T00:00:00.000000Z",
-    "elevation": 770,
-    "latitude": 31.7719,
-    "longitude": 35.1972,
     "termination_date": ""
   },
   {
@@ -2071,16 +1921,6 @@
   },
   {
     "network": "GE",
-    "code": "MARCO",
-    "description": "Station MARCO (GEOFON/IMAA-CNR Station Tramutola, Italy)",
-    "creation_date": "2018-06-28T00:00:00.000000Z",
-    "elevation": 890,
-    "latitude": 40.29722,
-    "longitude": 15.8063,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "MATE",
     "description": "Station MATE (U Basilicata/GEOFON Station Matera, Italy)",
     "creation_date": "2007-04-24T00:00:00.000000Z",
@@ -2111,32 +1951,12 @@
   },
   {
     "network": "GE",
-    "code": "MAUI",
-    "description": "Station MAUI (GEOFON Station Haleakala, Maui)",
-    "creation_date": "2000-03-09T00:00:00.000000Z",
-    "elevation": 2060,
-    "latitude": 20.7668,
-    "longitude": -156.2448,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "MELI",
     "description": "Station MELI (ROA/UCM/GEOFON Station Melilla, Spain)",
     "creation_date": "1999-12-17T00:00:00.000000Z",
     "elevation": 40,
     "latitude": 35.2899,
     "longitude": -2.9392,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "MELI",
-    "description": "Station MELI (ROA/UCM/GEOFON Station Melilla, Spain)",
-    "creation_date": "2004-02-02T00:00:00.000000Z",
-    "elevation": 5,
-    "latitude": 35.2938,
-    "longitude": -2.935,
     "termination_date": ""
   },
   {
@@ -2241,16 +2061,6 @@
   },
   {
     "network": "GE",
-    "code": "PSZ",
-    "description": "Station PSZ (GKKI/GEOFON Station Piszkes, Hungary)",
-    "creation_date": "1995-01-01T00:00:00.000000Z",
-    "elevation": 940,
-    "latitude": 47.9184,
-    "longitude": 19.8944,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "PUL",
     "description": "Station PUL (GEOFON Station Pulkovo, Russia)",
     "creation_date": "1998-05-05T00:00:00.000000Z",
@@ -2317,16 +2127,6 @@
     "elevation": 4000,
     "latitude": -24.2241,
     "longitude": -66.34,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "SANT",
-    "description": "Station SANT (NOA/GEOFON Station Santorini, Greece)",
-    "creation_date": "1997-06-20T00:00:00.000000Z",
-    "elevation": 540,
-    "latitude": 36.371,
-    "longitude": 25.459,
     "termination_date": ""
   },
   {
@@ -2421,62 +2221,12 @@
   },
   {
     "network": "GE",
-    "code": "SNAA",
-    "description": "Station SNAA (GEOFON/AWI Station Sanae, Antarctica)",
-    "creation_date": "2003-01-10T00:00:00.000000Z",
-    "elevation": 846,
-    "latitude": -71.6707,
-    "longitude": -2.8379,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "STU",
     "description": "Station STU (VBB Station Stuttgart, Germany)",
     "creation_date": "1994-04-29T00:00:00.000000Z",
     "elevation": 360,
     "latitude": 48.7719,
     "longitude": 9.195,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "SUMG",
-    "description": "Station SUMG (GEOFON Station Summit Camp, Greenland)",
-    "creation_date": "2000-05-16T00:00:00.000000Z",
-    "elevation": 3240,
-    "latitude": 72.5763,
-    "longitude": -38.4539,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "SUMG",
-    "description": "Station SUMG (GEOFON Station Summit Camp, Greenland)",
-    "creation_date": "2010-07-20T00:00:00.000000Z",
-    "elevation": 3206,
-    "latitude": 72.5744,
-    "longitude": -38.4618,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "SUMG",
-    "description": "Station SUMG (GEOFON Station Summit Camp, Greenland)",
-    "creation_date": "2013-07-26T00:00:00.000000Z",
-    "elevation": 3200,
-    "latitude": 72.57424,
-    "longitude": -38.46185,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "SUMG",
-    "description": "Station SUMG (GEOFON Station Summit Camp, Greenland)",
-    "creation_date": "2017-05-22T00:00:00.000000Z",
-    "elevation": 3200,
-    "latitude": 72.57428,
-    "longitude": -38.462075,
     "termination_date": ""
   },
   {
@@ -2521,16 +2271,6 @@
   },
   {
     "network": "GE",
-    "code": "VAL",
-    "description": "Station VAL (DIAS/IMS/GEOFON Station Valentia, Ireland)",
-    "creation_date": "2007-10-22T00:00:00.000000Z",
-    "elevation": 14,
-    "latitude": 51.9394,
-    "longitude": -10.2442,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "VSU",
     "description": "Station VSU (GEOFON Station Vasula, Estonia)",
     "creation_date": "2003-04-26T00:00:00.000000Z",
@@ -2567,16 +2307,6 @@
     "elevation": 270,
     "latitude": 35.1147,
     "longitude": 26.217,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "ZKR",
-    "description": "Station ZKR (NOA/GEOFON Station Zakros, Crete)",
-    "creation_date": "2011-07-19T11:49:00.000000Z",
-    "elevation": 254,
-    "latitude": 35.1147,
-    "longitude": 26.21691,
     "termination_date": ""
   },
   {
@@ -2667,16 +2397,6 @@
     "elevation": 113,
     "latitude": 8.39682,
     "longitude": 80.54254,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "HALK",
-    "description": "Station HALK (GEOFON Station Hakmana, Sri Lanka)",
-    "creation_date": "2010-04-23T00:00:00.000000Z",
-    "elevation": 42,
-    "latitude": 6.0885,
-    "longitude": 80.6805,
     "termination_date": ""
   },
   {
@@ -2961,26 +2681,6 @@
   },
   {
     "network": "GE",
-    "code": "KMBO",
-    "description": "Station KMBO (Kilima Mbogo, Kenya)",
-    "creation_date": "2009-07-30T00:00:00.000000Z",
-    "elevation": 1950,
-    "latitude": -1.1271,
-    "longitude": 37.2525,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "KMBO",
-    "description": "Station KMBO (Kilima Mbogo, Kenya)",
-    "creation_date": "2010-04-15T00:00:00.000000Z",
-    "elevation": 1950,
-    "latitude": -1.1271,
-    "longitude": 37.2525,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "ILTH",
     "description": "Station ILTH (GEOFON/DIAS Station Belurgan, Co Louth, Ireland)",
     "creation_date": "2020-02-27T13:30:00.000000Z",
@@ -2991,32 +2691,12 @@
   },
   {
     "network": "GE",
-    "code": "DSB",
-    "description": "Station DSB (GEOFON/DIAS Station Dublin, Ireland)",
-    "creation_date": "2021-04-22T14:00:00.000000Z",
-    "elevation": 236,
-    "latitude": 53.2452,
-    "longitude": -6.3762,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
     "code": "MARCO",
     "description": "Station MARCO (GEOFON/IMAA-CNR Station Tramutola, Italy)",
     "creation_date": "2021-06-04T00:00:00.000000Z",
     "elevation": 933,
     "latitude": 40.29724,
     "longitude": 15.80632,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "PSZ",
-    "description": "Station PSZ (GKKI/GEOFON Station Piszkes, Hungary)",
-    "creation_date": "2016-10-26T10:00:00.000000Z",
-    "elevation": 944,
-    "latitude": 47.9173,
-    "longitude": 19.895,
     "termination_date": ""
   },
   {
@@ -3057,16 +2737,6 @@
     "elevation": 940,
     "latitude": 47.91840001,
     "longitude": 19.89440001,
-    "termination_date": ""
-  },
-  {
-    "network": "GE",
-    "code": "SUMG",
-    "description": "Station SUMG (GEOFON Station Summit Camp, Greenland)",
-    "creation_date": "2022-07-22T12:00:00.000000Z",
-    "elevation": 3202,
-    "latitude": 72.5742,
-    "longitude": -38.4626,
     "termination_date": ""
   }
 ]
