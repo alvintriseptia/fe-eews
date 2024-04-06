@@ -1,31 +1,18 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { MainController, StationController } from "@/controllers/_index";
-import { IStation } from "@/entities/_index";
 import EarthquakeDetectionContext from "@/stores/EarthquakeDetectionContext";
-import {
-	CanvasLineChart,
-	CanvasList,
-	CanvasTimeChart,
-	DynamicLineChart,
-	ModalDialog,
-	Navbar,
-	Seismogram,
-} from "@/components/_index";
+import { CanvasList, Navbar } from "@/components/_index";
 import { EarthquakeRealtimeProps } from "@/components/EarthquakeRealtimeCard";
-import RenderIfVisible from "react-render-if-visible";
 import { observe } from "mobx";
-import STATIONS_DATA from "@/assets/data/stations.json";
-
-const ESTIMATED_ITEM_HEIGHT = 110;
 
 class StationView extends React.Component {
 	state = {
 		controller: {} as StationController,
 		mainController: {} as MainController,
-		seismogramStations: [] as IStation[],
-		filteredSeismogramStations: [] as IStation[],
-		disabledSeismogramStations: [] as IStation[],
+		seismogramStations: [] as string[],
+		filteredSeismogramStations: [] as string[],
+		disabledSeismogramStations: [] as string[],
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		navbar: {
 			isLoggedIn: false,
@@ -62,30 +49,27 @@ class StationView extends React.Component {
 			}
 		});
 
-		observe(this.state.controller, "seismograms", (change) => {
+		observe(this.state.controller, "enabledSeismograms", (change) => {
 			if (change.newValue) {
-				let newFilteredSeismogramStations = STATIONS_DATA.filter((station) => {
-					return change.newValue.has(station.code);
-				});
+				let newFilteredSeismogramStations = Array.from(change.newValue.keys());
 
 				if (this.state.searchQuery !== "") {
 					newFilteredSeismogramStations = newFilteredSeismogramStations.filter(
-						(station) => {
-							return station.code
-								.toLowerCase()
-								.includes(this.state.searchQuery.toLowerCase());
-						}
+						(station) => station.toLowerCase().startsWith(this.state.searchQuery)
 					);
 				}
 
 				this.setState({
-					seismogramStations: STATIONS_DATA.filter((station) => {
-						return change.newValue.has(station.code);
-					}),
+					seismogramStations: Array.from(change.newValue.keys()),
 					filteredSeismogramStations: newFilteredSeismogramStations,
-					disabledSeismogramStations: STATIONS_DATA.filter((station) => {
-						return !change.newValue.has(station.code);
-					}),
+				});
+			}
+		});
+
+		observe(this.state.controller, "disabledSeismograms", (change) => {
+			if (change.newValue) {
+				this.setState({
+					disabledSeismogramStations: Array.from(change.newValue.keys()),
 				});
 			}
 		});
@@ -93,7 +77,7 @@ class StationView extends React.Component {
 		await this.state.controller.initStations();
 		await this.state.controller.connectAllSeismogram("simulation");
 
-		this.state.mainController.connectEarthquakeDetection();
+		this.state.mainController.connectEarthquakeDetection("simulation");
 	}
 
 	componentWillUnmount(): void {
@@ -102,12 +86,12 @@ class StationView extends React.Component {
 	}
 
 	async disableStation(station: string) {
-		await this.state.controller.disableStation(station);
+		await this.state.controller.disableStation(station, "simulation");
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableStation(station: string) {
-		await this.state.controller.enableStation("simulation", station);
+		await this.state.controller.enableStation(station, "simulation");
 		this.setState({ dialogOpen: false });
 	}
 
@@ -117,14 +101,19 @@ class StationView extends React.Component {
 	}
 
 	searchStation(query: string) {
-		this.setState({
-			searchQuery: query,
-			filteredSeismogramStations: this.state.seismogramStations.filter(
-				(station) => {
-					return station.code.toLowerCase().includes(query.toLowerCase());
-				}
-			),
-		});
+		if (query === "") {
+			this.setState({
+				searchQuery: query,
+				filteredSeismogramStations: this.state.seismogramStations,
+			});
+		} else {
+			this.setState({
+				searchQuery: query,
+				filteredSeismogramStations: this.state.seismogramStations?.filter(
+					(station) => station.toLowerCase().startsWith(query)
+				),
+			});
+		}
 	}
 
 	setSection(section: string) {
@@ -146,7 +135,7 @@ class StationView extends React.Component {
 				/> */}
 
 				{/* CONTENT */}
-				<section className="h-full mt-10 overflow-x-hidden">
+				<section className="min-h-screen mt-10 overflow-x-hidden">
 					{/* Tabbar Enabled & Disabled Stations */}
 					<div className="flex mb-20">
 						<button
@@ -185,63 +174,38 @@ class StationView extends React.Component {
 								/>
 							</div>
 							<CanvasList
-								seismograms={
-									this.state.filteredSeismogramStations
-								}
-								onDisableStation={this.disableStation}
+								seismograms={this.state.filteredSeismogramStations || []}
+								onClickStation={this.disableStation}
+								type="enabled"
 							/>
 						</EarthquakeDetectionContext.Provider>
 					) : (
-						<table className="w-full border-collapse">
-							<thead>
-								<tr className="bg-tews-mmi-VIII text-white">
-									<th className="border p-2">Kode Stasiun</th>
-									<th className="border p-2">Network Stasiun</th>
-									<th className="border p-2">Deskripsi</th>
-									<th className="border p-2">
-										<div className="flex justify-center items-center">
-											<span>Aksi</span>
-											{this.state.disabledSeismogramStations.length > 0 && (
-												<button
-													className="bg-tews-blue text-white font-bold py-1 px-2 rounded ml-2 text-sm"
-													onClick={this.enableAllStation}
-												>
-													Aktifkan semua
-												</button>
-											)}
-										</div>
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								{this.state.disabledSeismogramStations.length === 0 ? (
-									<tr className="border border-blue-50/60 text-white">
-										<td colSpan={4} className="text-center">
-											Tidak ada stasiun yang dinonaktifkan
-										</td>
-									</tr>
-								) : (
-									this.state.disabledSeismogramStations.map((station) => (
-										<tr
-											key={station.code}
-											className="border border-blue-50/60 text-white"
-										>
-											<td className="border p-2">{station.code}</td>
-											<td className="border p-2">{station.network}</td>
-											<td className="border p-2">{station.description}</td>
-											<td className="border p-2">
-												<button
-													className="bg-tews-blue text-white font-bold py-2 px-4 rounded"
-													onClick={() => this.enableStation(station.code)}
-												>
-													Aktifkan
-												</button>
-											</td>
-										</tr>
-									))
+						<>
+							<div className="flex justify-end items-center">
+								<span>Aksi</span>
+								{this.state.disabledSeismogramStations.length > 0 && (
+									<button
+										className="bg-tews-blue text-white font-bold py-1 px-2 rounded ml-2 text-sm"
+										onClick={this.enableAllStation}
+									>
+										Aktifkan semua
+									</button>
 								)}
-							</tbody>
-						</table>
+							</div>
+							<div className="relative">
+								{this.state.disabledSeismogramStations.length === 0 ? (
+									<div className="text-white text-center">
+										Tidak ada stasiun yang dinonaktifkan
+									</div>
+								) : (
+									<CanvasList
+										seismograms={this.state.disabledSeismogramStations || []}
+										onClickStation={this.enableStation}
+										type="disabled"
+									/>
+								)}
+							</div>
+						</>
 					)}
 				</section>
 			</main>

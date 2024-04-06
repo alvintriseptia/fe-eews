@@ -53,6 +53,29 @@ export default class Seismogram implements ISeismogram {
 		seismogramWorker.addEventListener("message", this.handlerSeismogramData);
 	}
 
+	restartSeismogram(seismogramWorker: Worker, mode: string) {
+		seismogramWorker.postMessage({
+			station: this.station,
+			message: "restart",
+			mode: mode,
+			type: "seismogram",
+		});
+
+		this.handlerSeismogramData = (event) => {
+			const data = event.data;
+			if (data.station === this.station) {
+				this.seismogramData = data.data;
+				if (this.rerender + 1 < MAX_INT) {
+					this.rerender++;
+				} else {
+					this.rerender = 0;
+				}
+			}
+		};
+
+		seismogramWorker.addEventListener("message", this.handlerSeismogramData);
+	}
+
 	getLastSeismogramData(seismogramWorker: Worker) {
 		seismogramWorker.postMessage({
 			station: this.station,

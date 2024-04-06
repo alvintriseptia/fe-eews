@@ -6,15 +6,14 @@ import ChartJS from "chart.js/auto";
 import { TimeScale } from "chart.js";
 import "chartjs-adapter-luxon";
 import { SeismogramDataType } from "@/workers/seismogram";
+import Seismogram from "@/models/Seismogram";
 ChartJS.register(TimeScale);
 
 interface Props {
 	station: string;
-	xMin: number;
-	xMax: number;
+	xMin?: number;
+	xMax?: number;
 }
-const SAMPLING_RATE = 20;
-const BUFFER = 5000;
 
 const options = {
 	scales: {
@@ -52,6 +51,12 @@ const options = {
 	stacked: true,
 	animation: false,
 	spanGaps: true,
+	// showLine: false,
+	elements: {
+		point: {
+			radius: 0 
+		}
+	}
 } as any;
 function CanvasLineChart(props: Props) {
 	const data = React.useMemo(() => {
@@ -73,7 +78,7 @@ function CanvasLineChart(props: Props) {
 					label: "P-Wave Arrival",
 					backgroundColor: "#ff0000",
 					borderColor: "#ff0000",
-					borderWidth: 1,
+					borderWidth: 3,
 					yAxisID: "y2",
 					pointRadius: 0,
 					order: 0,
@@ -89,36 +94,50 @@ function CanvasLineChart(props: Props) {
 		const ctx = document.getElementById(
 			`trace-view-${props.station}`
 		) as HTMLCanvasElement;
+
+		const scale = {
+			...options.scales,
+		};
+
+		if (props.xMin && props.xMax) {
+			scale.x = {
+				...scale.x,
+				min: props.xMin,
+				max: props.xMax,
+			};
+		}
+
 		chart.current = new ChartJS(ctx, {
 			type: "line",
 			data: data,
 			options: {
 				...options,
-				scales: {
-					...options.scales,
-					x: {
-						...options.scales.x,
-						min: props.xMin,
-						max: props.xMax,
-					},
-				},
+				scales: scale,
 			},
 		});
 
 		const stationController = StationController.getInstance();
 		stationController.getLastSeismogramData(props.station);
-		const seismogram = stationController.seismograms.get(props.station);
-		observe(seismogram, "rerender", (change) => {
-			if (change.newValue > 0 && seismogram.seismogramData) {
-				const newData = seismogram.seismogramData as SeismogramDataType;
-				const { channelZ, channelN, channelE, pWaves } = newData;
+		let seismogram: Seismogram | null = null;
 
-				data.datasets[0].data = channelZ;
-				data.datasets[1].data = pWaves;
+		if (stationController.enabledSeismograms.has(props.station)) {
+			seismogram = stationController.enabledSeismograms.get(props.station);
+		} else if (stationController.disabledSeismograms.has(props.station)) {
+			seismogram = stationController.disabledSeismograms.get(props.station);
+		}
+		if (seismogram) {
+			observe(seismogram, "rerender", (change) => {
+				if (change.newValue > 0 && seismogram.seismogramData) {
+					const newData = seismogram.seismogramData as SeismogramDataType;
+					const { channelZ, channelN, channelE, pWaves } = newData;
 
-				chart.current?.update();
-			}
-		});
+					data.datasets[0].data = channelZ;
+					data.datasets[1].data = pWaves;
+
+					chart.current?.update();
+				}
+			});
+		}
 	}, []);
 
 	React.useEffect(() => {

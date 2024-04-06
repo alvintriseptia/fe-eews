@@ -4,8 +4,6 @@ import { SeismogramPlotType } from "@/types/_index";
 import IndexedDB from "@/lib/IndexedDB";
 import Socket from "@/lib/Socket";
 
-console.log("Worker seismogram is running");
-
 const socket = Socket.getInstance().getSocket();
 const stations = STATIONS_DATA;
 const seismogramSockets = {
@@ -40,8 +38,8 @@ const seismogramHistoryData = new Map<string, SeismogramDataType>(
 );
 
 const SAMPLING_RATE = 5;
-const FREQUENCY_UPDATE = 1000;
-const BUFFER = 12000;
+const FREQUENCY_UPDATE = 2000;
+const BUFFER = 3000;
 let isFetching = false;
 
 export type SeismogramDataType = {
@@ -61,33 +59,53 @@ export type SeismogramTempDataType = {
 
 const onmessage = async (event: MessageEvent) => {
 	const { station, message, mode, start_date, end_date, type } = event.data;
-	const stationData = stations.find((s) => s.code === station);
+
+	//check if station not in current map, then add it
+	if (!seismogramData.has(station)) {
+		seismogramData.set(station, {
+			channelZ: [],
+			channelN: [],
+			channelE: [],
+			pWaves: [],
+			currentIndex: 0,
+		});
+		seismogramHistoryData.set(station, {
+			channelZ: [],
+			channelN: [],
+			channelE: [],
+			pWaves: [],
+			currentIndex: 0,
+		});
+		seismogramInterval[station] = null;
+		seismogramSockets[station] = null;
+	}
 
 	if (type == "seismogram") {
 		if (mode === "simulation") {
-			if (stationData && message === "stop") {
-				stopStationSeismogram(stationData.code);
+			if (station && message === "stop") {
+				stopStationSeismogram(station);
+			} else if (station && message === "restart") {
+				stopStationSeismogram(station);
+				simulateStationSeismogram(station);
 			} else {
 				simulateStationSeismogram(station);
 			}
 		} else {
-			if (stationData && message === "stream") {
+			if (station && message === "stream") {
 				streamStationSeismogram(station);
-			} else if (stationData && message === "stop") {
-				stopStationSeismogram(stationData.code);
-			} else if (stationData && message === "lastData") {
+			} else if (station && message === "stop") {
+				stopStationSeismogram(station);
+			} else if (station && message === "restart") {
+				stopStationSeismogram(station);
+				streamStationSeismogram(station);
+			} else if (station && message === "lastData") {
 				// batching per 500 data
 				const data = seismogramData.get(station);
 				postMessage({
 					station: station,
 					data: data,
 				});
-			} else if (
-				stationData &&
-				message === "history" &&
-				start_date &&
-				end_date
-			) {
+			} else if (station && message === "history" && start_date && end_date) {
 				getHistoryStationSeismogram(station, start_date, end_date);
 			}
 		}
@@ -115,21 +133,10 @@ async function streamStationSeismogram(station: string) {
 			tempData = tempDataFromIndexedDB;
 		}
 
-		// get x last data from tempData
-		let lastTimeData =
-			tempData.channelZ.length > 0
-				? tempData.channelZ[tempData.channelZ.length - 1].x
-				: 0;
-		const skippedData = [];
 		// loop object data
 		for (const key in data) {
 			const value = data[key];
 			const time = new Date(parseInt(key.split("/")[1]));
-			if (time.getTime() <= lastTimeData) {
-				skippedData.push(time.getTime());
-				continue;
-			}
-			lastTimeData = time.getTime();
 			tempData.channelZ.push({
 				x: time.getTime(),
 				y: value.Z,
@@ -142,10 +149,6 @@ async function streamStationSeismogram(station: string) {
 				x: time.getTime(),
 				y: value.E,
 			});
-		}
-
-		if (skippedData.length > 0) {
-			console.log("skippedData " + skippedData.length, skippedData, station);
 		}
 
 		// save data to indexedDB
@@ -205,7 +208,6 @@ async function streamStationSeismogram(station: string) {
 						time: time,
 						lastTimeData: lastTimeData,
 					});
-					continue;
 				}
 				lastTimeData = time;
 				data.channelZ.push({
@@ -223,7 +225,10 @@ async function streamStationSeismogram(station: string) {
 			}
 
 			if (skippedData.length > 0) {
-				console.log("skippedData " + skippedData.length, skippedData, station);
+				//rearrange data
+				data.channelZ.sort((a, b) => a.x - b.x);
+				data.channelN.sort((a, b) => a.x - b.x);
+				data.channelE.sort((a, b) => a.x - b.x);
 			}
 
 			// check if there is p wave
@@ -257,6 +262,16 @@ async function streamStationSeismogram(station: string) {
 
 					pWaves.splice(i, 1);
 				}
+				
+
+				await IndexedDB.write({
+					objectStore: "pWavesTempData",
+					keyPath: "station",
+					key: station,
+					data: {
+						pWaves: pWaves,
+					},
+				});
 			}
 
 			// if the current length waves is more than BUFFER, then remove the first BUFFER / 2
@@ -289,14 +304,6 @@ async function streamStationSeismogram(station: string) {
 				keyPath: "station",
 				key: station,
 				data: tempData,
-			});
-			await IndexedDB.write({
-				objectStore: "pWavesTempData",
-				keyPath: "station",
-				key: station,
-				data: {
-					pWaves: pWaves,
-				},
 			});
 
 			postMessage({
@@ -391,23 +398,29 @@ function simulateStationSeismogram(station: string) {
 			// pwaves
 			const startTime = data.channelZ[0].x;
 			const endTime = data.channelZ[data.channelZ.length - 1].x;
-			data.pWaves = data.pWaves.filter((pWave) => {
+
+			let newPWaves = data.pWaves.filter((pWave) => {
 				const pWaveTime = pWave.x;
 				return pWaveTime >= startTime && pWaveTime <= endTime;
 			});
+			
+			data.pWaves = newPWaves;
+			let previousPWaves = pWaves;
 			pWaves = pWaves.filter((pWave) => {
 				const pWaveTime = pWave.x;
 				return pWaveTime >= startTime && pWaveTime <= endTime;
 			});
 
-			await IndexedDB.write({
-				objectStore: "pWavesTempData",
-				keyPath: "station",
-				key: station,
-				data: {
-					pWaves: pWaves,
-				},
-			});
+			if (previousPWaves.length !== pWaves.length) {
+				await IndexedDB.write({
+					objectStore: "pWavesTempData",
+					keyPath: "station",
+					key: station,
+					data: {
+						pWaves: pWaves,
+					},
+				});
+			}
 		}
 
 		seismogramData.set(station, data);

@@ -71,8 +71,8 @@ function CanvasTimeChart(props: Props) {
 				chart.options.scales.x.min = now - (props.maxTime / 2);
 				chart.options.scales.x.max = now + (props.maxTime / 2);
 				props.onTimeUpdate({
-					min: now,
-					max: now + props.maxTime,
+					min: now - (props.maxTime / 2),
+					max: now + (props.maxTime / 2),
 				});
 				chart.update();
 			}

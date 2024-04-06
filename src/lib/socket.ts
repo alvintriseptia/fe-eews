@@ -12,7 +12,7 @@ export default class Socket {
 
     public static getInstance(): Socket {
         if (!Socket.instance) {
-            console.log("Creating SocketTEWS instance");
+            // console.log("Creating SocketTEWS instance");
             Socket.instance = new Socket();
         }
         return Socket.instance;

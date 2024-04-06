@@ -146,17 +146,6 @@ class MainView extends React.Component<Props> {
 			}
 		});
 
-		observe(this.state.stationController, "seismograms", (change) => {
-			if (change.newValue) {
-				this.setState({
-					seismogramStations: STATIONS_DATA.filter((station) => {
-						return change.newValue.has(station.code);
-					}),
-				});
-			}
-		});
-
-		await this.state.stationController.connectAllSeismogram(this.props.mode);
 		document.querySelector("#loading_overlay").className = "hidden";
 	}
 
@@ -240,16 +229,6 @@ class MainView extends React.Component<Props> {
 								<MMIScale />
 							</section>
 						</div>
-
-						<EarthquakeDetectionContext.Provider
-							value={this.state.earthquakeRealtimeInformation?.earthquake}
-						>
-							<Seismogram
-								seismogramStations={this.state.seismogramStations.map(
-									(e) => e.code
-								)}
-							/>
-						</EarthquakeDetectionContext.Provider>
 					</div>
 				</section>
 			</main>

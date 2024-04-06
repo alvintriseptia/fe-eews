@@ -9,7 +9,6 @@ import {
 import { Seismogram, Station } from "@/models/_index";
 import { IStation } from "@/entities/_index";
 import toast from "react-hot-toast";
-import STATIONS_DATA from "@/assets/data/stations.json";
 
 /**
  * The StationController class handles the logic for managing stations.
@@ -18,11 +17,13 @@ class StationController {
 	private static instance: StationController;
 	private station = new Station();
 	seismogramWorker: Worker;
-	seismograms: Map<string, Seismogram> = new Map([]);
+	enabledSeismograms: Map<string, Seismogram> = new Map([]);
+	disabledSeismograms: Map<string, Seismogram> = new Map([]);
 
 	private constructor() {
 		makeObservable(this, {
-			seismograms: observable,
+			enabledSeismograms: observable,
+			disabledSeismograms: observable,
 			getStations: action,
 			initStations: action,
 			enableStation: action,
@@ -51,13 +52,16 @@ class StationController {
 	 */
 	async getStations(): Promise<IStation[]> {
 		try {
-			if (this.seismograms.size === 0) {
+			if (
+				this.enabledSeismograms.size === 0 &&
+				this.disabledSeismograms.size === 0
+			) {
 				await this.initStations();
 			}
 
 			const stations = await this.station.fetchSavedStations();
 			const result = stations.filter((station) => {
-				return this.seismograms.has(station.code);
+				return this.enabledSeismograms.has(station.code);
 			});
 			return result;
 		} catch (error) {
@@ -69,24 +73,32 @@ class StationController {
 		try {
 			const newSeismograms = await this.station.initStations();
 			if (newSeismograms) {
-				this.seismograms = new Map(newSeismograms);
+				this.enabledSeismograms = new Map(newSeismograms.enabledSeismograms);
+				this.disabledSeismograms = new Map(newSeismograms.disabledSeismograms);
 			}
 		} catch (error) {
 			this.displayError(error);
 		}
 	}
 
-	async enableStation(mode: string, station: string) {
+	async enableStation(station: string, mode: string) {
 		try {
 			const newSeismograms = await this.station.enableStation(
 				station,
-				this.seismograms
+				this.enabledSeismograms,
+				this.disabledSeismograms
 			);
 			if (newSeismograms) {
-				this.seismograms = new Map(newSeismograms);
-				this.connectSeismogram(mode, station);
-				toast.success(`Stasiun ${station} telah diaktifkan`);
+				this.disabledSeismograms
+					.get(station)
+					?.stopSeismogram(this.seismogramWorker);
+				this.enabledSeismograms = new Map(newSeismograms.enabledSeismograms);
+				this.disabledSeismograms = new Map(newSeismograms.disabledSeismograms);
+				this.enabledSeismograms
+					.get(station)
+					?.restartSeismogram(this.seismogramWorker, mode);
 			}
+			toast.success(`Stasiun ${station} telah diaktifkan`);
 		} catch (error) {
 			this.displayError(error);
 		}
@@ -96,8 +108,11 @@ class StationController {
 		try {
 			const newSeismograms = await this.station.enableAllStations();
 			if (newSeismograms) {
-				this.seismograms = new Map(newSeismograms);
-				this.connectAllSeismogram(mode);
+				this.enabledSeismograms = new Map(newSeismograms.enabledSeismograms);
+				this.disabledSeismograms = new Map(newSeismograms.disabledSeismograms);
+				for (const seismogram of this.enabledSeismograms.values()) {
+					seismogram.restartSeismogram(this.seismogramWorker, mode);
+				}
 				toast.success("Semua stasiun telah diaktifkan");
 			}
 		} catch (error) {
@@ -105,15 +120,22 @@ class StationController {
 		}
 	}
 
-	async disableStation(station: string) {
+	async disableStation(station: string, mode: string) {
 		try {
 			const newSeismograms = await this.station.disableStation(
 				station,
-				new Map(this.seismograms)
+				this.enabledSeismograms,
+				this.disabledSeismograms
 			);
 			if (newSeismograms) {
-				this.disconnectSeismogram(station);
-				this.seismograms = new Map(newSeismograms);
+				this.enabledSeismograms
+					.get(station)
+					?.stopSeismogram(this.seismogramWorker);
+				this.enabledSeismograms = new Map(newSeismograms.enabledSeismograms);
+				this.disabledSeismograms = new Map(newSeismograms.disabledSeismograms);
+				this.disabledSeismograms
+					.get(station)
+					?.restartSeismogram(this.seismogramWorker, mode);
 				toast.success(`Stasiun ${station} telah dinonaktifkan`);
 			}
 		} catch (error) {
@@ -126,10 +148,16 @@ class StationController {
 	 * @param seismogram - The seismogram to display.
 	 */
 	async connectAllSeismogram(mode: string) {
-		if (this.seismograms.size === 0) {
+		if (
+			this.enabledSeismograms.size === 0 &&
+			this.disabledSeismograms.size === 0
+		) {
 			await this.initStations();
 		}
-		for (const seismogram of this.seismograms.values()) {
+		for (const seismogram of this.enabledSeismograms.values()) {
+			seismogram.streamSeismogram(this.seismogramWorker, mode);
+		}
+		for (const seismogram of this.disabledSeismograms.values()) {
 			seismogram.streamSeismogram(this.seismogramWorker, mode);
 		}
 	}
@@ -141,27 +169,49 @@ class StationController {
 	 * @param station - The station of the seismogram.
 	 */
 	connectSeismogram(mode: string, station: string) {
-		const seismogram = this.seismograms.get(station);
-		if (seismogram) {
-			seismogram.streamSeismogram(this.seismogramWorker, mode);
+		if (this.enabledSeismograms.has(station)) {
+			this.enabledSeismograms
+				.get(station)
+				?.streamSeismogram(this.seismogramWorker, mode);
+		} else if (this.disabledSeismograms.has(station)) {
+			this.disabledSeismograms
+				.get(station)
+				?.streamSeismogram(this.seismogramWorker, mode);
 		}
 	}
 
 	getLastSeismogramData(station: string) {
-		this.seismograms.get(station)?.getLastSeismogramData(this.seismogramWorker);
+		if (this.enabledSeismograms.has(station)) {
+			this.enabledSeismograms
+				.get(station)
+				?.getLastSeismogramData(this.seismogramWorker);
+		} else if (this.disabledSeismograms.has(station)) {
+			this.disabledSeismograms
+				.get(station)
+				?.getLastSeismogramData(this.seismogramWorker);
+		}
 	}
 
 	getHistorySeismogramData(station: string, start: number, end: number) {
-		this.seismograms
-			.get(station)
-			?.getHistorySeismogramData(this.seismogramWorker, start, end);
+		if (this.enabledSeismograms.has(station)) {
+			this.enabledSeismograms
+				.get(station)
+				?.getHistorySeismogramData(this.seismogramWorker, start, end);
+		} else if (this.disabledSeismograms.has(station)) {
+			this.disabledSeismograms
+				.get(station)
+				?.getHistorySeismogramData(this.seismogramWorker, start, end);
+		}
 	}
 
 	/**
 	 * stop the seismogram worker.
 	 */
 	disconnectAllSeismogram() {
-		for (const seismogram of this.seismograms.values()) {
+		for (const seismogram of this.enabledSeismograms.values()) {
+			seismogram.stopSeismogram(this.seismogramWorker);
+		}
+		for (const seismogram of this.disabledSeismograms.values()) {
 			seismogram.stopSeismogram(this.seismogramWorker);
 		}
 	}
@@ -171,7 +221,15 @@ class StationController {
 	 * @param station - The station of the seismogram.
 	 */
 	disconnectSeismogram(station: string) {
-		this.seismograms.get(station)?.stopSeismogram(this.seismogramWorker);
+		if (this.enabledSeismograms.has(station)) {
+			this.enabledSeismograms
+				.get(station)
+				?.stopSeismogram(this.seismogramWorker);
+		} else if (this.disabledSeismograms.has(station)) {
+			this.disabledSeismograms
+				.get(station)
+				?.stopSeismogram(this.seismogramWorker);
+		}
 	}
 
 	displayError(error: string) {

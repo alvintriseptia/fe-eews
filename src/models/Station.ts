@@ -1,4 +1,4 @@
-import STATIONS_DATA from "@/assets/data/stations.json";
+import STATIONS_DATA from "@/assets/data/stations_testing.json";
 import { IStation } from "@/entities/_index";
 import Seismogram from "./Seismogram";
 import IndexedDB from "@/lib/IndexedDB";
@@ -64,10 +64,16 @@ class Station implements IStation {
 
 	async initStations() {
 		try {
-			const newSeismograms: Map<string, Seismogram> = new Map([]);
+			const enabledSeismograms: Map<string, Seismogram> = new Map([]);
+			const disabledSeismograms: Map<string, Seismogram> = new Map([]);
+
 			const enabled_seismograms = (await IndexedDB.read(
 				"seismograms",
 				"enabled_seismograms"
+			)) as string[] | null;
+			const disabled_seismograms = (await IndexedDB.read(
+				"seismograms",
+				"disabled_seismograms"
 			)) as string[] | null;
 
 			// if both enabled_seismograms and disabled_seismograms are null,
@@ -81,38 +87,61 @@ class Station implements IStation {
 				});
 			}
 
+			// if disabled_seismograms is null, save an empty array to indexedDB disabled_seismograms
+			if (!disabled_seismograms) {
+				await IndexedDB.write({
+					objectStore: "seismograms",
+					keyPath: "type",
+					key: "disabled_seismograms",
+					data: [],
+				});
+			}
+
 			if (enabled_seismograms) {
 				for (let station of enabled_seismograms) {
-					newSeismograms.set(station, new Seismogram(station));
+					enabledSeismograms.set(station, new Seismogram(station));
 				}
 			}
 
-			return newSeismograms;
+			if (disabled_seismograms) {
+				for (let station of disabled_seismograms) {
+					disabledSeismograms.set(station, new Seismogram(station));
+				}
+			}
+
+			return {
+				enabledSeismograms,
+				disabledSeismograms,
+			};
 		} catch (error) {
 			throw new Error(error);
 		}
 	}
 
-	async enableStation(station: string, seismograms: Map<string, Seismogram>) {
+	async enableStation(station: string, enabledSeismograms: Map<string, Seismogram>, disabledSeismograms: Map<string, Seismogram>) {
 		try {
-			const newSeismograms: Map<string, Seismogram> = seismograms;
-			const db_enabled_seismograms = (await IndexedDB.read(
-				"seismograms",
-				"enabled_seismograms"
-			)) as string[] | null;
-
-			const current_enabled_seismograms = db_enabled_seismograms || [];
-
 			// add to indexedDB
 			await IndexedDB.write({
 				objectStore: "seismograms",
 				keyPath: "type",
 				key: "enabled_seismograms",
-				data: [...current_enabled_seismograms, station],
+				data: [...enabledSeismograms.keys(), station],
 			});
 
-			newSeismograms.set(station, new Seismogram(station));
-			return newSeismograms;
+			await IndexedDB.write({
+				objectStore: "seismograms",
+				keyPath: "type",
+				key: "disabled_seismograms",
+				data: [...disabledSeismograms.keys()].filter((s) => s !== station),
+			});
+
+			enabledSeismograms.set(station, new Seismogram(station));
+			disabledSeismograms.delete(station);
+			
+			return {
+				enabledSeismograms,
+				disabledSeismograms,
+			}
 		} catch (error) {
 			throw new Error(error);
 		}
@@ -129,30 +158,51 @@ class Station implements IStation {
 				data: stations.map((s) => s.code),
 			});
 
+			await IndexedDB.write({
+				objectStore: "seismograms",
+				keyPath: "type",
+				key: "disabled_seismograms",
+				data: [],
+			});
+
 			for (let station of stations) {
 				newSeismograms.set(station.code, new Seismogram(station.code));
 			}
 
-			return newSeismograms;
+			return {
+				enabledSeismograms: newSeismograms,
+				disabledSeismograms: new Map([]) as Map<string, Seismogram>
+			}
 		} catch (error) {
 			throw new Error(error);
 		}
 	}
 
-	async disableStation(station: string, seismograms: Map<string, Seismogram>) {
+	async disableStation(station: string, enabledSeismograms: Map<string, Seismogram>, disabledSeismograms: Map<string, Seismogram>) {
 		try {
-			const newSeismograms: Map<string, Seismogram> = seismograms;
+			// add to indexedDB
+			await IndexedDB.write({
+				objectStore: "seismograms",
+				keyPath: "type",
+				key: "disabled_seismograms",
+				data: [...disabledSeismograms.keys(), station],
+			});
+
 			// remove from indexedDB
 			await IndexedDB.write({
 				objectStore: "seismograms",
 				keyPath: "type",
 				key: "enabled_seismograms",
-				data: [...newSeismograms.keys()].filter((s) => s !== station),
+				data: [...enabledSeismograms.keys()].filter((s) => s !== station),
 			});
 
-			newSeismograms.delete(station);
+			disabledSeismograms.set(station, new Seismogram(station));
+			enabledSeismograms.delete(station);
 
-			return newSeismograms;
+			return {
+				enabledSeismograms,
+				disabledSeismograms,
+			}
 		} catch (error) {
 			throw new Error(error);
 		}
