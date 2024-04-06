@@ -4,6 +4,10 @@ import { makeObservable, observable } from "mobx";
 
 const MAX_INT = 2147483647;
 
+// Get API host
+const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost"
+const apiPort = process.env.NEXT_PUBLIC_API_PORT || "3333";
+
 export default class Seismogram implements ISeismogram {
 	creation_date: number;
 	z_channel: number;
@@ -117,7 +121,7 @@ export default class Seismogram implements ISeismogram {
 			// to unix
 			start_date = start_date;
 			end_date = end_date;
-			const url = `http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
+			const url = `${apiHost}:${apiPort}/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
 

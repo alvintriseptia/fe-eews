@@ -62,7 +62,6 @@ class MainView extends React.Component<Props> {
 		earthquakeRealtimeInformation: {} as EarthquakeRealtimeProps,
 		countdown: 0,
 		seismogramStations: [] as IStation[],
-		stations: STATIONS_DATA as IStation[],
 	};
 	constructor(props: Props) {
 		super(props);

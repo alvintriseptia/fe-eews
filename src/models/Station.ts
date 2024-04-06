@@ -3,11 +3,15 @@ import { IStation } from "@/entities/_index";
 import Seismogram from "./Seismogram";
 import IndexedDB from "@/lib/IndexedDB";
 
-const stations = STATIONS_DATA as IStation[];
+// let stations = [] as IStation[];
 
 /**
  * Represents a Station.
  */
+// Get API host
+const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost"
+const apiPort = process.env.NEXT_PUBLIC_API_PORT || "3333";
+
 class Station implements IStation {
 	ch1: string;
 	ch2: string;
@@ -40,6 +44,28 @@ class Station implements IStation {
 	creation_date: string;
 	elevation: number;
 	description: string;
+	stations: IStation[]
+
+	getStationData() {
+		return this.stations;
+	}
+
+	async initStationsFromDB() {
+		try {
+			const response = await fetch(`${apiHost}:${apiPort}/stations`);
+			const jsonData = await response.json();
+
+			if(!jsonData.error){
+				this.stations = jsonData.data as IStation[];
+				return;
+			} 
+
+			throw new Error(jsonData.error.message)
+
+		} catch (error) {
+			throw new Error(error)
+		} 
+	}
 
 	/**
 	 * Fetches all saved stations from local storage.
@@ -76,6 +102,41 @@ class Station implements IStation {
 				"disabled_seismograms"
 			)) as string[] | null;
 
+			if (!this.stations) {
+				const indexStation = (await IndexedDB.read("stations", "stations")) as IStation[];
+				const expiry = (await IndexedDB.read("stations", "expiry") ?? Date.now() - 5 * 1000) as number;
+				
+				if (!indexStation || expiry <= Date.now()) {
+					console.log("Pulling station data from database...")
+					await this.initStationsFromDB()
+					await IndexedDB.write({
+						objectStore: "stations",
+						keyPath: "stations",
+						key: "stations",
+						data: this.stations
+					});
+
+					const expirySeconds = 60;
+					await IndexedDB.write({
+						objectStore: "stations",
+						keyPath: "stations",
+						key: "expiry",
+						data: Date.now() + (expirySeconds * 1000)
+					});
+
+					await IndexedDB.write({
+						objectStore: "seismograms",
+						keyPath: "type",
+						key: "enabled_seismograms",
+						data: this.stations.map((s) => s.code),
+					});
+					console.log("Done!")
+				} else {
+					console.log("Expired at: " + new Date(expiry))
+					this.stations = indexStation
+				}
+			}
+
 			// if both enabled_seismograms and disabled_seismograms are null,
 			// then save the default stations to indexedDB enabled_seismograms
 			if (!enabled_seismograms) {
@@ -83,7 +144,7 @@ class Station implements IStation {
 					objectStore: "seismograms",
 					keyPath: "type",
 					key: "enabled_seismograms",
-					data: stations.map((s) => s.code),
+					data: this.stations.map((s) => s.code),
 				});
 			}
 
@@ -155,7 +216,7 @@ class Station implements IStation {
 				objectStore: "seismograms",
 				keyPath: "type",
 				key: "enabled_seismograms",
-				data: stations.map((s) => s.code),
+				data: this.stations.map((s) => s.code),
 			});
 
 			await IndexedDB.write({
@@ -165,7 +226,7 @@ class Station implements IStation {
 				data: [],
 			});
 
-			for (let station of stations) {
+			for (let station of this.stations) {
 				newSeismograms.set(station.code, new Seismogram(station.code));
 			}
 

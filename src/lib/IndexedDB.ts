@@ -35,6 +35,7 @@ class IndexedDB {
 				db.createObjectStore("seismogramTempData", { keyPath: "station" });
 				db.createObjectStore("pWavesTempData", { keyPath: "station" });
 				db.createObjectStore("seismograms", { keyPath: "type" });
+				db.createObjectStore("stations", { keyPath: "stations" });
 			};
 		});
 	}

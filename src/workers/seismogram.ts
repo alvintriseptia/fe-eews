@@ -2,40 +2,19 @@ import STATIONS_DATA from "@/assets/data/stations.json";
 import { SeismogramPlotType } from "@/types/_index";
 // import { pWavesData } from "./earthquakeDetection";
 import IndexedDB from "@/lib/IndexedDB";
-import Socket from "@/lib/Socket";
+import Socket from "@/lib/socket";
+import Station from "@/models/Station";
 
 const socket = Socket.getInstance().getSocket();
-const stations = STATIONS_DATA;
-const seismogramSockets = {
-	...stations.map((s) => [s.code, null]),
-};
-const seismogramInterval = {
-	...stations.map((s) => [s.code, null]),
-};
-const seismogramData = new Map<string, SeismogramDataType>(
-	stations.map((s) => [
-		s.code,
-		{
-			channelZ: [],
-			channelN: [],
-			channelE: [],
-			pWaves: [],
-			currentIndex: 0,
-		},
-	])
-);
-const seismogramHistoryData = new Map<string, SeismogramDataType>(
-	stations.map((s) => [
-		s.code,
-		{
-			channelZ: [],
-			channelN: [],
-			channelE: [],
-			pWaves: [],
-			currentIndex: 0,
-		},
-	])
-);
+let stations = [];
+let seismogramSockets = {};
+let seismogramInterval = {};
+let seismogramData = new Map();
+let seismogramHistoryData = new Map();
+
+// Get API host
+const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost";
+const apiPort = process.env.NEXT_PUBLIC_API_PORT || "3333";
 
 const SAMPLING_RATE = 5;
 const FREQUENCY_UPDATE = 2000;
@@ -59,28 +38,27 @@ export type SeismogramTempDataType = {
 
 const onmessage = async (event: MessageEvent) => {
 	const { station, message, mode, start_date, end_date, type } = event.data;
-
-	//check if station not in current map, then add it
-	if (!seismogramData.has(station)) {
-		seismogramData.set(station, {
-			channelZ: [],
-			channelN: [],
-			channelE: [],
-			pWaves: [],
-			currentIndex: 0,
-		});
-		seismogramHistoryData.set(station, {
-			channelZ: [],
-			channelN: [],
-			channelE: [],
-			pWaves: [],
-			currentIndex: 0,
-		});
-		seismogramInterval[station] = null;
-		seismogramSockets[station] = null;
-	}
-
 	if (type == "seismogram") {
+		//check if station not in current map, then add it
+		if (!seismogramData.has(station)) {
+			seismogramData.set(station, {
+				channelZ: [],
+				channelN: [],
+				channelE: [],
+				pWaves: [],
+				currentIndex: 0,
+			});
+			seismogramHistoryData.set(station, {
+				channelZ: [],
+				channelN: [],
+				channelE: [],
+				pWaves: [],
+				currentIndex: 0,
+			});
+			seismogramInterval[station] = null;
+			seismogramSockets[station] = null;
+		}
+
 		if (mode === "simulation") {
 			if (station && message === "stop") {
 				stopStationSeismogram(station);
@@ -115,7 +93,6 @@ const onmessage = async (event: MessageEvent) => {
 async function streamStationSeismogram(station: string) {
 	seismogramSockets[station] = socket;
 	seismogramSockets[station].on(`waves-data-${station}`, async (data: any) => {
-		// console.log("get websocket data ", station, data);
 		// get data from indexedDB
 		let tempData = {
 			channelZ: [] as SeismogramPlotType[],
@@ -136,6 +113,7 @@ async function streamStationSeismogram(station: string) {
 		// loop object data
 		for (const key in data) {
 			const value = data[key];
+			// console.log(new Date(parseInt(key.split("/")[1])));
 			const time = new Date(parseInt(key.split("/")[1]));
 			tempData.channelZ.push({
 				x: time.getTime(),
@@ -262,7 +240,6 @@ async function streamStationSeismogram(station: string) {
 
 					pWaves.splice(i, 1);
 				}
-				
 
 				await IndexedDB.write({
 					objectStore: "pWavesTempData",
@@ -403,7 +380,7 @@ function simulateStationSeismogram(station: string) {
 				const pWaveTime = pWave.x;
 				return pWaveTime >= startTime && pWaveTime <= endTime;
 			});
-			
+
 			data.pWaves = newPWaves;
 			let previousPWaves = pWaves;
 			pWaves = pWaves.filter((pWave) => {
@@ -477,7 +454,7 @@ async function getHistoryStationSeismogram(
 	isFetching = true;
 	console.log("get history data");
 	const response = await fetch(
-		`http://localhost:3333/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`
+		`${apiHost}:${apiPort}/waves?station=${station}&start_date=${start_date}&end_date=${end_date}`
 	);
 	let data = await response.json();
 	if (data.message) {

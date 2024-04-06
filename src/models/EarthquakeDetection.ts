@@ -1,6 +1,10 @@
 import { IEarthquakeDetection, ISeismogram } from "@/entities/_index";
 import { AnnotationsMap, action, makeObservable, observable } from "mobx";
 
+// Get API host
+const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost"
+const apiPort = process.env.NEXT_PUBLIC_API_PORT || "3333";
+
 export default class EarthquakeDetection implements IEarthquakeDetection {
 	title: string;
 	description: string;
@@ -69,8 +73,6 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 			// const offset = new Date().getTimezoneOffset() * 60 * 1000;
 			// date.setTime(date.getTime() - offset);
 
-			console.log(data, date.getTime(), this.station);
-
 			//validasi jika data  masih dalam rentang 5 detik, maka dilewatkan
 			if (this.time_stamp + 5000 > date.getTime()) return;
 
@@ -115,7 +117,7 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 
 	async fetchHistoryEarthquakeDetection(start_date: number, end_date: number) {
 		try {
-			const url = `http://localhost:3333/history?start_date=${start_date}&end_date=${end_date}&limit=20`;
+			const url = `${apiHost}:${apiPort}/history?start_date=${start_date}&end_date=${end_date}&limit=20`;
 
 			const response = await fetch(url);
 			const data = await response.json();
@@ -136,7 +138,7 @@ export default class EarthquakeDetection implements IEarthquakeDetection {
 			// ubah milliseconds menjadi format unix
 			start_date = Math.floor(start_date);
 			end_date = Math.floor(end_date);
-			const url = `http://localhost:3333/export?start_date=${start_date}&end_date=${end_date}`;
+			const url = `${apiHost}:${apiPort}/export?start_date=${start_date}&end_date=${end_date}`;
 
 			const response = await fetch(url);
 
