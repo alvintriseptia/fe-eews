@@ -70,7 +70,7 @@ class StationController {
 	}
 
 	async getDBStation() {
-		if (this.seismograms.size === 0) {
+		if (this.enabledSeismograms.size === 0 && this.disabledSeismograms.size === 0) {
 			await this.initStations();
 		}
 	
@@ -85,7 +85,7 @@ class StationController {
 				this.disabledSeismograms = new Map(newSeismograms.disabledSeismograms);
 			}
 		} catch (error) {
-			this.displayError(error);
+			this.displayError(`${error}`);
 		}
 	}
 
@@ -108,7 +108,7 @@ class StationController {
 			}
 			toast.success(`Stasiun ${station} telah diaktifkan`);
 		} catch (error) {
-			this.displayError(error);
+			this.displayError(`${error}`);
 		}
 	}
 
@@ -124,7 +124,7 @@ class StationController {
 				toast.success("Semua stasiun telah diaktifkan");
 			}
 		} catch (error) {
-			this.displayError(error);
+			this.displayError(`${error}`);
 		}
 	}
 
@@ -147,7 +147,7 @@ class StationController {
 				toast.success(`Stasiun ${station} telah dinonaktifkan`);
 			}
 		} catch (error) {
-			this.displayError(error);
+			this.displayError(`${error}`);
 		}
 	}
 

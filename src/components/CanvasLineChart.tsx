@@ -50,7 +50,7 @@ const options = {
 	maintainAspectRatio: false,
 	stacked: true,
 	animation: false,
-	spanGaps: true,
+	// spanGaps: true,
 	// showLine: false,
 	elements: {
 		point: {

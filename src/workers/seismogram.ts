@@ -267,12 +267,12 @@ async function streamStationSeismogram(station: string) {
 				const endTime = data.channelZ[data.channelZ.length - 1].x;
 				data.pWaves = data.pWaves.filter((pWave) => {
 					const pWaveTime = pWave.x;
-					return pWaveTime >= startTime && pWaveTime <= endTime;
+					return (pWaveTime >= startTime && pWaveTime <= endTime) || pWaveTime == null;
 				});
 				pWaves = pWaves.filter((pWave) => {
 					const pWaveTime = pWave.x;
-					return pWaveTime >= startTime && pWaveTime <= endTime;
-				});
+					return (pWaveTime >= startTime && pWaveTime <= endTime) || pWaveTime == null;
+				}); 
 			}
 
 			seismogramData.set(station, data);
@@ -375,20 +375,30 @@ function simulateStationSeismogram(station: string) {
 			// pwaves
 			const startTime = data.channelZ[0].x;
 			const endTime = data.channelZ[data.channelZ.length - 1].x;
-
+			let isAllNull = true;
 			let newPWaves = data.pWaves.filter((pWave) => {
 				const pWaveTime = pWave.x;
-				return pWaveTime >= startTime && pWaveTime <= endTime;
+				if (pWaveTime != null) {
+					isAllNull = false;
+				}
+				return (pWaveTime >= startTime && pWaveTime <= endTime) || pWaveTime == null;
 			});
 
-			data.pWaves = newPWaves;
+			data.pWaves = isAllNull ? [] : newPWaves;
 			let previousPWaves = pWaves;
+			isAllNull = true;
 			pWaves = pWaves.filter((pWave) => {
 				const pWaveTime = pWave.x;
-				return pWaveTime >= startTime && pWaveTime <= endTime;
+				if (pWaveTime != null) {
+					isAllNull = false;
+				}
+				return (pWaveTime >= startTime && pWaveTime <= endTime) || pWaveTime == null;
 			});
 
 			if (previousPWaves.length !== pWaves.length) {
+				if(isAllNull) {
+					pWaves = [];
+				}
 				await IndexedDB.write({
 					objectStore: "pWavesTempData",
 					keyPath: "station",

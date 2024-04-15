@@ -22,10 +22,10 @@ const onmessage = (event: MessageEvent) => {
 				mag: 2,
 				detection: typeDetection[Math.floor(Math.random() * 3)],
 				countdown: 10,
-				station: "BBJI",
+				station: "JAGI",
 			};
 
-			addPWave("BBJI", Date.now(), earthquakeDetection);
+			addPWave("JAGI", Date.now(), earthquakeDetection);
 
 			postMessage(earthquakeDetection);
 
@@ -35,15 +35,15 @@ const onmessage = (event: MessageEvent) => {
 					earthquakeDetection.title = "Terdeteksi Gelombang P";
 					earthquakeDetection.description =
 						"Harap perhatian, muncul deteksi gelombang P di stasiun " +
-						station.code;
+						"JAGI";
 					earthquakeDetection.lat = station.latitude;
 					earthquakeDetection.long = station.longitude;
 					earthquakeDetection.detection =
 						typeDetection[Math.floor(Math.random() * 3)];
-					earthquakeDetection.station = station.code;
+					earthquakeDetection.station = "JAGI";
 					earthquakeDetection.time_stamp = Date.now();
 
-					addPWave(station.code, Date.now(), earthquakeDetection);
+					addPWave("JAGI", Date.now(), earthquakeDetection);
 				}
 			}, 30000);
 		} else {
