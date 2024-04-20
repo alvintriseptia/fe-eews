@@ -1,10 +1,8 @@
 import StationController from "@/controllers/StationController";
 import { observe } from "mobx";
 import React from "react";
-import { Line } from "react-chartjs-2";
 import ChartJS from "chart.js/auto";
 import { TimeScale } from "chart.js";
-import "chartjs-adapter-luxon";
 import { SeismogramDataType } from "@/workers/seismogram";
 import Seismogram from "@/models/Seismogram";
 ChartJS.register(TimeScale);

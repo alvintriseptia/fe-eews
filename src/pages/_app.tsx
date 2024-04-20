@@ -1,6 +1,7 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@/styles/globals.css";
 import "@/styles/tracer-view.css";
+import "chartjs-adapter-luxon";
 import { Toaster } from "react-hot-toast";
 import {LoadingOverlay} from "@/components/_index";
 
