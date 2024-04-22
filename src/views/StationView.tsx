@@ -75,9 +75,9 @@ class StationView extends React.Component {
 		});
 
 		await this.state.controller.initStations();
-		await this.state.controller.connectAllSeismogram("simulation");
+		await this.state.controller.connectAllSeismogram("realtime");
 
-		this.state.mainController.connectEarthquakeDetection("simulation");
+		this.state.mainController.connectEarthquakeDetection("realtime");
 	}
 
 	componentWillUnmount(): void {
@@ -86,17 +86,17 @@ class StationView extends React.Component {
 	}
 
 	async disableStation(station: string) {
-		await this.state.controller.disableStation(station, "simulation");
+		await this.state.controller.disableStation(station, "realtime");
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableStation(station: string) {
-		await this.state.controller.enableStation(station, "simulation");
+		await this.state.controller.enableStation(station, "realtime");
 		this.setState({ dialogOpen: false });
 	}
 
 	async enableAllStation() {
-		await this.state.controller.enableAllStations("simulation");
+		await this.state.controller.enableAllStations("realtime");
 		this.setState({ dialogOpen: false });
 	}
 
